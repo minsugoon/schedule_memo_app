@@ -1,114 +1,164 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import type { ScheduleItem, TabKey } from '@/lib/types';
-import { parseDate } from '@/lib/dateUtils';
-import AppHeader from './AppHeader';
-import TabBar from './TabBar';
-import InputSection from './InputSection';
-import ItemList from './ItemList';
+import { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import type { ScheduleItem, ScheduleDate, TabKey } from '@/lib/types'
+import { parseDate } from '@/lib/dateUtils'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { useSchedules, type DbSchedule } from '@/lib/hooks/useSchedules'
+import { useTabs } from '@/lib/hooks/useTabs'
+import AppHeader from './AppHeader'
+import TabBar from './TabBar'
+import InputSection from './InputSection'
+import ItemList from './ItemList'
+
+function toISODate(d: ScheduleDate): string {
+  return `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}T00:00:00Z`
+}
+
+function toScheduleItem(
+  row: DbSchedule,
+  tabCategoryMap: Record<string, 'personal' | 'work'>
+): ScheduleItem {
+  return {
+    id: new Date(row.created_at).getTime(),
+    date: parseDate(row.date_raw),
+    dateRaw: row.date_raw,
+    dateEnd: null,
+    dateEndRaw: '',
+    memo: row.memo,
+    done: row.is_done,
+    createdAt: new Date(row.created_at).getTime(),
+    category: row.tab_id ? (tabCategoryMap[row.tab_id] ?? 'personal') : 'personal',
+  }
+}
 
 export default function ScheduleApp() {
-  const [items, setItems] = useState<ScheduleItem[]>([]);
-  const [currentTab, setCurrentTab] = useState<TabKey>('personal');
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [hydrated, setHydrated] = useState(false);
+  const router = useRouter()
+  const { user, loading: authLoading, signOut } = useAuth()
+  const {
+    schedules, fetchSchedules,
+    addSchedule, updateSchedule, deleteSchedule, toggleDone,
+  } = useSchedules()
+  const { tabs, fetchTabs } = useTabs()
+
+  const [currentTab, setCurrentTab] = useState<TabKey>('personal')
+  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    const raw = localStorage.getItem('schedule_memo_v2');
-    if (raw) {
-      try { setItems(JSON.parse(raw) as ScheduleItem[]); } catch { /* 무시 */ }
+    const savedTheme = localStorage.getItem('memo_theme')
+    if (savedTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark')
+      setTheme('dark')
     }
-    const tab = localStorage.getItem('memo_tab');
-    if (tab === 'all' || tab === 'personal' || tab === 'work') setCurrentTab(tab);
-    const t = document.documentElement.getAttribute('data-theme');
-    setTheme(t === 'dark' ? 'dark' : 'light');
-    setHydrated(true);
-  }, []);
+    setHydrated(true)
+  }, [])
 
-  const save = (newItems: ScheduleItem[]) => {
-    setItems(newItems);
-    localStorage.setItem('schedule_memo_v2', JSON.stringify(newItems));
-  };
+  useEffect(() => {
+    if (user) {
+      fetchTabs()
+      fetchSchedules()
+    }
+  }, [user, fetchTabs, fetchSchedules])
 
-  const handleAddItem = (dateRaw: string, dateEndRaw: string, memo: string) => {
-    const cat: 'personal' | 'work' = currentTab === 'all' ? 'personal' : currentTab;
-    const parsed = parseDate(dateRaw);
-    const parsedEnd = parseDate(dateEndRaw);
-    const newItem: ScheduleItem = {
-      id: Date.now(),
-      date: parsed,
-      dateRaw,
-      dateEnd: parsedEnd || null,
-      dateEndRaw: dateEndRaw || '',
+  const tabCategoryMap = useMemo<Record<string, 'personal' | 'work'>>(() => {
+    const map: Record<string, 'personal' | 'work'> = {}
+    if (tabs[0]) map[tabs[0].id] = 'personal'
+    if (tabs[1]) map[tabs[1].id] = 'work'
+    return map
+  }, [tabs])
+
+  const items = useMemo<ScheduleItem[]>(
+    () => schedules.map(row => toScheduleItem(row, tabCategoryMap)),
+    [schedules, tabCategoryMap]
+  )
+
+  const findSchedule = (numericId: number) =>
+    schedules.find(s => new Date(s.created_at).getTime() === numericId)
+
+  const handleAddItem = async (dateRaw: string, dateEndRaw: string, memo: string) => {
+    const cat: 'personal' | 'work' = currentTab === 'all' ? 'personal' : currentTab
+    const tabId = cat === 'work' ? tabs[1]?.id : tabs[0]?.id
+    const parsed = parseDate(dateRaw)
+    const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
+
+    await addSchedule({
+      tab_id: tabId ?? null,
+      started_at: parsed ? toISODate(parsed) : new Date().toISOString(),
+      ended_at: parsedEnd ? toISODate(parsedEnd) : null,
+      is_all_day: true,
+      date_raw: dateRaw,
       memo,
-      done: false,
-      createdAt: Date.now(),
-      category: cat,
-    };
-    save([...items, newItem]);
-  };
+    })
+  }
 
-  const handleToggleDone = (id: number) => {
-    const updated = items.map(i => i.id === id ? { ...i, done: !i.done } : i);
-    save(updated);
-  };
+  const handleToggleDone = async (id: number) => {
+    const schedule = findSchedule(id)
+    if (!schedule) return
+    await toggleDone(schedule.id, schedule.is_done)
+  }
 
-  const handleDelete = (id: number) => {
-    if (!confirm('삭제하시겠습니까?')) return;
-    save(items.filter(i => i.id !== id));
-    setExpandedId(null);
-  };
+  const handleDelete = async (id: number) => {
+    if (!confirm('삭제하시겠습니까?')) return
+    const schedule = findSchedule(id)
+    if (!schedule) return
+    await deleteSchedule(schedule.id)
+    setExpandedId(null)
+  }
 
   const handleStartEdit = (id: number) => {
-    setEditingId(id);
-    setExpandedId(id);
-  };
+    setEditingId(id)
+    setExpandedId(id)
+  }
 
-  const handleSaveEdit = (id: number, dateRaw: string, dateEndRaw: string, memo: string) => {
-    const updated = items.map(i => {
-      if (i.id !== id) return i;
-      return {
-        ...i,
-        dateRaw,
-        date: parseDate(dateRaw) || i.date,
-        dateEndRaw,
-        dateEnd: parseDate(dateEndRaw) || null,
-        memo,
-      };
-    });
-    save(updated);
-    setEditingId(null);
-  };
+  const handleSaveEdit = async (id: number, dateRaw: string, dateEndRaw: string, memo: string) => {
+    const schedule = findSchedule(id)
+    if (!schedule) return
+    const parsed = parseDate(dateRaw)
+    const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
+
+    await updateSchedule(schedule.id, {
+      date_raw: dateRaw,
+      memo,
+      started_at: parsed ? toISODate(parsed) : undefined,
+      ended_at: parsedEnd ? toISODate(parsedEnd) : null,
+    })
+    setEditingId(null)
+  }
 
   const handleToggleExpand = (id: number) => {
-    if (editingId === id) { setEditingId(null); return; }
-    setExpandedId(prev => prev === id ? null : id);
-    setEditingId(null);
-  };
+    if (editingId === id) { setEditingId(null); return }
+    setExpandedId(prev => prev === id ? null : id)
+    setEditingId(null)
+  }
 
   const handleSwitchTab = (tab: TabKey) => {
-    setCurrentTab(tab);
-    localStorage.setItem('memo_tab', tab);
-    setExpandedId(null);
-    setEditingId(null);
-  };
+    setCurrentTab(tab)
+    setExpandedId(null)
+    setEditingId(null)
+  }
 
   const handleToggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('memo_theme', next);
-    setTheme(next);
-  };
+    const next = theme === 'light' ? 'dark' : 'light'
+    document.documentElement.setAttribute('data-theme', next)
+    localStorage.setItem('memo_theme', next)
+    setTheme(next)
+  }
 
-  if (!hydrated) return <div id="app" />;
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/login')
+  }
+
+  if (!hydrated || authLoading) return <div id="app" />
 
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
-      <AppHeader theme={theme} onToggleTheme={handleToggleTheme} />
+      <AppHeader theme={theme} onToggleTheme={handleToggleTheme} onSignOut={handleSignOut} />
       <TabBar currentTab={currentTab} items={items} onSwitchTab={handleSwitchTab} />
       <InputSection currentTab={currentTab} onAdd={handleAddItem} />
       <ItemList
@@ -123,5 +173,5 @@ export default function ScheduleApp() {
         onToggleExpand={handleToggleExpand}
       />
     </div>
-  );
+  )
 }
