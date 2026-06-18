@@ -16,6 +16,18 @@ function toISODate(d: ScheduleDate): string {
   return `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}T00:00:00Z`
 }
 
+function isoToScheduleDate(iso: string | null): ScheduleDate | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() }
+}
+
+function isoToDateRaw(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
+}
+
 function toScheduleItem(
   row: DbSchedule,
   tabCategoryMap: Record<string, 'personal' | 'work'>
@@ -24,8 +36,8 @@ function toScheduleItem(
     id: new Date(row.created_at).getTime(),
     date: parseDate(row.date_raw),
     dateRaw: row.date_raw,
-    dateEnd: null,
-    dateEndRaw: '',
+    dateEnd: isoToScheduleDate(row.ended_at),
+    dateEndRaw: isoToDateRaw(row.ended_at),
     memo: row.memo,
     done: row.is_done,
     createdAt: new Date(row.created_at).getTime(),
