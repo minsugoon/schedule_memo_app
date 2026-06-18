@@ -170,7 +170,7 @@ export default function ScheduleApp() {
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
-      <AppHeader theme={theme} onToggleTheme={handleToggleTheme} onSignOut={handleSignOut} />
+      <AppHeader theme={theme} onToggleTheme={handleToggleTheme} onSignOut={handleSignOut} onRefresh={fetchSchedules} />
       <TabBar currentTab={currentTab} items={items} onSwitchTab={handleSwitchTab} />
       <InputSection currentTab={currentTab} onAdd={handleAddItem} />
       <ItemList

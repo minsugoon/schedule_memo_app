@@ -8,11 +8,12 @@ interface AppHeaderProps {
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
   onSignOut?: () => void;
+  onRefresh?: () => void;
 }
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
 
-export default function AppHeader({ theme, onToggleTheme, onSignOut }: AppHeaderProps) {
+export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh }: AppHeaderProps) {
   const [clock, setClock] = useState('');
   const [todayDisplay, setTodayDisplay] = useState('');
 
@@ -33,6 +34,11 @@ export default function AppHeader({ theme, onToggleTheme, onSignOut }: AppHeader
       <div className="header-top">
         <span className="title">📋 할 일 메모장</span>
         <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button className="theme-btn" onClick={onRefresh} aria-label="새로고침">
+              🔄
+            </button>
+          )}
           <button className="theme-btn" onClick={onToggleTheme} aria-label="테마 전환">
             {theme === 'dark'
               ? <><IconSun size={13} aria-hidden /> 밝음</>
