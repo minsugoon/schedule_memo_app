@@ -9,11 +9,12 @@ interface AppHeaderProps {
   onToggleTheme: () => void;
   onSignOut?: () => void;
   onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
 
-export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh }: AppHeaderProps) {
+export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, refreshing }: AppHeaderProps) {
   const [clock, setClock] = useState('');
   const [todayDisplay, setTodayDisplay] = useState('');
 
@@ -35,8 +36,8 @@ export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh }
         <span className="title">📋 할 일 메모장</span>
         <div className="flex items-center gap-2">
           {onRefresh && (
-            <button className="theme-btn" onClick={onRefresh} aria-label="새로고침">
-              🔄
+            <button className="theme-btn" onClick={onRefresh} aria-label="새로고침" disabled={refreshing}>
+              <span className={refreshing ? 'animate-spin inline-block' : 'inline-block'}>🔄</span>
             </button>
           )}
           <button className="theme-btn" onClick={onToggleTheme} aria-label="테마 전환">

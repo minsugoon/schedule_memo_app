@@ -59,6 +59,7 @@ export default function ScheduleApp() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [hydrated, setHydrated] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('memo_theme')
@@ -160,6 +161,12 @@ export default function ScheduleApp() {
     setTheme(next)
   }
 
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await Promise.all([fetchTabs(), fetchSchedules()])
+    setRefreshing(false)
+  }
+
   const handleSignOut = async () => {
     await signOut()
     router.push('/login')
@@ -170,7 +177,7 @@ export default function ScheduleApp() {
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
-      <AppHeader theme={theme} onToggleTheme={handleToggleTheme} onSignOut={handleSignOut} onRefresh={fetchSchedules} />
+      <AppHeader theme={theme} onToggleTheme={handleToggleTheme} onSignOut={handleSignOut} onRefresh={handleRefresh} refreshing={refreshing} />
       <TabBar currentTab={currentTab} items={items} onSwitchTab={handleSwitchTab} />
       <InputSection currentTab={currentTab} onAdd={handleAddItem} />
       <ItemList
