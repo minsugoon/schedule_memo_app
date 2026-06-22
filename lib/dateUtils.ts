@@ -40,10 +40,14 @@ export function parseDate(raw: string): ScheduleDate | null {
   return null;
 }
 
-export function fmtShort(dt: ScheduleDate | null): string | null {
+export type FmtShortResult = { text: string; dayType: 'sat' | 'sun' | 'normal' };
+
+export function fmtShort(dt: ScheduleDate | null): FmtShortResult | null {
   if (!dt) return null;
-  const day = DAYS[new Date(dt.y, dt.m - 1, dt.d).getDay()];
-  return `${String(dt.m).padStart(2, '0')}월 ${String(dt.d).padStart(2, '0')}일(${day})`;
+  const dow = new Date(dt.y, dt.m - 1, dt.d).getDay();
+  const text = `${String(dt.m).padStart(2, '0')}월 ${String(dt.d).padStart(2, '0')}일(${DAYS[dow]})`;
+  const dayType = dow === 6 ? 'sat' : dow === 0 ? 'sun' : 'normal';
+  return { text, dayType };
 }
 
 export function dateKey(dt: ScheduleDate | null): string {

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isTodayInRange, isRange, fmtShort } from '@/lib/dateUtils';
+import { isTodayInRange, isRange, fmtShort, type FmtShortResult } from '@/lib/dateUtils';
 
 interface ItemCardProps {
   item: ScheduleItem;
@@ -39,9 +39,20 @@ export default function ItemCard({
   }, [editing, item]);
 
   const isToday = isTodayInRange(item.date, item.dateEnd);
-  const sd = fmtShort(item.date) || '날짜 없음';
-  const ed = item.dateEnd ? fmtShort(item.dateEnd) : '';
-  const dateLine = isRange(item) ? `${sd} ~ ${ed}` : sd;
+
+  const DAY_COLORS = { sat: '#1A56DB', sun: '#C81E1E' } as const;
+  const renderDate = (r: FmtShortResult | null, fallback = '날짜 없음') => {
+    if (!r) return fallback;
+    if (r.dayType === 'normal') return r.text;
+    const idx = r.text.lastIndexOf('(');
+    return <>{r.text.slice(0, idx)}<span style={{ color: DAY_COLORS[r.dayType] }}>{r.text.slice(idx)}</span></>;
+  };
+
+  const sdResult = fmtShort(item.date);
+  const edResult = item.dateEnd ? fmtShort(item.dateEnd) : null;
+  const dateLine = isRange(item)
+    ? <>{renderDate(sdResult)} ~ {renderDate(edResult)}</>
+    : renderDate(sdResult);
 
   const cls = [
     'item',
@@ -83,13 +94,13 @@ export default function ItemCard({
           </div>
           {(isToday && !item.done) || currentTab === 'all' ? (
             <div className="item-badge-col">
+              {isToday && !item.done && (
+                <span className="today-badge">오늘</span>
+              )}
               {currentTab === 'all' && (
                 <span className={`cat-badge ${item.category || 'personal'}`}>
                   {item.category === 'work' ? '회사' : '개인'}
                 </span>
-              )}
-              {isToday && !item.done && (
-                <span className="today-badge">오늘</span>
               )}
             </div>
           ) : null}
