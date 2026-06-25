@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ScheduleItem, ScheduleDate, TabKey } from '@/lib/types'
 import { parseDate } from '@/lib/dateUtils'
@@ -11,6 +11,12 @@ import AppHeader from './AppHeader'
 import TabBar from './TabBar'
 import InputSection from './InputSection'
 import ItemList from './ItemList'
+import PWAInstallModal from './PWAInstallModal'
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
 
 function toISODate(d: ScheduleDate): string {
   return `${d.y}-${String(d.m).padStart(2, '0')}-${String(d.d).padStart(2, '0')}T00:00:00Z`
@@ -60,6 +66,8 @@ export default function ScheduleApp() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [hydrated, setHydrated] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [showInstallModal, setShowInstallModal] = useState(false)
+  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('memo_theme')
@@ -68,6 +76,44 @@ export default function ScheduleApp() {
       setTheme('dark')
     }
     setHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault()
+      // beforeinstallprompt 재발화 = 앱이 제거된 상태이므로 설치 플래그 초기화
+      localStorage.removeItem('pwa_installed')
+      deferredPrompt.current = e as BeforeInstallPromptEvent
+    }
+
+    const handleAppInstalled = () => {
+      localStorage.setItem('pwa_installed', 'true')
+      deferredPrompt.current = null
+      setShowInstallModal(false)
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall)
+    window.addEventListener('appinstalled', handleAppInstalled)
+
+    // 이미 설치된 경우 타이머 불필요
+    if (localStorage.getItem('pwa_installed') === 'true') {
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
+        window.removeEventListener('appinstalled', handleAppInstalled)
+      }
+    }
+
+    const timer = setTimeout(() => {
+      if (deferredPrompt.current && localStorage.getItem('pwa_installed') !== 'true') {
+        setShowInstallModal(true)
+      }
+    }, 30000)
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
+      window.removeEventListener('appinstalled', handleAppInstalled)
+      clearTimeout(timer)
+    }
   }, [])
 
   useEffect(() => {
@@ -172,6 +218,17 @@ export default function ScheduleApp() {
     router.push('/login')
   }
 
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt.current) return
+    await deferredPrompt.current.prompt()
+    const { outcome } = await deferredPrompt.current.userChoice
+    if (outcome === 'accepted') {
+      localStorage.setItem('pwa_installed', 'true')
+    }
+    deferredPrompt.current = null
+    setShowInstallModal(false)
+  }
+
   if (!hydrated || authLoading) return <div id="app" />
 
   return (
@@ -191,6 +248,12 @@ export default function ScheduleApp() {
         onSaveEdit={handleSaveEdit}
         onToggleExpand={handleToggleExpand}
       />
+      {showInstallModal && (
+        <PWAInstallModal
+          onInstall={handleInstallPWA}
+          onClose={() => setShowInstallModal(false)}
+        />
+      )}
     </div>
   )
 }
