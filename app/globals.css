@@ -81,6 +81,14 @@ body { display: flex; justify-content: center; align-items: flex-start; padding:
   text-align: center; line-height: 16px;
 }
 .tab-item.active .tab-count { background: var(--text); color: var(--bg); }
+.tab-done-toggle {
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  width: 40px; background: none; border: none; border-right: 0.5px solid var(--border);
+  color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: color 0.15s; -webkit-tap-highlight-color: transparent;
+}
+.tab-done-toggle:hover { color: var(--text2); }
+.tab-done-toggle[aria-pressed="true"] { color: var(--check-done); border-bottom: 2px solid var(--check-done); }
 
 /* ── 입력 영역 ── */
 .input-section { flex-shrink: 0; padding: 11px var(--pad-h) 10px; border-bottom: 0.5px solid var(--border); background: var(--bg); }
@@ -140,6 +148,7 @@ input[type=text]::placeholder { color: var(--text3); }
 .item:hover { border-color: var(--border2); }
 .item.today-item { background: var(--today-bg); border-color: var(--today-border); }
 .item.done-item { opacity: 0.68; }
+.item.past-item { opacity: 0.45; }
 
 /* 카테고리 도트 */
 .cat-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }

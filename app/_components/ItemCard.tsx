@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isTodayInRange, isRange, fmtShort, type FmtShortResult } from '@/lib/dateUtils';
+import { isTodayInRange, isRange, fmtShort, dateKey, getToday, type FmtShortResult } from '@/lib/dateUtils';
 
 interface ItemCardProps {
   item: ScheduleItem;
@@ -39,6 +39,9 @@ export default function ItemCard({
   }, [editing, item]);
 
   const isToday = isTodayInRange(item.date, item.dateEnd);
+  const todayKey = dateKey(getToday());
+  const endKey = item.dateEnd ? dateKey(item.dateEnd) : item.date ? dateKey(item.date) : null;
+  const isPast = !item.done && endKey !== null && endKey < todayKey;
 
   const DAY_COLORS = { sat: '#1A56DB', sun: '#C81E1E' } as const;
   const renderDate = (r: FmtShortResult | null, fallback = '날짜 없음') => {
@@ -58,6 +61,7 @@ export default function ItemCard({
     'item',
     isToday && !item.done ? 'today-item' : '',
     item.done ? 'done-item' : '',
+    isPast ? 'past-item' : '',
     expanded ? 'expanded' : '',
   ].filter(Boolean).join(' ');
 

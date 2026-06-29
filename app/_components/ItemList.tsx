@@ -8,6 +8,7 @@ import ItemCard from './ItemCard';
 interface ItemListProps {
   items: ScheduleItem[];
   currentTab: TabKey;
+  showDone: boolean;
   expandedId: number | null;
   editingId: number | null;
   onToggleDone: (id: number) => void;
@@ -18,12 +19,11 @@ interface ItemListProps {
 }
 
 export default function ItemList({
-  items, currentTab, expandedId, editingId,
+  items, currentTab, showDone, expandedId, editingId,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onToggleExpand,
 }: ItemListProps) {
-  const filtered = currentTab === 'all'
-    ? sortItems(items)
-    : sortItems(items.filter(i => i.category === currentTab));
+  const base = currentTab === 'all' ? items : items.filter(i => i.category === currentTab);
+  const filtered = sortItems(showDone ? base : base.filter(i => !i.done));
 
   return (
     <div className="list-section">

@@ -61,6 +61,7 @@ export default function ScheduleApp() {
   const { tabs, fetchTabs } = useTabs()
 
   const [currentTab, setCurrentTab] = useState<TabKey>('personal')
+  const [showDone, setShowDone] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -235,11 +236,12 @@ export default function ScheduleApp() {
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
       <AppHeader theme={theme} onToggleTheme={handleToggleTheme} onSignOut={handleSignOut} onRefresh={handleRefresh} refreshing={refreshing} />
-      <TabBar currentTab={currentTab} items={items} onSwitchTab={handleSwitchTab} />
+      <TabBar currentTab={currentTab} items={items} showDone={showDone} onSwitchTab={handleSwitchTab} onToggleShowDone={() => setShowDone(p => !p)} />
       <InputSection currentTab={currentTab} onAdd={handleAddItem} />
       <ItemList
         items={items}
         currentTab={currentTab}
+        showDone={showDone}
         expandedId={expandedId}
         editingId={editingId}
         onToggleDone={handleToggleDone}
