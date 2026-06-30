@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { IconNotebook } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
 import { sortItems } from '@/lib/dateUtils';
@@ -22,8 +23,17 @@ export default function ItemList({
   items, currentTab, showDone, expandedId, editingId,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onToggleExpand,
 }: ItemListProps) {
-  const base = currentTab === 'all' ? items : items.filter(i => i.category === currentTab);
-  const filtered = sortItems(showDone ? base : base.filter(i => !i.done));
+  const filtered = useMemo(() => {
+    let result = currentTab === 'all'
+      ? items.filter(i => i.date !== null)
+      : items.filter(i => i.category === currentTab && i.date !== null);
+
+    if (!showDone) {
+      result = result.filter(i => !i.done);
+    }
+
+    return sortItems(result);
+  }, [items, currentTab, showDone]);
 
   return (
     <div className="list-section">

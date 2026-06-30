@@ -219,3 +219,93 @@ input[type=text]::placeholder { color: var(--text3); }
   body { align-items: center; padding-top: 20px; }
   #app { height: var(--app-h); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 28px rgba(0,0,0,0.1); }
 }
+
+/* ── 탭 바 래퍼 ── */
+.tab-bar-wrapper {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border-bottom: 0.5px solid var(--border);
+  height: var(--tab-h);
+}
+.tab-bar-wrapper > .tab-bar {
+  flex: 1;
+  background: transparent;
+  border-bottom: none;
+  height: 100%;
+}
+.tab-bar-actions {
+  display: flex;
+  gap: 4px;
+  padding: 0 8px;
+  align-items: center;
+  border-right: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.tab-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-action-btn:hover { background: var(--bg3); }
+.tab-action-btn.active { background: var(--bg3); color: var(--text); }
+.tab-action-btn.done-on { color: var(--check-done); }
+.tab-bar.faded { opacity: 0.4; pointer-events: none; }
+
+/* ── 메모 뷰 ── */
+.memo-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.memo-view-input {
+  flex-shrink: 0;
+  padding: 10px var(--pad-h) 9px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg);
+}
+.memo-view-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text2);
+  font-weight: 500;
+}
+.memo-view-count {
+  font-size: 12px;
+  color: var(--text3);
+  font-weight: 400;
+}
+.memo-view-add-row {
+  display: flex;
+  gap: 7px;
+  margin-top: 6px;
+  align-items: center;
+}
+.memo-view-add-row input { flex: 1; }
+.memo-add-btn {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.memo-add-btn:active { opacity: 0.75; }

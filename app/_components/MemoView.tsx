@@ -1,0 +1,91 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { IconPlus, IconClipboardText } from '@tabler/icons-react';
+import type { ScheduleItem } from '@/lib/types';
+import ItemCard from './ItemCard';
+
+interface MemoViewProps {
+  items: ScheduleItem[];
+  expandedId: number | null;
+  editingId: number | null;
+  onToggleDone: (id: number) => void;
+  onDelete: (id: number) => void;
+  onStartEdit: (id: number) => void;
+  onSaveEdit: (id: number, dateRaw: string, dateEndRaw: string, memo: string) => void;
+  onToggleExpand: (id: number) => void;
+  onAdd: (memo: string) => void;
+}
+
+export default function MemoView({
+  items, expandedId, editingId,
+  onToggleDone, onDelete, onStartEdit, onSaveEdit, onToggleExpand, onAdd,
+}: MemoViewProps) {
+  const [memo, setMemo] = useState('');
+
+  const sorted = useMemo(
+    () => [...items].sort((a, b) => b.createdAt - a.createdAt),
+    [items]
+  );
+
+  const charLen = [...memo].length;
+  const charClass = charLen > 50 ? 'char-over' : charLen > 40 ? 'char-warn' : 'char-ok';
+
+  const handleAdd = () => {
+    const trimmed = memo.trim();
+    if (!trimmed) { alert('메모를 입력해주세요.'); return; }
+    if ([...trimmed].length > 50) { alert('50자 이내로 입력해주세요.'); return; }
+    onAdd(trimmed);
+    setMemo('');
+  };
+
+  return (
+    <div className="memo-view">
+      <div className="memo-view-input">
+        <div className="memo-label-row">
+          <span className="memo-view-title">
+            <IconClipboardText size={15} aria-hidden />
+            메모 {sorted.length > 0 && <span className="memo-view-count">{sorted.length}개</span>}
+          </span>
+          <span className={`char-count ${charClass}`}>{charLen} / 50</span>
+        </div>
+        <div className="memo-view-add-row">
+          <input
+            type="text"
+            placeholder="메모 입력 (50자 이내)"
+            maxLength={55}
+            value={memo}
+            onChange={e => setMemo(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+          />
+          <button className="memo-add-btn" onClick={handleAdd} aria-label="메모 추가">
+            <IconPlus size={16} aria-hidden />
+          </button>
+        </div>
+      </div>
+      <div className="list-section">
+        {sorted.length === 0 ? (
+          <div className="list-empty">
+            <IconClipboardText size={32} aria-hidden style={{ display: 'block', margin: '0 auto 8px' }} />
+            날짜 없는 메모가 여기에 표시됩니다
+          </div>
+        ) : (
+          sorted.map(item => (
+            <ItemCard
+              key={item.id}
+              item={item}
+              currentTab="memo"
+              expanded={expandedId === item.id}
+              editing={editingId === item.id}
+              onToggleDone={onToggleDone}
+              onDelete={onDelete}
+              onStartEdit={onStartEdit}
+              onSaveEdit={onSaveEdit}
+              onToggleExpand={onToggleExpand}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

@@ -17,3 +17,4 @@ export interface ScheduleItem {
 }
 
 export type TabKey = 'all' | 'personal' | 'work';
+export type ViewMode = 'tabs' | 'memo';

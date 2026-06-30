@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import type { ScheduleItem, ScheduleDate, TabKey } from '@/lib/types'
+import type { ScheduleItem, ScheduleDate, TabKey, ViewMode } from '@/lib/types'
 import { parseDate } from '@/lib/dateUtils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useSchedules, type DbSchedule } from '@/lib/hooks/useSchedules'
@@ -11,6 +11,7 @@ import AppHeader from './AppHeader'
 import TabBar from './TabBar'
 import InputSection from './InputSection'
 import ItemList from './ItemList'
+import MemoView from './MemoView'
 import PWAInstallModal from './PWAInstallModal'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -61,6 +62,7 @@ export default function ScheduleApp() {
   const { tabs, fetchTabs } = useTabs()
 
   const [currentTab, setCurrentTab] = useState<TabKey>('personal')
+  const [viewMode, setViewMode] = useState<ViewMode>('tabs')
   const [showDone, setShowDone] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -82,7 +84,6 @@ export default function ScheduleApp() {
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault()
-      // beforeinstallprompt 재발화 = 앱이 제거된 상태이므로 설치 플래그 초기화
       localStorage.removeItem('pwa_installed')
       deferredPrompt.current = e as BeforeInstallPromptEvent
     }
@@ -96,7 +97,6 @@ export default function ScheduleApp() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstall)
     window.addEventListener('appinstalled', handleAppInstalled)
 
-    // 이미 설치된 경우 타이머 불필요
     if (localStorage.getItem('pwa_installed') === 'true') {
       return () => {
         window.removeEventListener('beforeinstallprompt', handleBeforeInstall)
@@ -140,13 +140,21 @@ export default function ScheduleApp() {
     schedules.find(s => new Date(s.created_at).getTime() === numericId)
 
   const handleAddItem = async (dateRaw: string, dateEndRaw: string, memo: string) => {
-    const cat: 'personal' | 'work' = currentTab === 'all' ? 'personal' : currentTab
-    const tabId = cat === 'work' ? tabs[1]?.id : tabs[0]?.id
+    const hasDate = dateRaw.trim() !== ''
+    let tabId: string | null = null
+
+    if (!hasDate) {
+      tabId = null
+    } else {
+      const cat: 'personal' | 'work' = currentTab === 'all' ? 'personal' : currentTab
+      tabId = cat === 'work' ? tabs[1]?.id ?? null : tabs[0]?.id ?? null
+    }
+
     const parsed = parseDate(dateRaw)
     const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
 
     await addSchedule({
-      tab_id: tabId ?? null,
+      tab_id: tabId,
       started_at: parsed ? toISODate(parsed) : new Date().toISOString(),
       ended_at: parsedEnd ? toISODate(parsedEnd) : null,
       is_all_day: true,
@@ -232,24 +240,56 @@ export default function ScheduleApp() {
 
   if (!hydrated || authLoading) return <div id="app" />
 
+  const memoItems = items.filter(i => i.date === null)
+
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
-      <AppHeader theme={theme} onToggleTheme={handleToggleTheme} onSignOut={handleSignOut} onRefresh={handleRefresh} refreshing={refreshing} />
-      <TabBar currentTab={currentTab} items={items} showDone={showDone} onSwitchTab={handleSwitchTab} onToggleShowDone={() => setShowDone(p => !p)} />
-      <InputSection currentTab={currentTab} onAdd={handleAddItem} />
-      <ItemList
-        items={items}
-        currentTab={currentTab}
-        showDone={showDone}
-        expandedId={expandedId}
-        editingId={editingId}
-        onToggleDone={handleToggleDone}
-        onDelete={handleDelete}
-        onStartEdit={handleStartEdit}
-        onSaveEdit={handleSaveEdit}
-        onToggleExpand={handleToggleExpand}
+      <AppHeader
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
+        onSignOut={handleSignOut}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
       />
+      <TabBar
+        currentTab={currentTab}
+        items={items}
+        onSwitchTab={handleSwitchTab}
+        viewMode={viewMode}
+        onToggleViewMode={() => setViewMode(prev => prev === 'tabs' ? 'memo' : 'tabs')}
+        showDone={showDone}
+        onToggleShowDone={() => setShowDone(prev => !prev)}
+      />
+      {viewMode === 'memo' ? (
+        <MemoView
+          items={memoItems}
+          expandedId={expandedId}
+          editingId={editingId}
+          onToggleDone={handleToggleDone}
+          onDelete={handleDelete}
+          onStartEdit={handleStartEdit}
+          onSaveEdit={handleSaveEdit}
+          onToggleExpand={handleToggleExpand}
+          onAdd={(memo) => handleAddItem('', '', memo)}
+        />
+      ) : (
+        <>
+          <InputSection currentTab={currentTab} onAdd={handleAddItem} />
+          <ItemList
+            items={items}
+            currentTab={currentTab}
+            showDone={showDone}
+            expandedId={expandedId}
+            editingId={editingId}
+            onToggleDone={handleToggleDone}
+            onDelete={handleDelete}
+            onStartEdit={handleStartEdit}
+            onSaveEdit={handleSaveEdit}
+            onToggleExpand={handleToggleExpand}
+          />
+        </>
+      )}
       {showInstallModal && (
         <PWAInstallModal
           onInstall={handleInstallPWA}
