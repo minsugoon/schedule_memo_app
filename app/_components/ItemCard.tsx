@@ -25,6 +25,7 @@ export default function ItemCard({
   const [editEnd, setEditEnd] = useState(item.dateEndRaw || '');
   const [editMemo, setEditMemo] = useState(item.memo);
   const editMemoRef = useRef<HTMLInputElement>(null);
+  const editDateRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editing) {
@@ -32,11 +33,15 @@ export default function ItemCard({
       setEditEnd(item.dateEndRaw || '');
       setEditMemo(item.memo);
       setTimeout(() => {
-        editMemoRef.current?.focus();
-        editMemoRef.current?.select();
+        if (currentTab === 'memo') {
+          editDateRef.current?.focus();
+        } else {
+          editMemoRef.current?.focus();
+          editMemoRef.current?.select();
+        }
       }, 50);
     }
-  }, [editing, item]);
+  }, [editing, item, currentTab]);
 
   const isToday = isTodayInRange(item.date, item.dateEnd);
   const todayKey = dateKey(getToday());
@@ -136,26 +141,23 @@ export default function ItemCard({
       {/* 인라인 편집 폼 */}
       {editing && (
         <div className="edit-row">
-          {!isMemoMode && (
-            <>
-              <input
-                type="text"
-                className="edit-date-inp"
-                value={editDate}
-                placeholder="시작일"
-                onChange={e => setEditDate(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleSaveEdit(); }}
-              />
-              <input
-                type="text"
-                className="edit-end-inp"
-                value={editEnd}
-                placeholder="종료일(선택)"
-                onChange={e => setEditEnd(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleSaveEdit(); }}
-              />
-            </>
-          )}
+          <input
+            ref={editDateRef}
+            type="text"
+            className="edit-date-inp"
+            value={editDate}
+            placeholder="시작일"
+            onChange={e => setEditDate(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleSaveEdit(); }}
+          />
+          <input
+            type="text"
+            className="edit-end-inp"
+            value={editEnd}
+            placeholder="종료일(선택)"
+            onChange={e => setEditEnd(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleSaveEdit(); }}
+          />
           <input
             ref={editMemoRef}
             type="text"
