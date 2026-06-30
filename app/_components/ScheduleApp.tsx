@@ -250,6 +250,7 @@ export default function ScheduleApp() {
 
   const handleSwitchTab = (tab: TabKey) => {
     setCurrentTab(tab)
+    setViewMode('tabs')
     setExpandedId(null)
     setEditingId(null)
   }

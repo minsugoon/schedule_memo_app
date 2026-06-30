@@ -39,14 +39,14 @@ export default function TabBar({
           <IconNotes size={18} aria-hidden />
         </button>
       </div>
-      <div className={`tab-bar${viewMode === 'memo' ? ' faded' : ''}`}>
+      <div className="tab-bar">
         {(['all', 'personal', 'work'] as TabKey[]).map(tab => {
           const label = tab === 'all' ? '전체' : tab === 'personal' ? '개인' : '회사';
           const count = tab === 'all' ? totalCount : tab === 'personal' ? personalCount : workCount;
           return (
             <div
               key={tab}
-              className={`tab-item${currentTab === tab && viewMode !== 'memo' ? ' active' : ''}`}
+              className={`tab-item${currentTab === tab ? ' active' : ''}`}
               onClick={() => onSwitchTab(tab)}
             >
               {label}
