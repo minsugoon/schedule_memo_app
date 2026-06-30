@@ -26,6 +26,7 @@ type AddScheduleInput = {
 }
 
 type UpdateScheduleInput = {
+  tab_id?: string | null
   started_at?: string
   ended_at?: string | null
   is_all_day?: boolean

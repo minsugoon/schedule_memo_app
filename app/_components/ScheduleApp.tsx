@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ScheduleItem, ScheduleDate, TabKey, ViewMode } from '@/lib/types'
-import { parseDate } from '@/lib/dateUtils'
+import { parseDate, fmtShort } from '@/lib/dateUtils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useSchedules, type DbSchedule } from '@/lib/hooks/useSchedules'
 import { useTabs } from '@/lib/hooks/useTabs'
@@ -13,6 +13,7 @@ import InputSection from './InputSection'
 import ItemList from './ItemList'
 import MemoView from './MemoView'
 import PWAInstallModal from './PWAInstallModal'
+import TabMoveModal from './TabMoveModal'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -70,6 +71,12 @@ export default function ScheduleApp() {
   const [hydrated, setHydrated] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
+  const [tabMoveTarget, setTabMoveTarget] = useState<{
+    id: number
+    dateRaw: string
+    dateEndRaw: string
+    memo: string
+  } | null>(null)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
@@ -136,6 +143,11 @@ export default function ScheduleApp() {
     [schedules, tabCategoryMap]
   )
 
+  const moveTargetTabs = useMemo(
+    () => tabs.slice(0, 2).map((t, i) => ({ id: t.id, name: i === 0 ? '개인' : '회사' })),
+    [tabs]
+  )
+
   const findSchedule = (numericId: number) =>
     schedules.find(s => new Date(s.created_at).getTime() === numericId)
 
@@ -185,6 +197,15 @@ export default function ScheduleApp() {
   const handleSaveEdit = async (id: number, dateRaw: string, dateEndRaw: string, memo: string) => {
     const schedule = findSchedule(id)
     if (!schedule) return
+
+    const wasMemo = !schedule.date_raw || schedule.date_raw.trim() === ''
+    const nowHasDate = dateRaw.trim() !== ''
+
+    if (wasMemo && nowHasDate) {
+      setTabMoveTarget({ id, dateRaw, dateEndRaw, memo })
+      return
+    }
+
     const parsed = parseDate(dateRaw)
     const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
 
@@ -195,6 +216,30 @@ export default function ScheduleApp() {
       ended_at: parsedEnd ? toISODate(parsedEnd) : null,
     })
     setEditingId(null)
+  }
+
+  const handleTabMoveSelect = async (tabId: string) => {
+    if (!tabMoveTarget) return
+    const schedule = findSchedule(tabMoveTarget.id)
+    if (!schedule) { setTabMoveTarget(null); return }
+
+    const parsed = parseDate(tabMoveTarget.dateRaw)
+    const parsedEnd = tabMoveTarget.dateEndRaw ? parseDate(tabMoveTarget.dateEndRaw) : null
+
+    await updateSchedule(schedule.id, {
+      tab_id: tabId,
+      date_raw: tabMoveTarget.dateRaw,
+      memo: tabMoveTarget.memo,
+      started_at: parsed ? toISODate(parsed) : undefined,
+      ended_at: parsedEnd ? toISODate(parsedEnd) : null,
+    })
+
+    setTabMoveTarget(null)
+    setEditingId(null)
+  }
+
+  const handleTabMoveCancel = () => {
+    setTabMoveTarget(null)
   }
 
   const handleToggleExpand = (id: number) => {
@@ -245,6 +290,14 @@ export default function ScheduleApp() {
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
+      <TabMoveModal
+        isOpen={tabMoveTarget !== null}
+        memo={tabMoveTarget?.memo ?? ''}
+        dateText={tabMoveTarget ? (fmtShort(parseDate(tabMoveTarget.dateRaw))?.text ?? tabMoveTarget.dateRaw) : ''}
+        tabs={moveTargetTabs}
+        onSelect={handleTabMoveSelect}
+        onCancel={handleTabMoveCancel}
+      />
       <AppHeader
         theme={theme}
         onToggleTheme={handleToggleTheme}
