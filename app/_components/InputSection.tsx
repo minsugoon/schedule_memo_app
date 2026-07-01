@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
-import HelpModal from './HelpModal';
 
 interface InputSectionProps {
   currentTab: TabKey;
@@ -14,15 +13,15 @@ interface InputSectionProps {
     timeEndRaw: string,
     memo: string
   ) => void;
+  onHelp: (type: 'date' | 'time') => void;
 }
 
-export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
+export default function InputSection({ currentTab, onAdd, onHelp }: InputSectionProps) {
   const [dateRaw, setDateRaw] = useState('');
   const [timeRaw, setTimeRaw] = useState('');
   const [dateEndRaw, setDateEndRaw] = useState('');
   const [timeEndRaw, setTimeEndRaw] = useState('');
   const [memo, setMemo] = useState('');
-  const [helpType, setHelpType] = useState<'date' | 'time' | null>(null);
 
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
@@ -74,7 +73,7 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
         />
         <button
           className="help-btn"
-          onClick={() => setHelpType('date')}
+          onClick={() => onHelp('date')}
           aria-label="날짜 입력 방법 안내"
         >❓</button>
       </div>
@@ -102,7 +101,7 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
         />
         <button
           className="help-btn"
-          onClick={() => setHelpType('time')}
+          onClick={() => onHelp('time')}
           aria-label="시간 입력 방법 안내"
         >❓</button>
       </div>
@@ -125,14 +124,6 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
       <button className="add-btn" onClick={handleAdd}>
         <IconPlus size={15} aria-hidden /> {btnLabel}
       </button>
-
-      {/* 도움말 모달 */}
-      {helpType !== null && (
-        <HelpModal
-          type={helpType}
-          onClose={() => setHelpType(null)}
-        />
-      )}
 
     </div>
   );

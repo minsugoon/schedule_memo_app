@@ -14,6 +14,7 @@ import ItemList from './ItemList'
 import MemoView from './MemoView'
 import PWAInstallModal from './PWAInstallModal'
 import TabMoveModal from './TabMoveModal'
+import HelpModal from './HelpModal'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -74,6 +75,7 @@ export default function ScheduleApp() {
   const [hydrated, setHydrated] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
+  const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
   const [tabMoveTarget, setTabMoveTarget] = useState<{
     id: number
     dateRaw: string
@@ -315,6 +317,12 @@ export default function ScheduleApp() {
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
+      {helpType !== null && (
+        <HelpModal
+          type={helpType}
+          onClose={() => setHelpType(null)}
+        />
+      )}
       <TabMoveModal
         isOpen={tabMoveTarget !== null}
         memo={tabMoveTarget?.memo ?? ''}
@@ -353,7 +361,11 @@ export default function ScheduleApp() {
         />
       ) : (
         <>
-          <InputSection currentTab={currentTab} onAdd={handleAddItem} />
+          <InputSection
+            currentTab={currentTab}
+            onAdd={handleAddItem}
+            onHelp={(type) => setHelpType(type)}
+          />
           <ItemList
             items={items}
             currentTab={currentTab}
