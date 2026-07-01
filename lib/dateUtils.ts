@@ -74,12 +74,12 @@ export function sortItems(a: ScheduleItem[]): ScheduleItem[] {
   });
 }
 
-// ── 시간 유틸 (추가) ──
+// ── 시간 유틸 ──
 
 const AM_WORDS = ['오전', '아침', '새벽'];
 const PM_WORDS = ['오후', '점심', '저녁', '밤'];
 
-export function parseTime(raw: string): { h: number; m: number; ampm: 'AM' | 'PM' | null } | null {
+export function parseTime(raw: string): { h: number; m: number } | null {
   if (!raw || !raw.trim()) return null;
   const s = raw.trim();
 
@@ -124,8 +124,7 @@ export function parseTime(raw: string): { h: number; m: number; ampm: 'AM' | 'PM
 
   if (h < 0 || h > 23 || m < 0 || m > 59) return null;
 
-  const ampm: 'AM' | 'PM' | null = hasAM ? 'AM' : hasPM ? 'PM' : null;
-  return { h, m, ampm };
+  return { h, m };
 }
 
 export function fmtTime(h: number, m: number): string {

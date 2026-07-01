@@ -22,7 +22,8 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
   const [timeEndRaw, setTimeEndRaw] = useState('');
   const [memo, setMemo] = useState('');
 
-  const timeRawRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
+  const timeRef = useRef<HTMLInputElement>(null);
   const dateEndRef = useRef<HTMLInputElement>(null);
   const timeEndRef = useRef<HTMLInputElement>(null);
   const memoRef = useRef<HTMLInputElement>(null);
@@ -47,25 +48,17 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
 
   return (
     <div className="input-section">
-      <div className="date-row">
+      {/* 1줄: 날짜 */}
+      <div className="date-time-row">
         <input
+          ref={dateRef}
           type="text"
           placeholder="시작일 (0609…)"
           value={dateRaw}
           onChange={e => setDateRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') timeRawRef.current?.focus(); }}
+          onKeyDown={e => { if (e.key === 'Enter') timeRef.current?.focus(); }}
         />
-        <input
-          ref={timeRawRef}
-          type="text"
-          placeholder="시간 (선택)"
-          value={timeRaw}
-          onChange={e => setTimeRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') dateEndRef.current?.focus(); }}
-          style={{ flex: '0 0 110px' }}
-        />
-      </div>
-      <div className="date-row">
+        <span className="row-sep">~</span>
         <input
           ref={dateEndRef}
           type="text"
@@ -74,21 +67,32 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
           onChange={e => setDateEndRaw(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') timeEndRef.current?.focus(); }}
         />
+      </div>
+      {/* 2줄: 시간 */}
+      <div className="date-time-row">
+        <input
+          ref={timeRef}
+          type="text"
+          placeholder="06:30 또는 18:30"
+          value={timeRaw}
+          onChange={e => setTimeRaw(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') dateEndRef.current?.focus(); }}
+        />
+        <span className="row-sep">~</span>
         <input
           ref={timeEndRef}
           type="text"
-          placeholder="시간 (선택)"
+          placeholder="06:30 또는 18:30"
           value={timeEndRaw}
           onChange={e => setTimeEndRaw(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') memoRef.current?.focus(); }}
-          style={{ flex: '0 0 110px' }}
         />
       </div>
+      {/* 3줄: 메모 (글자수 overlay) */}
       <div className="memo-input-wrap">
         <input
           ref={memoRef}
           type="text"
-          className="memo-input-field"
           placeholder="할 일 메모 (50자 이내)"
           maxLength={55}
           value={memo}

@@ -20,7 +20,10 @@ interface ItemCardProps {
 function extractTime(iso: string | null | undefined): { h: number; m: number } | null {
   if (!iso) return null;
   const d = new Date(iso);
-  return { h: d.getUTCHours(), m: d.getUTCMinutes() };
+  const h = d.getUTCHours();
+  const m = d.getUTCMinutes();
+  if (h === 0 && m === 0) return null;
+  return { h, m };
 }
 
 export default function ItemCard({

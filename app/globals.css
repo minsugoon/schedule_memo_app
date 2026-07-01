@@ -325,6 +325,11 @@ input[type=text]::placeholder { color: var(--text3); }
 .tab-move-cancel-btn { width: 100%; padding: 10px; border-radius: 10px; border: none; background: none; color: var(--text3); font-size: 13px; cursor: pointer; }
 .tab-move-cancel-btn:hover { color: var(--text2); }
 
+/* ── 날짜/시간 입력 행 (방안 C) ── */
+.date-time-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.date-time-row input { flex: 1; min-width: 0; }
+.row-sep { font-size: 13px; color: var(--text3); flex-shrink: 0; }
+
 /* ── 메모 입력 글자수 오버레이 ── */
 .memo-input-wrap { position: relative; margin-bottom: 7px; }
 .memo-input-wrap input { padding-right: 52px; width: 100%; }
