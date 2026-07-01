@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
+import HelpModal from './HelpModal';
 
 interface InputSectionProps {
   currentTab: TabKey;
@@ -21,6 +22,7 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
   const [dateEndRaw, setDateEndRaw] = useState('');
   const [timeEndRaw, setTimeEndRaw] = useState('');
   const [memo, setMemo] = useState('');
+  const [helpType, setHelpType] = useState<'date' | 'time' | null>(null);
 
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
@@ -48,11 +50,13 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
 
   return (
     <div className="input-section">
+
       {/* 1줄: 날짜 */}
       <div className="date-time-row">
         <input
           ref={dateRef}
           type="text"
+          style={{ fontSize: '11px' }}
           placeholder="시작일 (0609…)"
           value={dateRaw}
           onChange={e => setDateRaw(e.target.value)}
@@ -62,33 +66,48 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
         <input
           ref={dateEndRef}
           type="text"
+          style={{ fontSize: '11px' }}
           placeholder="종료일 (선택)"
           value={dateEndRaw}
           onChange={e => setDateEndRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') timeEndRef.current?.focus(); }}
+          onKeyDown={e => { if (e.key === 'Enter') timeRef.current?.focus(); }}
         />
+        <button
+          className="help-btn"
+          onClick={() => setHelpType('date')}
+          aria-label="날짜 입력 방법 안내"
+        >❓</button>
       </div>
+
       {/* 2줄: 시간 */}
       <div className="date-time-row">
         <input
           ref={timeRef}
           type="text"
-          placeholder="06:30 또는 18:30"
+          style={{ fontSize: '11px' }}
+          placeholder="시작시간 (선택)"
           value={timeRaw}
           onChange={e => setTimeRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') dateEndRef.current?.focus(); }}
+          onKeyDown={e => { if (e.key === 'Enter') timeEndRef.current?.focus(); }}
         />
         <span className="row-sep">~</span>
         <input
           ref={timeEndRef}
           type="text"
-          placeholder="06:30 또는 18:30"
+          style={{ fontSize: '11px' }}
+          placeholder="종료시간 (선택)"
           value={timeEndRaw}
           onChange={e => setTimeEndRaw(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') memoRef.current?.focus(); }}
         />
+        <button
+          className="help-btn"
+          onClick={() => setHelpType('time')}
+          aria-label="시간 입력 방법 안내"
+        >❓</button>
       </div>
-      {/* 3줄: 메모 (글자수 overlay) */}
+
+      {/* 3줄: 메모 */}
       <div className="memo-input-wrap">
         <input
           ref={memoRef}
@@ -101,9 +120,20 @@ export default function InputSection({ currentTab, onAdd }: InputSectionProps) {
         />
         <span className={`memo-char-count ${charClass}`}>{charLen} / 50</span>
       </div>
+
+      {/* 추가 버튼 */}
       <button className="add-btn" onClick={handleAdd}>
         <IconPlus size={15} aria-hidden /> {btnLabel}
       </button>
+
+      {/* 도움말 모달 */}
+      {helpType !== null && (
+        <HelpModal
+          type={helpType}
+          onClose={() => setHelpType(null)}
+        />
+      )}
+
     </div>
   );
 }
