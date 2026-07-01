@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isTodayInRange, isRange, fmtShort, dateKey, getToday, type FmtShortResult } from '@/lib/dateUtils';
+import { isTodayInRange, isRange, fmtShort, fmtTime, dateKey, getToday, type FmtShortResult } from '@/lib/dateUtils';
 
 interface ItemCardProps {
   item: ScheduleItem;
@@ -15,6 +15,12 @@ interface ItemCardProps {
   onStartEdit: (id: number) => void;
   onSaveEdit: (id: number, dateRaw: string, dateEndRaw: string, memo: string) => void;
   onToggleExpand: (id: number) => void;
+}
+
+function extractTime(iso: string | null | undefined): { h: number; m: number } | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return { h: d.getUTCHours(), m: d.getUTCMinutes() };
 }
 
 export default function ItemCard({
@@ -58,9 +64,22 @@ export default function ItemCard({
 
   const sdResult = fmtShort(item.date);
   const edResult = item.dateEnd ? fmtShort(item.dateEnd) : null;
+
+  const startTime = item.isAllDay === false ? extractTime(item.startedAt) : null;
+  const endTime = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null;
+
   const dateLine = isRange(item)
-    ? <>{renderDate(sdResult)} ~ {renderDate(edResult)}</>
-    : renderDate(sdResult);
+    ? <>
+        {renderDate(sdResult)}
+        {startTime && <> {fmtTime(startTime.h, startTime.m)}</>}
+        {' ~ '}
+        {renderDate(edResult)}
+        {endTime && <> {fmtTime(endTime.h, endTime.m)}</>}
+      </>
+    : <>
+        {renderDate(sdResult)}
+        {startTime && <> {fmtTime(startTime.h, startTime.m)}</>}
+      </>;
 
   const cls = [
     'item',

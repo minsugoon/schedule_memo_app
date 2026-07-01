@@ -324,3 +324,8 @@ input[type=text]::placeholder { color: var(--text3); }
 .tab-move-option-btn:hover { background: var(--bg3); border-color: var(--border2); }
 .tab-move-cancel-btn { width: 100%; padding: 10px; border-radius: 10px; border: none; background: none; color: var(--text3); font-size: 13px; cursor: pointer; }
 .tab-move-cancel-btn:hover { color: var(--text2); }
+
+/* ── 메모 입력 글자수 오버레이 ── */
+.memo-input-wrap { position: relative; margin-bottom: 7px; }
+.memo-input-wrap input { padding-right: 52px; width: 100%; }
+.memo-char-count { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; pointer-events: none; }

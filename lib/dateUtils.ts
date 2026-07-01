@@ -73,3 +73,77 @@ export function sortItems(a: ScheduleItem[]): ScheduleItem[] {
     return ka !== kb ? ka.localeCompare(kb) : a.createdAt - b.createdAt;
   });
 }
+
+// ── 시간 유틸 (추가) ──
+
+const AM_WORDS = ['오전', '아침', '새벽'];
+const PM_WORDS = ['오후', '점심', '저녁', '밤'];
+
+export function parseTime(raw: string): { h: number; m: number; ampm: 'AM' | 'PM' | null } | null {
+  if (!raw || !raw.trim()) return null;
+  const s = raw.trim();
+
+  const hasAM = AM_WORDS.some(w => s.includes(w)) || /\bam\b/i.test(s);
+  const hasPM = PM_WORDS.some(w => s.includes(w)) || /\bpm\b/i.test(s);
+
+  let stripped = s;
+  for (const w of [...AM_WORDS, ...PM_WORDS]) {
+    stripped = stripped.split(w).join('');
+  }
+  stripped = stripped.replace(/\bam\b/gi, '').replace(/\bpm\b/gi, '').trim();
+
+  type PE = [RegExp, (a: RegExpMatchArray) => [number, number] | null];
+  const patterns: PE[] = [
+    [/^(\d{1,2}):(\d{2})$/, a => [+a[1], +a[2]]],
+    [/^(\d{2})(\d{2})$/, a => {
+      const hh = +a[1], mm = +a[2];
+      return (hh <= 23 && mm <= 59) ? [hh, mm] : null;
+    }],
+    [/^(\d)(\d{2})$/, a => [+a[1], +a[2]]],
+    [/^(\d{1,2})시\s*(\d{1,2})분$/, a => [+a[1], +a[2]]],
+    [/^(\d{1,2})시$/, a => [+a[1], 0]],
+    [/^(\d{1,2})$/, a => [+a[1], 0]],
+  ];
+
+  let h = -1, m = 0;
+  for (const [re, fn] of patterns) {
+    const match = stripped.match(re);
+    if (match) {
+      const result = fn(match);
+      if (result) { [h, m] = result; break; }
+    }
+  }
+
+  if (h === -1) return null;
+
+  if (hasAM) {
+    if (h === 12) h = 0;
+  } else if (hasPM) {
+    if (h !== 12) h = h + 12;
+  }
+
+  if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+
+  const ampm: 'AM' | 'PM' | null = hasAM ? 'AM' : hasPM ? 'PM' : null;
+  return { h, m, ampm };
+}
+
+export function fmtTime(h: number, m: number): string {
+  const mStr = String(m).padStart(2, '0');
+  if (h < 12) {
+    const displayH = h === 0 ? 12 : h;
+    return `오전 ${displayH}:${mStr}`;
+  } else {
+    const displayH = h === 12 ? 12 : h - 12;
+    return `오후 ${displayH}:${mStr}`;
+  }
+}
+
+export function timeToISO(date: ScheduleDate, h: number, m: number): string {
+  const y = String(date.y).padStart(4, '0');
+  const mo = String(date.m).padStart(2, '0');
+  const d = String(date.d).padStart(2, '0');
+  const hh = String(h).padStart(2, '0');
+  const mm = String(m).padStart(2, '0');
+  return `${y}-${mo}-${d}T${hh}:${mm}:00Z`;
+}

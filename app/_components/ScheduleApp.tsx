@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ScheduleItem, ScheduleDate, TabKey, ViewMode } from '@/lib/types'
-import { parseDate, fmtShort } from '@/lib/dateUtils'
+import { parseDate, fmtShort, parseTime, timeToISO } from '@/lib/dateUtils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useSchedules, type DbSchedule } from '@/lib/hooks/useSchedules'
 import { useTabs } from '@/lib/hooks/useTabs'
@@ -50,6 +50,9 @@ function toScheduleItem(
     done: row.is_done,
     createdAt: new Date(row.created_at).getTime(),
     category: row.tab_id ? (tabCategoryMap[row.tab_id] ?? 'personal') : 'personal',
+    startedAt: row.started_at,
+    endedAt: row.ended_at,
+    isAllDay: row.is_all_day,
   }
 }
 
@@ -151,7 +154,13 @@ export default function ScheduleApp() {
   const findSchedule = (numericId: number) =>
     schedules.find(s => new Date(s.created_at).getTime() === numericId)
 
-  const handleAddItem = async (dateRaw: string, dateEndRaw: string, memo: string) => {
+  const handleAddItem = async (
+    dateRaw: string,
+    timeRaw: string,
+    dateEndRaw: string,
+    timeEndRaw: string,
+    memo: string
+  ) => {
     const hasDate = dateRaw.trim() !== ''
     let tabId: string | null = null
 
@@ -165,11 +174,26 @@ export default function ScheduleApp() {
     const parsed = parseDate(dateRaw)
     const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
 
+    const parsedTime = timeRaw.trim() ? parseTime(timeRaw) : null
+    const parsedEndTime = timeEndRaw.trim() ? parseTime(timeEndRaw) : null
+
+    const startedAt = parsed
+      ? (parsedTime
+          ? timeToISO(parsed, parsedTime.h, parsedTime.m)
+          : toISODate(parsed))
+      : new Date().toISOString()
+
+    const endedAt = parsedEnd
+      ? (parsedEndTime
+          ? timeToISO(parsedEnd, parsedEndTime.h, parsedEndTime.m)
+          : toISODate(parsedEnd))
+      : null
+
     await addSchedule({
       tab_id: tabId,
-      started_at: parsed ? toISODate(parsed) : new Date().toISOString(),
-      ended_at: parsedEnd ? toISODate(parsedEnd) : null,
-      is_all_day: true,
+      started_at: startedAt,
+      ended_at: endedAt,
+      is_all_day: !parsedTime,
       date_raw: dateRaw,
       memo,
     })
@@ -325,7 +349,7 @@ export default function ScheduleApp() {
           onStartEdit={handleStartEdit}
           onSaveEdit={handleSaveEdit}
           onToggleExpand={handleToggleExpand}
-          onAdd={(memo) => handleAddItem('', '', memo)}
+          onAdd={(memo) => handleAddItem('', '', '', '', memo)}
         />
       ) : (
         <>
