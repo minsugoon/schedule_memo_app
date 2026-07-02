@@ -262,6 +262,20 @@ input[type=text]::placeholder { color: var(--text3); }
 .edit-save-btn:hover { opacity: 0.85; }
 .edit-cancel-btn:hover { background: var(--border); }
 
+/* 탭 선택 모달 */
+.tab-select-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; }
+.tab-select-card { background:var(--card-bg); border-radius:14px; padding:20px; width:100%; max-width:320px; border:0.5px solid var(--border); }
+.tab-select-title { font-size:15px; font-weight:500; color:var(--text); margin-bottom:4px; }
+.tab-select-sub { font-size:12px; color:var(--text3); margin-bottom:16px; }
+.tab-select-options { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+.tab-select-option { width:100%; padding:12px 14px; border-radius:10px; border:0.5px solid var(--border); background:var(--input-bg); color:var(--text); font-size:14px; font-weight:500; cursor:pointer; display:flex; align-items:center; gap:10px; }
+.tab-select-option:hover { background:var(--bg3); border-color:var(--border2); }
+.tab-select-option.current { border-color:var(--border2); background:var(--bg2); }
+.tab-select-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.tab-select-current-badge { margin-left:auto; font-size:10px; background:var(--bg3); color:var(--text3); border-radius:4px; padding:1px 6px; }
+.tab-select-cancel { width:100%; padding:10px; border-radius:10px; border:none; background:none; color:var(--text3); font-size:13px; cursor:pointer; }
+.tab-select-cancel:hover { color:var(--text2); }
+
 @media (min-width: 431px) {
   body { align-items: center; padding-top: 20px; }
   #app { height: var(--app-h); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 28px rgba(0,0,0,0.1); }

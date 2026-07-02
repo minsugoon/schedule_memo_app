@@ -4,23 +4,26 @@ import { useState, useEffect } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
 import { isTodayInRange, isRange, fmtShort, fmtTime, dateKey, getToday, type FmtShortResult } from '@/lib/dateUtils';
+import TabSelectModal from './TabSelectModal';
 
 interface ItemCardProps {
   item: ScheduleItem;
   currentTab: TabKey | 'memo';
   expanded: boolean;
   editing: boolean;
+  availableTabs: Array<{ id: string; name: string; color: string | null }>;
   onToggleDone: (id: number) => void;
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
-  onSaveEdit: (id: number, dateRaw: string, dateEndRaw: string, memo: string) => void;
+  onSaveEdit: (id: number, dateRaw: string, dateEndRaw: string, memo: string, tabId: string) => void;
   onSaveEditWithTime?: (
     id: number,
     dateRaw: string,
     timeRaw: string,
     dateEndRaw: string,
     timeEndRaw: string,
-    memo: string
+    memo: string,
+    tabId: string
   ) => void;
   onCancelEdit: (id: number) => void;
   onToggleExpand: (id: number) => void;
@@ -36,7 +39,7 @@ function extractTime(iso: string | null | undefined): { h: number; m: number } |
 }
 
 export default function ItemCard({
-  item, currentTab, expanded, editing,
+  item, currentTab, expanded, editing, availableTabs,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand,
 }: ItemCardProps) {
   const [editDate, setEditDate] = useState('');
@@ -44,12 +47,14 @@ export default function ItemCard({
   const [editDateEnd, setEditDateEnd] = useState('');
   const [editTimeEnd, setEditTimeEnd] = useState('');
   const [editMemo, setEditMemo] = useState('');
+  const [showTabSelect, setShowTabSelect] = useState(false);
 
   useEffect(() => {
     if (editing) {
       setEditDate(item.dateRaw || '');
       setEditDateEnd(item.dateEndRaw || '');
       setEditMemo(item.memo);
+      setShowTabSelect(false);
 
       const st = item.isAllDay === false ? extractTime(item.startedAt) : null;
       setEditTime(st ? `${String(st.h).padStart(2, '0')}:${String(st.m).padStart(2, '0')}` : '');
@@ -102,16 +107,25 @@ export default function ItemCard({
   const editMemoCharLen = [...editMemo].length;
   const editMemoCharClass = editMemoCharLen > 50 ? 'char-over' : editMemoCharLen > 40 ? 'char-warn' : 'char-ok';
 
-  const handleSaveEdit = () => {
+  const handleSaveClick = () => {
     const trimmed = editMemo.trim();
     if (!trimmed) { alert('메모를 입력해주세요.'); return; }
     if ([...trimmed].length > 50) { alert('50자 이내로 입력해주세요.'); return; }
+    setShowTabSelect(true);
+  };
 
+  const handleTabSelected = (tabId: string) => {
+    setShowTabSelect(false);
+    const trimmed = editMemo.trim();
     if (onSaveEditWithTime) {
-      onSaveEditWithTime(item.id, editDate, editTime, editDateEnd, editTimeEnd, trimmed);
+      onSaveEditWithTime(item.id, editDate, editTime, editDateEnd, editTimeEnd, trimmed, tabId);
     } else {
-      onSaveEdit(item.id, editDate, editDateEnd, trimmed);
+      onSaveEdit(item.id, editDate, editDateEnd, trimmed, tabId);
     }
+  };
+
+  const handleTabSelectCancel = () => {
+    setShowTabSelect(false);
   };
 
   const handleCancelEdit = () => {
@@ -120,6 +134,7 @@ export default function ItemCard({
     setEditDateEnd('');
     setEditTimeEnd('');
     setEditMemo('');
+    setShowTabSelect(false);
     onCancelEdit(item.id);
   };
 
@@ -191,7 +206,7 @@ export default function ItemCard({
               maxLength={55}
               value={editMemo}
               onChange={e => setEditMemo(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleSaveEdit(); }}
+              onKeyDown={e => { if (e.key === 'Enter') handleSaveClick(); }}
             />
             <span className={`memo-char-count ${editMemoCharClass}`}>
               {editMemoCharLen} / 50
@@ -202,7 +217,7 @@ export default function ItemCard({
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
               className="edit-action-btn edit-save-btn"
-              onClick={e => { e.stopPropagation(); handleSaveEdit(); }}
+              onClick={e => { e.stopPropagation(); handleSaveClick(); }}
             >
               저장
             </button>
@@ -213,6 +228,14 @@ export default function ItemCard({
               취소
             </button>
           </div>
+
+          <TabSelectModal
+            isOpen={showTabSelect}
+            currentTabId={item.tabId ?? null}
+            tabs={availableTabs}
+            onSelect={handleTabSelected}
+            onCancel={handleTabSelectCancel}
+          />
         </>
       ) : (
         <>

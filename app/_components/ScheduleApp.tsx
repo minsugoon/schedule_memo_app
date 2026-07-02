@@ -39,7 +39,7 @@ function isoToDateRaw(iso: string | null): string {
 
 function toScheduleItem(
   row: DbSchedule,
-  tabCategoryMap: Record<string, 'personal' | 'work'>
+  tabCategoryMap: Record<string, 'personal' | 'work' | 'memo'>
 ): ScheduleItem {
   return {
     id: new Date(row.created_at).getTime(),
@@ -50,10 +50,11 @@ function toScheduleItem(
     memo: row.memo,
     done: row.is_done,
     createdAt: new Date(row.created_at).getTime(),
-    category: row.tab_id ? (tabCategoryMap[row.tab_id] ?? 'personal') : 'personal',
+    category: row.tab_id && tabCategoryMap[row.tab_id] === 'work' ? 'work' : 'personal',
     startedAt: row.started_at,
     endedAt: row.ended_at,
     isAllDay: row.is_all_day,
+    tabId: row.tab_id,
   }
 }
 
@@ -136,12 +137,14 @@ export default function ScheduleApp() {
     }
   }, [user, fetchTabs, fetchSchedules])
 
-  const tabCategoryMap = useMemo<Record<string, 'personal' | 'work'>>(() => {
-    const map: Record<string, 'personal' | 'work'> = {}
+  const tabCategoryMap = useMemo<Record<string, 'personal' | 'work' | 'memo'>>(() => {
+    const map: Record<string, 'personal' | 'work' | 'memo'> = {}
     const personalTab = tabs.find(t => t.name === '개인')
     const workTab = tabs.find(t => t.name === '회사')
+    const memoTab = tabs.find(t => t.name === '메모')
     if (personalTab) map[personalTab.id] = 'personal'
     if (workTab) map[workTab.id] = 'work'
+    if (memoTab) map[memoTab.id] = 'memo'
     return map
   }, [tabs])
 
@@ -154,6 +157,11 @@ export default function ScheduleApp() {
     () => tabs
       .filter(t => t.name === '개인' || t.name === '회사')
       .map(t => ({ id: t.id, name: t.name })),
+    [tabs]
+  )
+
+  const availableTabs = useMemo(
+    () => tabs.filter(t => t.name !== '메모' && t.name !== '전체'),
     [tabs]
   )
 
@@ -226,28 +234,22 @@ export default function ScheduleApp() {
     setExpandedId(id)
   }
 
-  const handleSaveEdit = async (id: number, dateRaw: string, dateEndRaw: string, memo: string) => {
+  const handleSaveEdit = async (id: number, dateRaw: string, dateEndRaw: string, memo: string, tabId: string) => {
     const schedule = findSchedule(id)
     if (!schedule) return
-
-    const wasMemo = !schedule.date_raw || schedule.date_raw.trim() === ''
-    const nowHasDate = dateRaw.trim() !== ''
-
-    if (wasMemo && nowHasDate) {
-      setTabMoveTarget({ id, dateRaw, dateEndRaw, memo })
-      return
-    }
 
     const parsed = parseDate(dateRaw)
     const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
 
     await updateSchedule(schedule.id, {
+      tab_id: tabId,
       date_raw: dateRaw,
       memo,
       started_at: parsed ? toISODate(parsed) : undefined,
       ended_at: parsedEnd ? toISODate(parsedEnd) : null,
     })
     setEditingId(null)
+    setExpandedId(null)
   }
 
   const handleSaveEditWithTime = async (
@@ -256,19 +258,11 @@ export default function ScheduleApp() {
     timeRaw: string,
     dateEndRaw: string,
     timeEndRaw: string,
-    memo: string
+    memo: string,
+    tabId: string
   ) => {
     const schedule = findSchedule(id)
     if (!schedule) return
-
-    const wasMemo = !schedule.date_raw || schedule.date_raw.trim() === ''
-    const nowHasDate = dateRaw.trim() !== ''
-
-    if (wasMemo && nowHasDate) {
-      setTabMoveTarget({ id, dateRaw, dateEndRaw, memo })
-      setEditingId(null)
-      return
-    }
 
     const parsed = parseDate(dateRaw)
     const parsedEnd = dateEndRaw.trim() ? parseDate(dateEndRaw) : null
@@ -284,6 +278,7 @@ export default function ScheduleApp() {
       : null
 
     await updateSchedule(schedule.id, {
+      tab_id: tabId,
       date_raw: dateRaw,
       memo,
       started_at: startedAt,
@@ -408,6 +403,7 @@ export default function ScheduleApp() {
           items={memoItems}
           expandedId={expandedId}
           editingId={editingId}
+          availableTabs={availableTabs}
           onToggleDone={handleToggleDone}
           onDelete={handleDelete}
           onStartEdit={handleStartEdit}
@@ -430,6 +426,7 @@ export default function ScheduleApp() {
             showDone={showDone}
             expandedId={expandedId}
             editingId={editingId}
+            availableTabs={availableTabs}
             onToggleDone={handleToggleDone}
             onDelete={handleDelete}
             onStartEdit={handleStartEdit}

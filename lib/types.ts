@@ -17,6 +17,7 @@ export interface ScheduleItem {
   startedAt?: string | null;
   endedAt?: string | null;
   isAllDay?: boolean;
+  tabId?: string | null;
 }
 
 export type TabKey = 'all' | 'personal' | 'work';
