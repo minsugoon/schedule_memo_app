@@ -1,5 +1,6 @@
 @AGENTS.md
 @PROJECT_SPEC.md
+@SUPABASE_TABLE.md
 
 # 할 일 메모장 — Claude Code 규칙
 
