@@ -67,10 +67,26 @@ export function isRange(it: ScheduleItem): boolean {
   return !!(it.dateEnd && dateKey(it.dateEnd) !== dateKey(it.date));
 }
 
+function startTimeMinutes(it: ScheduleItem): number | null {
+  if (it.isAllDay) return null;
+  if (!it.startedAt) return null;
+  const m = it.startedAt.match(/T(\d{2}):(\d{2})/);
+  if (!m) return null;
+  return +m[1] * 60 + +m[2];
+}
+
 export function sortItems(a: ScheduleItem[]): ScheduleItem[] {
   return [...a].sort((a, b) => {
     const ka = dateKey(a.date), kb = dateKey(b.date);
-    return ka !== kb ? ka.localeCompare(kb) : a.createdAt - b.createdAt;
+    if (ka !== kb) return ka.localeCompare(kb);
+
+    const ta = startTimeMinutes(a), tb = startTimeMinutes(b);
+    if (ta === null && tb === null) return a.createdAt - b.createdAt;
+    if (ta === null) return 1;
+    if (tb === null) return -1;
+    if (ta !== tb) return ta - tb;
+
+    return a.createdAt - b.createdAt;
   });
 }
 
