@@ -15,6 +15,7 @@ import MemoView from './MemoView'
 import PWAInstallModal from './PWAInstallModal'
 import TabMoveModal from './TabMoveModal'
 import HelpModal from './HelpModal'
+import PatchNoteModal from './PatchNoteModal'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -76,6 +77,7 @@ export default function ScheduleApp() {
   const [hydrated, setHydrated] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
+  const [showPatchNote, setShowPatchNote] = useState(false)
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
   const [tabMoveTarget, setTabMoveTarget] = useState<{
     id: number
@@ -136,6 +138,14 @@ export default function ScheduleApp() {
       fetchSchedules()
     }
   }, [user, fetchTabs, fetchSchedules])
+
+  useEffect(() => {
+    if (!hydrated) return
+    const key = 'patch_seen_20260702'
+    if (!localStorage.getItem(key)) {
+      setShowPatchNote(true)
+    }
+  }, [hydrated])
 
   const tabCategoryMap = useMemo<Record<string, 'personal' | 'work' | 'memo'>>(() => {
     const map: Record<string, 'personal' | 'work' | 'memo'> = {}
@@ -349,6 +359,11 @@ export default function ScheduleApp() {
     router.push('/login')
   }
 
+  const handleClosePatchNote = () => {
+    localStorage.setItem('patch_seen_20260702', 'true')
+    setShowPatchNote(false)
+  }
+
   const handleInstallPWA = async () => {
     if (!deferredPrompt.current) return
     await deferredPrompt.current.prompt()
@@ -367,6 +382,15 @@ export default function ScheduleApp() {
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
+
+      {/* 패치 노트 모달 — 최우선 z-index */}
+      {showPatchNote && (
+        <PatchNoteModal
+          isOpen={showPatchNote}
+          onClose={handleClosePatchNote}
+        />
+      )}
+
       {helpType !== null && (
         <HelpModal
           type={helpType}
