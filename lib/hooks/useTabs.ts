@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 export type DbTab = {
   id: string
   user_id: string
+  name: string
   sort_order: number
   is_default: boolean
 }
@@ -19,7 +20,7 @@ export function useTabs() {
     const supabase = createClient()
     const { data, error } = await supabase
       .from('tabs')
-      .select('id, user_id, sort_order, is_default')
+      .select('id, user_id, name, sort_order, is_default')
       .order('sort_order', { ascending: true })
 
     if (error) {

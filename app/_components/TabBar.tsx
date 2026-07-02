@@ -2,8 +2,10 @@
 
 import { IconCircleCheck, IconNotes } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey, ViewMode } from '@/lib/types';
+import type { DbTab } from '@/lib/hooks/useTabs';
 
 interface TabBarProps {
+  tabs: DbTab[];
   currentTab: TabKey;
   items: ScheduleItem[];
   onSwitchTab: (tab: TabKey) => void;
@@ -13,12 +15,28 @@ interface TabBarProps {
   onToggleShowDone: () => void;
 }
 
+const NAME_TO_KEY: Record<string, TabKey> = {
+  '전체': 'all',
+  '개인': 'personal',
+  '회사': 'work',
+};
+
 export default function TabBar({
-  currentTab, items, onSwitchTab, viewMode, onToggleViewMode, showDone, onToggleShowDone,
+  tabs, currentTab, items, onSwitchTab, viewMode, onToggleViewMode, showDone, onToggleShowDone,
 }: TabBarProps) {
   const totalCount = items.filter(i => !i.done && i.date !== null).length;
   const personalCount = items.filter(i => i.category === 'personal' && !i.done && i.date !== null).length;
   const workCount = items.filter(i => i.category === 'work' && !i.done && i.date !== null).length;
+
+  const countByKey: Record<TabKey, number> = {
+    all: totalCount,
+    personal: personalCount,
+    work: workCount,
+  };
+
+  const tabBarTabs = tabs
+    .filter(t => t.name !== '메모')
+    .sort((a, b) => a.sort_order - b.sort_order);
 
   return (
     <div className="tab-bar-wrapper">
@@ -40,17 +58,17 @@ export default function TabBar({
         </button>
       </div>
       <div className="tab-bar">
-        {(['all', 'personal', 'work'] as TabKey[]).map(tab => {
-          const label = tab === 'all' ? '전체' : tab === 'personal' ? '개인' : '회사';
-          const count = tab === 'all' ? totalCount : tab === 'personal' ? personalCount : workCount;
+        {tabBarTabs.map(tab => {
+          const key = NAME_TO_KEY[tab.name];
+          if (!key) return null;
           return (
             <div
-              key={tab}
-              className={`tab-item${currentTab === tab ? ' active' : ''}`}
-              onClick={() => onSwitchTab(tab)}
+              key={tab.id}
+              className={`tab-item${currentTab === key ? ' active' : ''}`}
+              onClick={() => onSwitchTab(key)}
             >
-              {label}
-              <span className="tab-count">{count}</span>
+              {tab.name}
+              <span className="tab-count">{countByKey[key]}</span>
             </div>
           );
         })}

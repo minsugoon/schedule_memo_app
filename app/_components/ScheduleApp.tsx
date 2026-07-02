@@ -138,8 +138,10 @@ export default function ScheduleApp() {
 
   const tabCategoryMap = useMemo<Record<string, 'personal' | 'work'>>(() => {
     const map: Record<string, 'personal' | 'work'> = {}
-    if (tabs[0]) map[tabs[0].id] = 'personal'
-    if (tabs[1]) map[tabs[1].id] = 'work'
+    const personalTab = tabs.find(t => t.name === '개인')
+    const workTab = tabs.find(t => t.name === '회사')
+    if (personalTab) map[personalTab.id] = 'personal'
+    if (workTab) map[workTab.id] = 'work'
     return map
   }, [tabs])
 
@@ -149,7 +151,9 @@ export default function ScheduleApp() {
   )
 
   const moveTargetTabs = useMemo(
-    () => tabs.slice(0, 2).map((t, i) => ({ id: t.id, name: i === 0 ? '개인' : '회사' })),
+    () => tabs
+      .filter(t => t.name === '개인' || t.name === '회사')
+      .map(t => ({ id: t.id, name: t.name })),
     [tabs]
   )
 
@@ -170,7 +174,9 @@ export default function ScheduleApp() {
       tabId = null
     } else {
       const cat: 'personal' | 'work' = currentTab === 'all' ? 'personal' : currentTab
-      tabId = cat === 'work' ? tabs[1]?.id ?? null : tabs[0]?.id ?? null
+      tabId = cat === 'work'
+        ? tabs.find(t => t.name === '회사')?.id ?? null
+        : tabs.find(t => t.name === '개인')?.id ?? null
     }
 
     const parsed = parseDate(dateRaw)
@@ -388,6 +394,7 @@ export default function ScheduleApp() {
         refreshing={refreshing}
       />
       <TabBar
+        tabs={tabs}
         currentTab={currentTab}
         items={items}
         onSwitchTab={handleSwitchTab}
