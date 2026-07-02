@@ -16,12 +16,21 @@ interface ItemListProps {
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
   onSaveEdit: (id: number, dateRaw: string, dateEndRaw: string, memo: string) => void;
+  onSaveEditWithTime: (
+    id: number,
+    dateRaw: string,
+    timeRaw: string,
+    dateEndRaw: string,
+    timeEndRaw: string,
+    memo: string
+  ) => void;
+  onCancelEdit: (id: number) => void;
   onToggleExpand: (id: number) => void;
 }
 
 export default function ItemList({
   items, currentTab, showDone, expandedId, editingId,
-  onToggleDone, onDelete, onStartEdit, onSaveEdit, onToggleExpand,
+  onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand,
 }: ItemListProps) {
   const filtered = useMemo(() => {
     let result = currentTab === 'all'
@@ -54,6 +63,8 @@ export default function ItemList({
             onDelete={onDelete}
             onStartEdit={onStartEdit}
             onSaveEdit={onSaveEdit}
+            onSaveEditWithTime={onSaveEditWithTime}
+            onCancelEdit={onCancelEdit}
             onToggleExpand={onToggleExpand}
           />
         ))

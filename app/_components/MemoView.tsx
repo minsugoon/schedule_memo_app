@@ -13,13 +13,22 @@ interface MemoViewProps {
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
   onSaveEdit: (id: number, dateRaw: string, dateEndRaw: string, memo: string) => void;
+  onSaveEditWithTime: (
+    id: number,
+    dateRaw: string,
+    timeRaw: string,
+    dateEndRaw: string,
+    timeEndRaw: string,
+    memo: string
+  ) => void;
+  onCancelEdit: (id: number) => void;
   onToggleExpand: (id: number) => void;
   onAdd: (memo: string) => void;
 }
 
 export default function MemoView({
   items, expandedId, editingId,
-  onToggleDone, onDelete, onStartEdit, onSaveEdit, onToggleExpand, onAdd,
+  onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand, onAdd,
 }: MemoViewProps) {
   const [memo, setMemo] = useState('');
 
@@ -81,6 +90,8 @@ export default function MemoView({
               onDelete={onDelete}
               onStartEdit={onStartEdit}
               onSaveEdit={onSaveEdit}
+              onSaveEditWithTime={onSaveEditWithTime}
+              onCancelEdit={onCancelEdit}
               onToggleExpand={onToggleExpand}
             />
           ))

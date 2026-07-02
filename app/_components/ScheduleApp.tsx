@@ -244,6 +244,55 @@ export default function ScheduleApp() {
     setEditingId(null)
   }
 
+  const handleSaveEditWithTime = async (
+    id: number,
+    dateRaw: string,
+    timeRaw: string,
+    dateEndRaw: string,
+    timeEndRaw: string,
+    memo: string
+  ) => {
+    const schedule = findSchedule(id)
+    if (!schedule) return
+
+    const wasMemo = !schedule.date_raw || schedule.date_raw.trim() === ''
+    const nowHasDate = dateRaw.trim() !== ''
+
+    if (wasMemo && nowHasDate) {
+      setTabMoveTarget({ id, dateRaw, dateEndRaw, memo })
+      setEditingId(null)
+      return
+    }
+
+    const parsed = parseDate(dateRaw)
+    const parsedEnd = dateEndRaw.trim() ? parseDate(dateEndRaw) : null
+    const parsedTime = timeRaw.trim() ? parseTime(timeRaw) : null
+    const parsedEndTime = timeEndRaw.trim() ? parseTime(timeEndRaw) : null
+
+    const startedAt = parsed
+      ? (parsedTime ? timeToISO(parsed, parsedTime.h, parsedTime.m) : toISODate(parsed))
+      : undefined
+
+    const endedAt = parsedEnd
+      ? (parsedEndTime ? timeToISO(parsedEnd, parsedEndTime.h, parsedEndTime.m) : toISODate(parsedEnd))
+      : null
+
+    await updateSchedule(schedule.id, {
+      date_raw: dateRaw,
+      memo,
+      started_at: startedAt,
+      ended_at: endedAt,
+      is_all_day: !parsedTime,
+    })
+    setEditingId(null)
+    setExpandedId(null)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setExpandedId(null)
+  }
+
   const handleTabMoveSelect = async (tabId: string) => {
     if (!tabMoveTarget) return
     const schedule = findSchedule(tabMoveTarget.id)
@@ -356,6 +405,8 @@ export default function ScheduleApp() {
           onDelete={handleDelete}
           onStartEdit={handleStartEdit}
           onSaveEdit={handleSaveEdit}
+          onSaveEditWithTime={handleSaveEditWithTime}
+          onCancelEdit={handleCancelEdit}
           onToggleExpand={handleToggleExpand}
           onAdd={(memo) => handleAddItem('', '', '', '', memo)}
         />
@@ -376,6 +427,8 @@ export default function ScheduleApp() {
             onDelete={handleDelete}
             onStartEdit={handleStartEdit}
             onSaveEdit={handleSaveEdit}
+            onSaveEditWithTime={handleSaveEditWithTime}
+            onCancelEdit={handleCancelEdit}
             onToggleExpand={handleToggleExpand}
           />
         </>

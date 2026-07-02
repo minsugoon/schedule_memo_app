@@ -216,6 +216,52 @@ input[type=text]::placeholder { color: var(--text3); }
 .edit-memo-inp { flex: 2; min-width: 110px; }
 .edit-save { background: var(--btn-bg); color: var(--btn-text); border: none; border-radius: 7px; padding: 6px 12px; font-size: 14px; cursor: pointer; white-space: nowrap; }
 
+/* 카드 내 수정 모드 */
+.edit-current-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.edit-current-date {
+  font-size: 11px;
+  color: var(--text3);
+  font-variant-numeric: tabular-nums;
+}
+.edit-current-memo {
+  font-size: 13px;
+  color: var(--text2);
+}
+.edit-input-row {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.edit-input-row input {
+  flex: 1;
+  min-width: 0;
+}
+.edit-action-btn {
+  flex: 1;
+  padding: 9px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+.edit-save-btn {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+}
+.edit-cancel-btn {
+  background: var(--bg3);
+  color: var(--text2);
+}
+.edit-save-btn:hover { opacity: 0.85; }
+.edit-cancel-btn:hover { background: var(--border); }
+
 @media (min-width: 431px) {
   body { align-items: center; padding-top: 20px; }
   #app { height: var(--app-h); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 28px rgba(0,0,0,0.1); }
