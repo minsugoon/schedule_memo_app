@@ -5,6 +5,7 @@ import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
 import { isRange, fmtShort, fmtTime, dateKey, getToday, getBadgeInfo, type FmtShortResult } from '@/lib/dateUtils';
 import TabSelectModal from './TabSelectModal';
+import EmojiButton from './EmojiButton';
 
 interface ItemCardProps {
   item: ScheduleItem;
@@ -204,8 +205,13 @@ export default function ItemCard({
 
           {/* 메모 입력 */}
           <div className="memo-input-wrap" style={{ marginBottom: '10px' }}>
+            <EmojiButton
+              memo={editMemo}
+              onEmojiAdd={emoji => setEditMemo(prev => emoji + prev)}
+            />
             <input
               type="text"
+              className="has-emoji-btn"
               placeholder="수정할 메모 내용"
               maxLength={55}
               value={editMemo}

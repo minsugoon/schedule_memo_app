@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { IconPlus, IconClipboardText } from '@tabler/icons-react';
 import type { ScheduleItem } from '@/lib/types';
 import ItemCard from './ItemCard';
+import EmojiButton from './EmojiButton';
 
 interface MemoViewProps {
   items: ScheduleItem[];
@@ -48,6 +49,10 @@ export default function MemoView({
     return tabs.find(t => t.id === item.tabId)?.name;
   };
 
+  const handleEmojiAdd = (emoji: string) => {
+    setMemo(prev => emoji + prev);
+  };
+
   const handleAdd = () => {
     const trimmed = memo.trim();
     if (!trimmed) { alert('메모를 입력해주세요.'); return; }
@@ -67,6 +72,7 @@ export default function MemoView({
           <span className={`char-count ${charClass}`}>{charLen} / 50</span>
         </div>
         <div className="memo-view-add-row">
+          <EmojiButton memo={memo} onEmojiAdd={handleEmojiAdd} />
           <input
             type="text"
             placeholder="메모 입력 (50자 이내)"
