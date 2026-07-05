@@ -174,43 +174,41 @@ export const calcDayDiff = (target: ScheduleDate): number => {
 };
 
 export const getBadgeInfo = (item: ScheduleItem): {
-  dayBadge: string | null;
   isToday: boolean;
   isOngoing: boolean;
 } => {
-  const result = {
-    dayBadge: null as string | null,
-    isToday: false,
-    isOngoing: false,
-  };
+  const result = { isToday: false, isOngoing: false };
   if (!item.date) return result;
 
   const diff = calcDayDiff(item.date);
   const hasEnd = !!item.dateEnd;
-  const endDiff = hasEnd ? calcDayDiff(item.dateEnd!) : null;
 
   if (!hasEnd) {
-    // 하루 일정
-    if (diff === 0) {
-      result.isToday = true;
-    } else if (diff >= -3 && diff <= -1) {
-      result.dayBadge = `D${diff}`;        // D-3, D-2, D-1
-    } else if (diff >= 1 && diff <= 3) {
-      result.dayBadge = `D+${diff}`;       // D+1, D+2, D+3
-    }
-    // diff ≤ -4 또는 diff ≥ 4 → 아무것도 없음
+    // 하루 일정 — 당일만 오늘
+    if (diff === 0) result.isToday = true;
 
   } else {
     // 기간 일정
+    const endDiff = calcDayDiff(item.dateEnd!);
+
     if (diff === 0) {
-      result.isToday = true;               // 시작일 = 오늘
-      result.isOngoing = true;             // [오늘][진행중] 둘 다
-    } else if (diff >= -3 && diff <= -1) {
-      result.dayBadge = `D${diff}`;        // 시작 전 D-3~D-1
-    } else if (diff < 0 && endDiff !== null && endDiff >= 0) {
-      result.isOngoing = true;             // 기간 중간 또는 종료일=오늘
+      // 시작일 = 오늘 → [오늘] + [진행중]
+      result.isToday = true;
+      result.isOngoing = true;
+
+    } else if (diff < 0 && endDiff > 0) {
+      // 오늘이 기간 중간 → [진행중]
+      // 오늘이 기간 안에 포함되어 있으므로 [오늘]도 표시
+      result.isToday = true;
+      result.isOngoing = true;
+
+    } else if (diff < 0 && endDiff === 0) {
+      // 종료일 = 오늘 → [오늘] + [진행중]
+      result.isToday = true;
+      result.isOngoing = true;
     }
-    // endDiff < 0: 완전히 지남 → 아무것도 없음
+    // diff < 0 && endDiff < 0: 완전히 지남 → 없음
+    // diff > 0: 아직 시작 전 → 없음
   }
 
   return result;

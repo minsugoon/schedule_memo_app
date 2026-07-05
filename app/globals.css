@@ -322,14 +322,6 @@ input[type=text]::placeholder { color: var(--text3); }
   line-height: 1.4;
 }
 
-/* D-N (빨간) */
-.day-badge.day-past { background: #FCEBEB; color: #A32D2D; }
-[data-theme="dark"] .day-badge.day-past { background: #3D1212; color: #F09595; }
-
-/* D+N (파란) */
-.day-badge.day-future { background: #E6F1FB; color: #185FA5; }
-[data-theme="dark"] .day-badge.day-future { background: #0C2A50; color: #85B7EB; }
-
 /* 오늘 (노란) — today-badge-v2 신규 */
 .today-badge-v2 { background: #FAC775; color: #4A1B0C; }
 [data-theme="dark"] .today-badge-v2 { background: #BA7517; color: #FAF0D8; }

@@ -65,7 +65,7 @@ export default function ItemCard({
     }
   }, [editing, item]);
 
-  const { dayBadge, isToday, isOngoing } = getBadgeInfo(item);
+  const { isToday, isOngoing } = getBadgeInfo(item);
   const showTabBadge = currentTab === 'all' && !!tabName;
   const isCardToday = isToday;
 
@@ -260,31 +260,22 @@ export default function ItemCard({
                 {!isMemoMode && (
                   <span className="item-date-line">{dateLine}</span>
                 )}
-                <span className="item-memo-line">{item.memo}</span>
+                <span className={`item-memo-line${isCardToday && !item.done ? ' font-bold' : ''}`}>{item.memo}</span>
               </div>
-              {(dayBadge || (isToday && !item.done) || (isOngoing && !item.done) || showTabBadge) ? (
+              {(isToday || isOngoing || showTabBadge) && (
                 <div className="item-badge-col">
 
-                  {/* 1. DAY 뱃지 (오늘이 아닐 때만) */}
-                  {dayBadge && (
-                    <span className={`item-badge day-badge ${
-                      dayBadge.startsWith('D+') ? 'day-future' : 'day-past'
-                    }`}>
-                      {dayBadge}
-                    </span>
-                  )}
-
-                  {/* 2. 오늘 뱃지 */}
+                  {/* 1. 오늘 뱃지 */}
                   {isToday && !item.done && (
                     <span className="item-badge today-badge-v2">오늘</span>
                   )}
 
-                  {/* 3. 진행중 뱃지 */}
+                  {/* 2. 진행중 뱃지 */}
                   {isOngoing && !item.done && (
                     <span className="item-badge ongoing-badge">진행중</span>
                   )}
 
-                  {/* 4. 탭이름 뱃지 (전체 탭에서만) */}
+                  {/* 3. 탭이름 뱃지 (전체 탭에서만) */}
                   {showTabBadge && (
                     <span className={`item-badge cat-badge ${item.category ?? ''}`}>
                       {tabName}
@@ -292,7 +283,7 @@ export default function ItemCard({
                   )}
 
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
 
