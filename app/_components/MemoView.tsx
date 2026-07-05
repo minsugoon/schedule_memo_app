@@ -10,6 +10,7 @@ interface MemoViewProps {
   expandedId: number | null;
   editingId: number | null;
   availableTabs: Array<{ id: string; name: string; color: string | null }>;
+  tabs: Array<{ id: string; name: string }>;
   onToggleDone: (id: number) => void;
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
@@ -29,7 +30,7 @@ interface MemoViewProps {
 }
 
 export default function MemoView({
-  items, expandedId, editingId, availableTabs,
+  items, expandedId, editingId, availableTabs, tabs,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand, onAdd,
 }: MemoViewProps) {
   const [memo, setMemo] = useState('');
@@ -41,6 +42,11 @@ export default function MemoView({
 
   const charLen = [...memo].length;
   const charClass = charLen > 50 ? 'char-over' : charLen > 40 ? 'char-warn' : 'char-ok';
+
+  const getTabName = (item: ScheduleItem): string | undefined => {
+    if (!item.tabId) return undefined;
+    return tabs.find(t => t.id === item.tabId)?.name;
+  };
 
   const handleAdd = () => {
     const trimmed = memo.trim();
@@ -89,6 +95,7 @@ export default function MemoView({
               expanded={expandedId === item.id}
               editing={editingId === item.id}
               availableTabs={availableTabs}
+              tabName={getTabName(item)}
               onToggleDone={onToggleDone}
               onDelete={onDelete}
               onStartEdit={onStartEdit}

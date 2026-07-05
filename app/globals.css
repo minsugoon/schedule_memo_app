@@ -311,6 +311,33 @@ input[type=text]::placeholder { color: var(--text3); }
   color: var(--text3);
 }
 
+/* 일정 카드 뱃지 */
+.item-badge {
+  font-size: 10px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+/* D-N (빨간) */
+.day-badge.day-past { background: #FCEBEB; color: #A32D2D; }
+[data-theme="dark"] .day-badge.day-past { background: #3D1212; color: #F09595; }
+
+/* D+N (파란) */
+.day-badge.day-future { background: #E6F1FB; color: #185FA5; }
+[data-theme="dark"] .day-badge.day-future { background: #0C2A50; color: #85B7EB; }
+
+/* 오늘 (노란) — today-badge-v2 신규 */
+.today-badge-v2 { background: #FAC775; color: #4A1B0C; }
+[data-theme="dark"] .today-badge-v2 { background: #BA7517; color: #FAF0D8; }
+
+/* 진행중 (초록) */
+.ongoing-badge { background: #E1F5EE; color: #0F6E56; }
+[data-theme="dark"] .ongoing-badge { background: #073D2C; color: #9FE1CB; }
+
 @media (min-width: 431px) {
   body { align-items: center; padding-top: 20px; }
   #app { height: var(--app-h); border-radius: 16px; overflow: hidden; box-shadow: 0 4px 28px rgba(0,0,0,0.1); }

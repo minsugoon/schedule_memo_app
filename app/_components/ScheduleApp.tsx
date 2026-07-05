@@ -428,6 +428,7 @@ export default function ScheduleApp() {
           expandedId={expandedId}
           editingId={editingId}
           availableTabs={availableTabs}
+          tabs={tabs}
           onToggleDone={handleToggleDone}
           onDelete={handleDelete}
           onStartEdit={handleStartEdit}
@@ -451,6 +452,7 @@ export default function ScheduleApp() {
             expandedId={expandedId}
             editingId={editingId}
             availableTabs={availableTabs}
+            tabs={tabs}
             onToggleDone={handleToggleDone}
             onDelete={handleDelete}
             onStartEdit={handleStartEdit}

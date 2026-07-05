@@ -13,6 +13,7 @@ interface ItemListProps {
   expandedId: number | null;
   editingId: number | null;
   availableTabs: Array<{ id: string; name: string; color: string | null }>;
+  tabs: Array<{ id: string; name: string }>;
   onToggleDone: (id: number) => void;
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
@@ -31,7 +32,7 @@ interface ItemListProps {
 }
 
 export default function ItemList({
-  items, currentTab, showDone, expandedId, editingId, availableTabs,
+  items, currentTab, showDone, expandedId, editingId, availableTabs, tabs,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand,
 }: ItemListProps) {
   const filtered = useMemo(() => {
@@ -45,6 +46,11 @@ export default function ItemList({
 
     return sortItems(result);
   }, [items, currentTab, showDone]);
+
+  const getTabName = (item: ScheduleItem): string | undefined => {
+    if (!item.tabId) return undefined;
+    return tabs.find(t => t.id === item.tabId)?.name;
+  };
 
   return (
     <div className="list-section">
@@ -62,6 +68,7 @@ export default function ItemList({
             expanded={expandedId === item.id}
             editing={editingId === item.id}
             availableTabs={availableTabs}
+            tabName={getTabName(item)}
             onToggleDone={onToggleDone}
             onDelete={onDelete}
             onStartEdit={onStartEdit}

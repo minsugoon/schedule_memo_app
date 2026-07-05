@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isTodayInRange, isRange, fmtShort, fmtTime, dateKey, getToday, type FmtShortResult } from '@/lib/dateUtils';
+import { isRange, fmtShort, fmtTime, dateKey, getToday, getBadgeInfo, type FmtShortResult } from '@/lib/dateUtils';
 import TabSelectModal from './TabSelectModal';
 
 interface ItemCardProps {
@@ -12,6 +12,7 @@ interface ItemCardProps {
   expanded: boolean;
   editing: boolean;
   availableTabs: Array<{ id: string; name: string; color: string | null }>;
+  tabName?: string;
   onToggleDone: (id: number) => void;
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
@@ -39,7 +40,7 @@ function extractTime(iso: string | null | undefined): { h: number; m: number } |
 }
 
 export default function ItemCard({
-  item, currentTab, expanded, editing, availableTabs,
+  item, currentTab, expanded, editing, availableTabs, tabName,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand,
 }: ItemCardProps) {
   const [editDate, setEditDate] = useState('');
@@ -64,7 +65,10 @@ export default function ItemCard({
     }
   }, [editing, item]);
 
-  const isToday = isTodayInRange(item.date, item.dateEnd);
+  const { dayBadge, isToday, isOngoing } = getBadgeInfo(item);
+  const showTabBadge = currentTab === 'all' && !!tabName;
+  const isCardToday = isToday;
+
   const todayKey = dateKey(getToday());
   const endKey = item.dateEnd ? dateKey(item.dateEnd) : item.date ? dateKey(item.date) : null;
   const isPast = !item.done && endKey !== null && endKey < todayKey;
@@ -98,7 +102,7 @@ export default function ItemCard({
 
   const cls = [
     'item',
-    isToday && !item.done ? 'today-item' : '',
+    isCardToday && !item.done ? 'today-item' : '',
     item.done ? 'done-item' : '',
     isPast ? 'past-item' : '',
     expanded ? 'expanded' : '',
@@ -258,16 +262,35 @@ export default function ItemCard({
                 )}
                 <span className="item-memo-line">{item.memo}</span>
               </div>
-              {(isToday && !item.done) || (currentTab === 'all') ? (
+              {(dayBadge || (isToday && !item.done) || (isOngoing && !item.done) || showTabBadge) ? (
                 <div className="item-badge-col">
-                  {isToday && !item.done && (
-                    <span className="today-badge">오늘</span>
-                  )}
-                  {currentTab === 'all' && (
-                    <span className={`cat-badge ${item.category || 'personal'}`}>
-                      {item.category === 'work' ? '회사' : '개인'}
+
+                  {/* 1. DAY 뱃지 (오늘이 아닐 때만) */}
+                  {dayBadge && (
+                    <span className={`item-badge day-badge ${
+                      dayBadge.startsWith('D+') ? 'day-future' : 'day-past'
+                    }`}>
+                      {dayBadge}
                     </span>
                   )}
+
+                  {/* 2. 오늘 뱃지 */}
+                  {isToday && !item.done && (
+                    <span className="item-badge today-badge-v2">오늘</span>
+                  )}
+
+                  {/* 3. 진행중 뱃지 */}
+                  {isOngoing && !item.done && (
+                    <span className="item-badge ongoing-badge">진행중</span>
+                  )}
+
+                  {/* 4. 탭이름 뱃지 (전체 탭에서만) */}
+                  {showTabBadge && (
+                    <span className={`item-badge cat-badge ${item.category ?? ''}`}>
+                      {tabName}
+                    </span>
+                  )}
+
                 </div>
               ) : null}
             </div>
