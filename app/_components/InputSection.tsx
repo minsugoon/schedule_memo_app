@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
-import EmojiButton from './EmojiButton';
 
 interface InputSectionProps {
   currentTab: TabKey;
@@ -42,12 +41,6 @@ export default function InputSection({ currentTab, onAdd, onHelp }: InputSection
     setDateEndRaw('');
     setTimeEndRaw('');
     setMemo('');
-  };
-
-  const handleEmojiAdd = (emoji: string) => {
-    setMemo(prev => emoji + prev);
-    // 글자수 카운터 업데이트를 위해 약간 딜레이 후 포커스
-    setTimeout(() => memoRef.current?.focus(), 150);
   };
 
   const btnLabel = currentTab === 'all'
@@ -115,11 +108,9 @@ export default function InputSection({ currentTab, onAdd, onHelp }: InputSection
 
       {/* 3줄: 메모 */}
       <div className="memo-input-wrap">
-        <EmojiButton memo={memo} onEmojiAdd={handleEmojiAdd} />
         <input
           ref={memoRef}
           type="text"
-          className="has-emoji-btn"
           placeholder="할 일 메모 (50자 이내)"
           maxLength={55}
           value={memo}
