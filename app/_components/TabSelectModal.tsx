@@ -3,7 +3,7 @@
 interface TabSelectModalProps {
   isOpen: boolean;
   currentTabId: string | null;
-  tabs: Array<{ id: string; name: string; color: string | null }>;
+  tabs: Array<{ id: string; name: string; color: string | null; tab_type?: string | null }>;
   onSelect: (tabId: string) => void;
   onCancel: () => void;
 }
@@ -13,7 +13,7 @@ export default function TabSelectModal({
 }: TabSelectModalProps) {
   if (!isOpen) return null;
 
-  const options = tabs.filter(t => t.name !== '메모' && t.name !== '전체');
+  const options = tabs.filter(t => t.tab_type !== 'memo' && t.tab_type !== 'all');
 
   return (
     <div className="tab-select-overlay" onClick={onCancel}>
