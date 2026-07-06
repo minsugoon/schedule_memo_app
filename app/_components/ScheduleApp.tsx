@@ -62,7 +62,7 @@ export default function ScheduleApp() {
     schedules, fetchSchedules,
     addSchedule, updateSchedule, deleteSchedule, toggleDone,
   } = useSchedules()
-  const { tabs, fetchTabs } = useTabs()
+  const { tabs, fetchTabs, addTab, updateTabName, deleteTab } = useTabs()
 
   const [currentTab, setCurrentTab] = useState<TabKey>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('tabs')
@@ -413,6 +413,9 @@ export default function ScheduleApp() {
         onToggleViewMode={() => setViewMode(prev => prev === 'tabs' ? 'memo' : 'tabs')}
         showDone={showDone}
         onToggleShowDone={() => setShowDone(prev => !prev)}
+        onAddTab={addTab}
+        onUpdateTabName={updateTabName}
+        onDeleteTab={deleteTab}
       />
       {viewMode === 'memo' ? (
         <MemoView

@@ -15,6 +15,9 @@ export type DbTab = {
   created_at: string
 }
 
+const MAX_TABS = 5
+const MAX_NAME_LENGTH = 2
+
 export function useTabs() {
   const [tabs, setTabs] = useState<DbTab[]>([])
   const [loading, setLoading] = useState(false)
@@ -36,46 +39,88 @@ export function useTabs() {
     setLoading(false)
   }, [])
 
-  const addTab = useCallback(async (name: string, language = 'ko') => {
-    if (tabs.length >= 10) return
+  const addTab = useCallback(async (name: string) => {
+    const trimmed = name.trim()
+    if (!trimmed) return false
+    if ([...trimmed].length > MAX_NAME_LENGTH) {
+      alert('탭 이름은 2글자 이내로 입력해주세요.')
+      return false
+    }
+    if (tabs.length >= MAX_TABS) {
+      alert('탭은 최대 5개까지 만들 수 있습니다.')
+      return false
+    }
+    if (tabs.some(t => t.name === trimmed)) {
+      alert('이미 같은 이름의 탭이 있습니다.')
+      return false
+    }
+
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    if (!session) return false
 
-    const { data: newTab, error: tabError } = await supabase
+    const newSortOrder = tabs.reduce((max, t) => Math.max(max, t.sort_order), 0) + 1
+
+    const { data, error } = await supabase
       .from('tabs')
-      .insert({ user_id: session.user.id, sort_order: tabs.length, is_default: false })
-      .select('id')
+      .insert({
+        user_id: session.user.id,
+        name: trimmed,
+        sort_order: newSortOrder,
+        is_default: false,
+        tab_type: null,
+      })
+      .select('id, user_id, name, color, icon, sort_order, is_default, tab_type, created_at')
       .single()
 
-    if (tabError || !newTab) {
-      console.error('tab insert error:', tabError?.message)
-      return
+    if (error || !data) {
+      console.error('tab insert error:', error?.message)
+      return false
     }
 
-    const { error: labelError } = await supabase
-      .from('tab_labels')
-      .insert({ tab_id: newTab.id, name, language })
+    setTabs(prev => [...prev, data as DbTab].sort((a, b) => a.sort_order - b.sort_order))
+    return true
+  }, [tabs])
 
-    if (labelError) {
-      console.error('tab_label insert error:', labelError.message)
+  const updateTabName = useCallback(async (tabId: string, newName: string) => {
+    const trimmed = newName.trim()
+    if (!trimmed) return false
+    if ([...trimmed].length > MAX_NAME_LENGTH) {
+      alert('탭 이름은 2글자 이내로 입력해주세요.')
+      return false
+    }
+    if (tabs.some(t => t.name === trimmed && t.id !== tabId)) {
+      alert('이미 같은 이름의 탭이 있습니다.')
+      return false
     }
 
-    await fetchTabs()
-  }, [tabs.length, fetchTabs])
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('tabs')
+      .update({ name: trimmed })
+      .eq('id', tabId)
+
+    if (error) {
+      console.error('tab name update error:', error.message)
+      return false
+    }
+    setTabs(prev => prev.map(t => t.id === tabId ? { ...t, name: trimmed } : t))
+    return true
+  }, [tabs])
 
   const deleteTab = useCallback(async (id: string) => {
     const tab = tabs.find(t => t.id === id)
-    if (!tab || tab.is_default) return
+    if (!tab || tab.is_default) return false
 
     const supabase = createClient()
     const { error } = await supabase.from('tabs').delete().eq('id', id)
     if (error) {
       console.error('tab delete error:', error.message)
-      return
+      return false
     }
-    await fetchTabs()
-  }, [tabs, fetchTabs])
+    setTabs(prev => prev.filter(t => t.id !== id))
+    return true
+  }, [tabs])
 
   const updateTabOrder = useCallback(async (orderedIds: string[]) => {
     const supabase = createClient()
@@ -88,5 +133,5 @@ export function useTabs() {
     await fetchTabs()
   }, [fetchTabs])
 
-  return { tabs, loading, fetchTabs, addTab, deleteTab, updateTabOrder }
+  return { tabs, loading, fetchTabs, addTab, updateTabName, deleteTab, updateTabOrder }
 }

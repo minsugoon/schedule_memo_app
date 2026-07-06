@@ -67,6 +67,9 @@ body { display: flex; justify-content: center; align-items: flex-start; padding:
   height: var(--tab-h); overflow-x: auto; scrollbar-width: none;
 }
 .tab-bar::-webkit-scrollbar { display: none; }
+.tab-bar.scrollable { overflow-x: auto; scrollbar-width: none; }
+.tab-bar.scrollable .tab-item { flex: 0 0 65px; min-width: 65px; }
+.tab-bar.scrollable::-webkit-scrollbar { display: none; }
 .tab-item {
   flex: 1; display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 400; color: var(--text3); cursor: pointer;
@@ -82,6 +85,8 @@ body { display: flex; justify-content: center; align-items: flex-start; padding:
   text-align: center; line-height: 16px;
 }
 .tab-item.active .tab-count { background: var(--text); color: var(--bg); }
+.tab-add-btn { flex: 0 0 36px; color: var(--text3); }
+.tab-add-btn:hover { color: var(--text); background: var(--bg3); }
 .tab-done-toggle {
   flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   width: 40px; background: none; border: none; border-right: 0.5px solid var(--border);
@@ -440,6 +445,27 @@ input[type=text]::placeholder { color: var(--text3); }
 .tab-move-option-btn:hover { background: var(--bg3); border-color: var(--border2); }
 .tab-move-cancel-btn { width: 100%; padding: 10px; border-radius: 10px; border: none; background: none; color: var(--text3); font-size: 13px; cursor: pointer; }
 .tab-move-cancel-btn:hover { color: var(--text2); }
+
+/* ── 탭 이름 추가/수정 모달 ── */
+.tab-name-confirm-btn {
+  flex: 1; padding: 10px; border-radius: 9px;
+  border: none; background: var(--btn-bg);
+  color: var(--btn-text); font-size: 13px;
+  font-weight: 500; cursor: pointer;
+}
+.tab-name-cancel-btn {
+  padding: 10px 16px; border-radius: 9px;
+  border: 0.5px solid var(--border); background: none;
+  color: var(--text2); font-size: 13px; cursor: pointer;
+}
+.tab-name-delete-btn {
+  padding: 10px 14px; border-radius: 9px;
+  border: 0.5px solid var(--del); background: none;
+  color: var(--del); font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+}
+.tab-name-delete-btn:hover { background: #FCEBEB; }
+[data-theme="dark"] .tab-name-delete-btn:hover { background: #2C1515; }
 
 /* ── 날짜/시간 입력 행 (방안 C) ── */
 .date-time-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
