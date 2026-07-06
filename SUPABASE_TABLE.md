@@ -1,7 +1,7 @@
 # SUPABASE_TABLE — DB 테이블 구조
 
-> 기준일: 2026-07-02
-> 출처: Supabase SQL Query 직접 추출 (실제 DB 기준)
+> 기준일: 2026-07-03
+> 출처: Supabase SQL Query 직접 추출 (실제 DB 기준, CSV 재추출로 검증)
 
 ---
 
@@ -10,7 +10,7 @@
 ```
 auth.users
   ├── user_settings  (1:1)   language / theme / updated_at
-  ├── tabs           (1:N)   name, sort_order, is_default, color, icon
+  ├── tabs           (1:N)   name, tab_type, sort_order, is_default, color, icon
   │     └── tab_labels (복합PK: tab_id + language)  다국어 이름
   └── schedules      (1:N)   tab_id 연결, started_at / ended_at / is_all_day
 ```
@@ -55,36 +55,42 @@ auth.users
 | `endedAt`           | `ended_at`                                     |
 | `isAllDay`          | `is_all_day`                                   |
 | `date` / `dateEnd`  | `started_at` / `ended_at` 파싱값 (`parseDate`) |
-| `category`          | `tab_id`가 가리키는 탭의 `name` 기준으로 추론  |
+| `tabId`             | `tab_id` (그대로 저장, uuid 직접 비교용)       |
+
+> **`category` 필드는 제거됨.** 탭 판별·필터링·뱃지 색상은 전부 `tabId === tabs[].id` 직접 비교로 처리하며, 표시용 이름/색상/타입은 `tabId`로 `tabs`를 찾아서 가져온다.
 
 ---
 
 ## 3. `tabs` — 사용자 정의 탭
 
-| 컬럼         | 타입        | Not Null | 기본값              | 설명                                 |
-| ------------ | ----------- | -------- | ------------------- | ------------------------------------ |
-| `id`         | uuid        | ✅       | `gen_random_uuid()` | PK (자동 생성)                       |
-| `user_id`    | uuid        | ✅       | —                   | `auth.users.id` 참조 (소유자)        |
-| `name`       | text        | ✅       | —                   | 탭 이름 (예: 전체, 개인, 회사, 메모) |
-| `color`      | text        | —        | `null`              | 탭 색상 HEX (예: `#5DCAA5`)          |
-| `icon`       | text        | —        | `null`              | 아이콘명 (예: `ti-user`)             |
-| `sort_order` | integer     | ✅       | `0`                 | 탭 표시 순서 (낮을수록 왼쪽)         |
-| `is_default` | boolean     | ✅       | `false`             | true=기본 탭 (삭제/이름변경 불가)    |
-| `created_at` | timestamptz | ✅       | `now()`             | 생성 시각 (자동)                     |
+| 컬럼         | 타입        | Not Null | 기본값              | 설명                                       |
+| ------------ | ----------- | -------- | ------------------- | ------------------------------------------- |
+| `id`         | uuid        | ✅       | `gen_random_uuid()` | PK (자동 생성)                             |
+| `user_id`    | uuid        | ✅       | —                   | `auth.users.id` 참조 (소유자)              |
+| `name`       | text        | ✅       | —                   | 탭 이름 (예: 전체, 개인, 회사, 메모) — 사용자가 자유롭게 변경 가능 |
+| `color`      | text        | —        | `null`              | 탭 색상 HEX (예: `#5DCAA5`)                |
+| `icon`       | text        | —        | `null`              | 아이콘명 (예: `ti-user`)                   |
+| `sort_order` | integer     | ✅       | `0`                 | 탭 표시 순서 (낮을수록 왼쪽)               |
+| `is_default` | boolean     | ✅       | `false`             | true=기본 탭 (삭제/이름변경 불가)          |
+| `created_at` | timestamptz | ✅       | `now()`             | 생성 시각 (자동)                           |
+| `tab_type`   | text        | —        | `null`              | 고정 enum: `all` / `personal` / `work` / `memo` / `null`(커스텀 탭) |
 
 **기본 탭 sort_order 기준:**
 
-| 탭 이름 | sort_order | is_default | 역할                                  |
-| ------- | ---------- | ---------- | ------------------------------------- |
-| 전체    | 0          | true       | 탭 바 첫 번째 (날짜 있는 항목만 표시) |
-| 개인    | 1          | true       | 탭 바 두 번째                         |
-| 회사    | 2          | true       | 탭 바 세 번째                         |
-| 메모    | 99         | true       | 탭 바 독립 버튼 (날짜 없는 항목 전용) |
+| 탭 이름 | sort_order | is_default | tab_type   | 역할                                  |
+| ------- | ---------- | ---------- | ---------- | ------------------------------------- |
+| 전체    | 0          | true       | `all`      | 탭 바 첫 번째 (날짜 있는 항목만 표시) |
+| 개인    | 1          | true       | `personal` | 탭 바 두 번째                         |
+| 회사    | 2          | true       | `work`     | 탭 바 세 번째                         |
+| 메모    | 99         | true       | `memo`     | 탭 바 독립 버튼 (날짜 없는 항목 전용) |
 
-**⚠️ 주의사항:**
+**⚠️ 주의사항 (2026-07-03 업데이트로 방식 변경):**
 
-- `tabs[0]` / `tabs[1]` 인덱스로 개인/회사를 구분하는 방식은 불안정
-- 반드시 `tabs.find(t => t.name === '개인')` 처럼 `name` 기준으로 탐색할 것
+- ~~`tabs[0]` / `tabs[1]` 인덱스로 구분~~ → 폐기
+- ~~`tabs.find(t => t.name === '개인')` 처럼 `name` 기준으로 탐색~~ → 폐기 (이름은 사용자가 바꿀 수 있어서 매핑이 깨짐)
+- **현재 방식:** `tabs.find(t => t.tab_type === 'personal')` 처럼 고정 enum인 `tab_type` 기준으로 탐색. 이름을 바꿔도 매핑이 깨지지 않음
+- 일정↔탭 매칭 자체는 `schedules.tab_id === tabs.id` (uuid) 직접 비교로 처리 — `tab_type`은 "개인/회사/전체/메모" 같은 **특수 탭을 찾을 때만** 사용
+- 커스텀(사용자 추가) 탭은 `tab_type = null`
 - `is_default: true` 탭은 삭제 불가, 이름 변경 불가 처리 필수
 
 ---
@@ -127,16 +133,25 @@ auth.users
 
 ## 6. SUPABASE_TABLE.md vs 기존 문서 차이점
 
-| 항목                       | 기존 문서          | 실제 DB (이번 업데이트)    |
-| -------------------------- | ------------------ | -------------------------- |
-| `schedules.date_end_raw`   | 누락               | ✅ 추가                    |
-| `schedules.sort_order`     | 누락               | ✅ 추가                    |
-| `schedules.updated_at`     | 누락               | ✅ 추가                    |
-| `tabs.name`                | 누락               | ✅ 추가                    |
-| `tabs.color`               | 누락               | ✅ 추가                    |
-| `tabs.icon`                | 누락               | ✅ 추가                    |
-| `tabs.created_at`          | 누락               | ✅ 추가                    |
-| `tab_labels.label`         | name으로 잘못 기재 | ✅ label로 수정            |
-| `user_settings.id`         | 누락               | ✅ 추가                    |
-| `user_settings.updated_at` | 누락               | ✅ 추가                    |
-| 탭 매핑 방식               | index 기준         | ✅ name 기준으로 수정 권장 |
+| 항목                       | 기존 문서          | 실제 DB (2026-07-02 업데이트) |
+| -------------------------- | ------------------ | ------------------------------ |
+| `schedules.date_end_raw`   | 누락               | ✅ 추가                        |
+| `schedules.sort_order`     | 누락               | ✅ 추가                        |
+| `schedules.updated_at`     | 누락               | ✅ 추가                        |
+| `tabs.name`                | 누락               | ✅ 추가                        |
+| `tabs.color`               | 누락               | ✅ 추가                        |
+| `tabs.icon`                | 누락               | ✅ 추가                        |
+| `tabs.created_at`          | 누락               | ✅ 추가                        |
+| `tab_labels.label`         | name으로 잘못 기재 | ✅ label로 수정                |
+| `user_settings.id`         | 누락               | ✅ 추가                        |
+| `user_settings.updated_at` | 누락               | ✅ 추가                        |
+| 탭 매핑 방식               | index 기준         | name 기준으로 수정 권장         |
+
+### 2026-07-03 업데이트 (CSV 재추출 반영)
+
+| 항목                | 기존 문서       | 실제 DB (이번 업데이트)                                          |
+| ------------------- | --------------- | ----------------------------------------------------------------- |
+| `tabs.tab_type`      | 없음            | ✅ 신규 컬럼 추가 (`all`/`personal`/`work`/`memo`/`null`)         |
+| `ScheduleItem.category` | 존재 (문서 §2) | ✅ 필드 완전 제거 — `tabId` 직접 비교로 대체                      |
+| 탭 매핑 방식         | `name` 기준     | ✅ `tab_type` 기준으로 교체 (이름 변경에도 매핑 안 깨짐)           |
+| 일정↔탭 매칭         | (문서화 안 됨)   | ✅ `schedules.tab_id === tabs.id` (uuid) 직접 비교로 명시           |
