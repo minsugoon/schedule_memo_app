@@ -13,6 +13,7 @@ interface ItemCardProps {
   editing: boolean;
   availableTabs: Array<{ id: string; name: string; color: string | null }>;
   tabName?: string;
+  tabType?: 'all' | 'personal' | 'work' | 'memo' | null;
   onToggleDone: (id: number) => void;
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
@@ -40,7 +41,7 @@ function extractTime(iso: string | null | undefined): { h: number; m: number } |
 }
 
 export default function ItemCard({
-  item, currentTab, expanded, editing, availableTabs, tabName,
+  item, currentTab, expanded, editing, availableTabs, tabName, tabType,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand,
 }: ItemCardProps) {
   const [editDate, setEditDate] = useState('');
@@ -277,7 +278,7 @@ export default function ItemCard({
 
                   {/* 3. 탭이름 뱃지 (전체 탭에서만) */}
                   {showTabBadge && (
-                    <span className={`item-badge cat-badge ${item.category ?? ''}`}>
+                    <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
                       {tabName}
                     </span>
                   )}

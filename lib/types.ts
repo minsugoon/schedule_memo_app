@@ -13,12 +13,11 @@ export interface ScheduleItem {
   memo: string;
   done: boolean;
   createdAt: number;
-  category: 'personal' | 'work';
   startedAt?: string | null;
   endedAt?: string | null;
   isAllDay?: boolean;
   tabId?: string | null;
 }
 
-export type TabKey = 'all' | 'personal' | 'work';
+export type TabKey = 'all' | 'personal' | 'work' | 'memo' | string;
 export type ViewMode = 'tabs' | 'memo';

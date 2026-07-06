@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { IconPlus, IconClipboardText } from '@tabler/icons-react';
 import type { ScheduleItem } from '@/lib/types';
+import type { DbTab } from '@/lib/hooks/useTabs';
 import ItemCard from './ItemCard';
 
 interface MemoViewProps {
@@ -10,7 +11,7 @@ interface MemoViewProps {
   expandedId: number | null;
   editingId: number | null;
   availableTabs: Array<{ id: string; name: string; color: string | null }>;
-  tabs: Array<{ id: string; name: string }>;
+  tabs: DbTab[];
   onToggleDone: (id: number) => void;
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
@@ -46,6 +47,11 @@ export default function MemoView({
   const getTabName = (item: ScheduleItem): string | undefined => {
     if (!item.tabId) return undefined;
     return tabs.find(t => t.id === item.tabId)?.name;
+  };
+
+  const getTabType = (item: ScheduleItem): DbTab['tab_type'] => {
+    if (!item.tabId) return null;
+    return tabs.find(t => t.id === item.tabId)?.tab_type ?? null;
   };
 
   const handleAdd = () => {
@@ -96,6 +102,7 @@ export default function MemoView({
               editing={editingId === item.id}
               availableTabs={availableTabs}
               tabName={getTabName(item)}
+              tabType={getTabType(item)}
               onToggleDone={onToggleDone}
               onDelete={onDelete}
               onStartEdit={onStartEdit}

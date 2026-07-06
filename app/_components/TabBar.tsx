@@ -15,28 +15,21 @@ interface TabBarProps {
   onToggleShowDone: () => void;
 }
 
-const NAME_TO_KEY: Record<string, TabKey> = {
-  '전체': 'all',
-  '개인': 'personal',
-  '회사': 'work',
-};
-
 export default function TabBar({
   tabs, currentTab, items, onSwitchTab, viewMode, onToggleViewMode, showDone, onToggleShowDone,
 }: TabBarProps) {
-  const totalCount = items.filter(i => !i.done && i.date !== null).length;
-  const personalCount = items.filter(i => i.category === 'personal' && !i.done && i.date !== null).length;
-  const workCount = items.filter(i => i.category === 'work' && !i.done && i.date !== null).length;
-
-  const countByKey: Record<TabKey, number> = {
-    all: totalCount,
-    personal: personalCount,
-    work: workCount,
-  };
+  const memoTab = tabs.find(t => t.tab_type === 'memo');
 
   const tabBarTabs = tabs
-    .filter(t => t.name !== '메모')
+    .filter(t => t.tab_type !== 'memo')
     .sort((a, b) => a.sort_order - b.sort_order);
+
+  const countFor = (tab: DbTab): number => {
+    if (tab.tab_type === 'all') {
+      return items.filter(i => !i.done && i.date !== null && i.tabId !== memoTab?.id).length;
+    }
+    return items.filter(i => !i.done && i.date !== null && i.tabId === tab.id).length;
+  };
 
   return (
     <div className="tab-bar-wrapper">
@@ -59,8 +52,7 @@ export default function TabBar({
       </div>
       <div className="tab-bar">
         {tabBarTabs.map(tab => {
-          const key = NAME_TO_KEY[tab.name];
-          if (!key) return null;
+          const key: TabKey = tab.tab_type === 'all' ? 'all' : tab.id;
           return (
             <div
               key={tab.id}
@@ -68,7 +60,7 @@ export default function TabBar({
               onClick={() => onSwitchTab(key)}
             >
               {tab.name}
-              <span className="tab-count">{countByKey[key]}</span>
+              <span className="tab-count">{countFor(tab)}</span>
             </div>
           );
         })}

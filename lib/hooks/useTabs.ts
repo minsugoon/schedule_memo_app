@@ -8,8 +8,11 @@ export type DbTab = {
   user_id: string
   name: string
   color: string | null
+  icon: string | null
   sort_order: number
   is_default: boolean
+  tab_type: 'all' | 'personal' | 'work' | 'memo' | null
+  created_at: string
 }
 
 export function useTabs() {
@@ -21,7 +24,7 @@ export function useTabs() {
     const supabase = createClient()
     const { data, error } = await supabase
       .from('tabs')
-      .select('id, user_id, name, color, sort_order, is_default')
+      .select('id, user_id, name, color, icon, sort_order, is_default, tab_type, created_at')
       .order('sort_order', { ascending: true })
 
     if (error) {

@@ -197,10 +197,12 @@ input[type=text]::placeholder { color: var(--text3); }
 
 /* 전체 탭 카테고리 뱃지 */
 .cat-badge { font-size: 12px; border-radius: 4px; padding: 2px 6px; font-weight: 500; white-space: nowrap; margin-left: 4px; }
-.cat-badge.personal { background: #E1F5EE; color: #0F6E56; }
-.cat-badge.work { background: #E6F1FB; color: #185FA5; }
-[data-theme="dark"] .cat-badge.personal { background: #085041; color: #9FE1CB; }
-[data-theme="dark"] .cat-badge.work { background: #0C447C; color: #B5D4F4; }
+.cat-badge.tab-type-personal { background: #E1F5EE; color: #0F6E56; }
+.cat-badge.tab-type-work     { background: #E6F1FB; color: #185FA5; }
+.cat-badge.tab-type-custom   { background: var(--bg3); color: var(--text2); }
+[data-theme="dark"] .cat-badge.tab-type-personal { background: #085041; color: #9FE1CB; }
+[data-theme="dark"] .cat-badge.tab-type-work     { background: #0C447C; color: #B5D4F4; }
+[data-theme="dark"] .cat-badge.tab-type-custom   { background: var(--bg3); color: var(--text2); }
 
 /* 상태 */
 .today-item .item-date-line { color: var(--text2); }

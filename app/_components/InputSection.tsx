@@ -3,9 +3,11 @@
 import { useState, useRef } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
+import type { DbTab } from '@/lib/hooks/useTabs';
 
 interface InputSectionProps {
   currentTab: TabKey;
+  tabs: DbTab[];
   onAdd: (
     dateRaw: string,
     timeRaw: string,
@@ -16,7 +18,7 @@ interface InputSectionProps {
   onHelp: (type: 'date' | 'time') => void;
 }
 
-export default function InputSection({ currentTab, onAdd, onHelp }: InputSectionProps) {
+export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputSectionProps) {
   const [dateRaw, setDateRaw] = useState('');
   const [timeRaw, setTimeRaw] = useState('');
   const [dateEndRaw, setDateEndRaw] = useState('');
@@ -43,9 +45,10 @@ export default function InputSection({ currentTab, onAdd, onHelp }: InputSection
     setMemo('');
   };
 
+  const currentTabObj = tabs.find(t => t.id === currentTab);
   const btnLabel = currentTab === 'all'
     ? '추가 (개인 탭에 저장)'
-    : `${currentTab === 'work' ? '회사' : '개인'} 일정 추가 (Enter)`;
+    : `${currentTabObj?.name ?? '개인'} 일정 추가 (Enter)`;
 
   return (
     <div className="input-section">

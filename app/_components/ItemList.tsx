@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { IconNotebook } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
+import type { DbTab } from '@/lib/hooks/useTabs';
 import { sortItems } from '@/lib/dateUtils';
 import ItemCard from './ItemCard';
 
@@ -13,7 +14,7 @@ interface ItemListProps {
   expandedId: number | null;
   editingId: number | null;
   availableTabs: Array<{ id: string; name: string; color: string | null }>;
-  tabs: Array<{ id: string; name: string }>;
+  tabs: DbTab[];
   onToggleDone: (id: number) => void;
   onDelete: (id: number) => void;
   onStartEdit: (id: number) => void;
@@ -36,20 +37,38 @@ export default function ItemList({
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand,
 }: ItemListProps) {
   const filtered = useMemo(() => {
-    let result = currentTab === 'all'
-      ? items.filter(i => i.date !== null)
-      : items.filter(i => i.category === currentTab && i.date !== null);
+    let result: ScheduleItem[];
+
+    if (currentTab === 'all') {
+      // 전체 탭: 날짜 있는 항목만 (메모 제외)
+      const memoTab = tabs.find(t => t.tab_type === 'memo');
+      result = items.filter(i =>
+        i.date !== null &&
+        i.tabId !== memoTab?.id
+      );
+    } else {
+      // 특정 탭: tab_id 직접 비교
+      result = items.filter(i =>
+        i.tabId === currentTab &&
+        i.date !== null
+      );
+    }
 
     if (!showDone) {
       result = result.filter(i => !i.done);
     }
 
     return sortItems(result);
-  }, [items, currentTab, showDone]);
+  }, [items, currentTab, showDone, tabs]);
 
   const getTabName = (item: ScheduleItem): string | undefined => {
     if (!item.tabId) return undefined;
     return tabs.find(t => t.id === item.tabId)?.name;
+  };
+
+  const getTabType = (item: ScheduleItem): DbTab['tab_type'] => {
+    if (!item.tabId) return null;
+    return tabs.find(t => t.id === item.tabId)?.tab_type ?? null;
   };
 
   return (
@@ -69,6 +88,7 @@ export default function ItemList({
             editing={editingId === item.id}
             availableTabs={availableTabs}
             tabName={getTabName(item)}
+            tabType={getTabType(item)}
             onToggleDone={onToggleDone}
             onDelete={onDelete}
             onStartEdit={onStartEdit}

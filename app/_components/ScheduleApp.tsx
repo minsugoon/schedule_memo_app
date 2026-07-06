@@ -38,10 +38,7 @@ function isoToDateRaw(iso: string | null): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
 }
 
-function toScheduleItem(
-  row: DbSchedule,
-  tabCategoryMap: Record<string, 'personal' | 'work' | 'memo'>
-): ScheduleItem {
+function toScheduleItem(row: DbSchedule): ScheduleItem {
   return {
     id: new Date(row.created_at).getTime(),
     date: parseDate(row.date_raw),
@@ -51,7 +48,6 @@ function toScheduleItem(
     memo: row.memo,
     done: row.is_done,
     createdAt: new Date(row.created_at).getTime(),
-    category: row.tab_id && tabCategoryMap[row.tab_id] === 'work' ? 'work' : 'personal',
     startedAt: row.started_at,
     endedAt: row.ended_at,
     isAllDay: row.is_all_day,
@@ -68,7 +64,7 @@ export default function ScheduleApp() {
   } = useSchedules()
   const { tabs, fetchTabs } = useTabs()
 
-  const [currentTab, setCurrentTab] = useState<TabKey>('personal')
+  const [currentTab, setCurrentTab] = useState<TabKey>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('tabs')
   const [showDone, setShowDone] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
@@ -147,31 +143,25 @@ export default function ScheduleApp() {
     }
   }, [hydrated])
 
-  const tabCategoryMap = useMemo<Record<string, 'personal' | 'work' | 'memo'>>(() => {
-    const map: Record<string, 'personal' | 'work' | 'memo'> = {}
-    const personalTab = tabs.find(t => t.name === '개인')
-    const workTab = tabs.find(t => t.name === '회사')
-    const memoTab = tabs.find(t => t.name === '메모')
-    if (personalTab) map[personalTab.id] = 'personal'
-    if (workTab) map[workTab.id] = 'work'
-    if (memoTab) map[memoTab.id] = 'memo'
-    return map
-  }, [tabs])
+  const memoTab = tabs.find(t => t.tab_type === 'memo')
+  const personalTab = tabs.find(t => t.tab_type === 'personal')
+  const workTab = tabs.find(t => t.tab_type === 'work')
+  const allTab = tabs.find(t => t.tab_type === 'all')
 
   const items = useMemo<ScheduleItem[]>(
-    () => schedules.map(row => toScheduleItem(row, tabCategoryMap)),
-    [schedules, tabCategoryMap]
+    () => schedules.map(row => toScheduleItem(row)),
+    [schedules]
   )
 
   const moveTargetTabs = useMemo(
     () => tabs
-      .filter(t => t.name === '개인' || t.name === '회사')
+      .filter(t => t.tab_type !== 'memo' && t.tab_type !== 'all')
       .map(t => ({ id: t.id, name: t.name })),
     [tabs]
   )
 
   const availableTabs = useMemo(
-    () => tabs.filter(t => t.name !== '메모' && t.name !== '전체'),
+    () => tabs.filter(t => t.tab_type !== 'memo' && t.tab_type !== 'all'),
     [tabs]
   )
 
@@ -189,12 +179,14 @@ export default function ScheduleApp() {
     let tabId: string | null = null
 
     if (!hasDate) {
-      tabId = null
+      tabId = memoTab?.id ?? null
     } else {
-      const cat: 'personal' | 'work' = currentTab === 'all' ? 'personal' : currentTab
-      tabId = cat === 'work'
-        ? tabs.find(t => t.name === '회사')?.id ?? null
-        : tabs.find(t => t.name === '개인')?.id ?? null
+      const currentTabObj = tabs.find(t => t.id === currentTab)
+      if (currentTabObj && currentTabObj.tab_type !== 'all' && currentTabObj.tab_type !== 'memo') {
+        tabId = currentTabObj.id
+      } else {
+        tabId = personalTab?.id ?? null
+      }
     }
 
     const parsed = parseDate(dateRaw)
@@ -442,6 +434,7 @@ export default function ScheduleApp() {
         <>
           <InputSection
             currentTab={currentTab}
+            tabs={tabs}
             onAdd={handleAddItem}
             onHelp={(type) => setHelpType(type)}
           />
