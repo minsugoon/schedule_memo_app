@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isRange, fmtShort, fmtTime, dateKey, getToday, getBadgeInfo, type FmtShortResult } from '@/lib/dateUtils';
+import { isRange, extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, fmtShortNoPad } from '@/lib/dateUtils';
 import TabSelectModal from './TabSelectModal';
 
 interface ItemCardProps {
@@ -29,15 +29,6 @@ interface ItemCardProps {
   ) => void;
   onCancelEdit: (id: number) => void;
   onToggleExpand: (id: number) => void;
-}
-
-function extractTime(iso: string | null | undefined): { h: number; m: number } | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  const h = d.getUTCHours();
-  const m = d.getUTCMinutes();
-  if (h === 0 && m === 0) return null;
-  return { h, m };
 }
 
 export default function ItemCard({
@@ -74,32 +65,14 @@ export default function ItemCard({
   const endKey = item.dateEnd ? dateKey(item.dateEnd) : item.date ? dateKey(item.date) : null;
   const isPast = !item.done && endKey !== null && endKey < todayKey;
 
-  const DAY_COLORS = { sat: '#1A56DB', sun: '#C81E1E' } as const;
-  const renderDate = (r: FmtShortResult | null, fallback = '날짜 없음') => {
-    if (!r) return fallback;
-    if (r.dayType === 'normal') return r.text;
-    const idx = r.text.lastIndexOf('(');
-    return <>{r.text.slice(0, idx)}<span style={{ color: DAY_COLORS[r.dayType] }}>{r.text.slice(idx)}</span></>;
-  };
-
-  const sdResult = fmtShort(item.date);
-  const edResult = item.dateEnd ? fmtShort(item.dateEnd) : null;
-
-  const startTime = item.isAllDay === false ? extractTime(item.startedAt) : null;
-  const endTime = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null;
-
-  const dateLine = isRange(item)
-    ? <>
-        {renderDate(sdResult)}
-        {startTime && <> {fmtTime(startTime.h, startTime.m)}</>}
-        {' ~ '}
-        {renderDate(edResult)}
-        {endTime && <> {fmtTime(endTime.h, endTime.m)}</>}
-      </>
-    : <>
-        {renderDate(sdResult)}
-        {startTime && <> {fmtTime(startTime.h, startTime.m)}</>}
-      </>;
+  const dateLine = fmtDateLine(
+    item.startedAt,
+    item.endedAt,
+    item.isAllDay ?? true,
+    item.dateRaw,
+    item.dateEndRaw,
+    item.dateEnd
+  );
 
   const cls = [
     'item',

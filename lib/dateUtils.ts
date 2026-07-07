@@ -213,3 +213,107 @@ export const getBadgeInfo = (item: ScheduleItem): {
 
   return result;
 };
+
+// ── 카드 날짜줄 포맷 유틸 ──
+
+export function extractTime(iso: string | null | undefined): { h: number; m: number } | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  const h = d.getUTCHours();
+  const m = d.getUTCMinutes();
+  if (h === 0 && m === 0) return null;
+  return { h, m };
+}
+
+// 앞자리 0 없는 날짜 포맷 (7월 7일(화) 형식)
+export const fmtShortNoPad = (dt: ScheduleDate | null | undefined): string => {
+  if (!dt) return '';
+  const dateObj = new Date(dt.y, dt.m - 1, dt.d);
+  const day = DAYS[dateObj.getDay()];
+  return `${dt.m}월 ${dt.d}일(${day})`;
+};
+
+// ISO 문자열 → ScheduleDate 변환 (UTC 기준 — timeToISO가 UTC 'Z'로 저장하므로 통일)
+const parseISOToScheduleDate = (iso: string | null | undefined): ScheduleDate | null => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() };
+};
+
+// 두 날짜가 같은지 비교
+const isSameDate = (
+  a: ScheduleDate | null | undefined,
+  b: ScheduleDate | null | undefined
+): boolean => {
+  if (!a || !b) return false;
+  return a.y === b.y && a.m === b.m && a.d === b.d;
+};
+
+/**
+ * 일정 카드 날짜줄 포맷
+ * @returns 표시할 날짜+시간 문자열
+ */
+export const fmtDateLine = (
+  startedAt: string | null | undefined,
+  endedAt: string | null | undefined,
+  isAllDay: boolean,
+  dateRaw: string,
+  dateEndRaw: string,
+  dateEnd: ScheduleDate | null | undefined
+): string => {
+  // started_at 없으면 date_raw 원문 표시
+  if (!startedAt) return dateRaw || '날짜 없음';
+
+  const startDate = parseISOToScheduleDate(startedAt);
+  if (!startDate) return dateRaw || '날짜 없음';
+
+  const startDayStr = fmtShortNoPad(startDate);
+
+  if (isAllDay) {
+    // 종일 일정
+    if (dateEnd) {
+      const endDate = parseISOToScheduleDate(endedAt);
+      const endDayStr = endDate ? fmtShortNoPad(endDate) : (dateEndRaw || '');
+      if (isSameDate(startDate, endDate)) {
+        return startDayStr;   // 당일 종일 → 날짜 하나만
+      }
+      return `${startDayStr} ~ ${endDayStr}`;
+    }
+    return startDayStr;
+  }
+
+  // 시간 있는 일정
+  const startTime = extractTime(startedAt);
+  const startTimeStr = startTime ? fmtTime(startTime.h, startTime.m) : '';
+
+  if (!endedAt) {
+    return startTimeStr
+      ? `${startDayStr} ${startTimeStr}`
+      : startDayStr;
+  }
+
+  const endDate = parseISOToScheduleDate(endedAt);
+  const endTime = extractTime(endedAt);
+  const endTimeStr = endTime ? fmtTime(endTime.h, endTime.m) : '';
+
+  if (isSameDate(startDate, endDate)) {
+    // 당일 시작/종료 → 날짜 1번, 시간 범위
+    // 예: 7월 7일(화) 오후 12:00 - 오후 1:00
+    const timePart = startTimeStr && endTimeStr
+      ? `${startTimeStr} - ${endTimeStr}`
+      : startTimeStr || endTimeStr;
+    return `${startDayStr} ${timePart}`.trim();
+  }
+
+  // 다른 날짜 범위
+  // 예: 7월 7일(화) 오후 12:00 ~ 7월 8일(수) 오후 1:00
+  const endDayStr = endDate ? fmtShortNoPad(endDate) : (dateEndRaw || '');
+  const startPart = startTimeStr
+    ? `${startDayStr} ${startTimeStr}`
+    : startDayStr;
+  const endPart = endTimeStr
+    ? `${endDayStr} ${endTimeStr}`
+    : endDayStr;
+  return `${startPart} ~ ${endPart}`;
+};
