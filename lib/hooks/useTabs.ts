@@ -46,7 +46,8 @@ export function useTabs() {
       alert('탭 이름은 2글자 이내로 입력해주세요.')
       return false
     }
-    if (tabs.length >= MAX_TABS) {
+    const visibleTabs = tabs.filter(t => t.tab_type !== 'memo')
+    if (visibleTabs.length >= MAX_TABS) {
       alert('탭은 최대 5개까지 만들 수 있습니다.')
       return false
     }
