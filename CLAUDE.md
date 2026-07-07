@@ -65,11 +65,18 @@ schedule_memo_app/
 │   │   ├── TabBar.tsx
 │   │   ├── InputSection.tsx
 │   │   ├── ItemList.tsx
-│   │   └── ItemCard.tsx
+│   │   ├── ItemCard.tsx
+│   │   ├── MemoView.tsx
+│   │   ├── TabNameModal.tsx
+│   │   ├── TabMoveModal.tsx
+│   │   ├── TabSelectModal.tsx
+│   │   ├── HelpModal.tsx
+│   │   ├── PatchNoteModal.tsx
+│   │   └── PWAInstallModal.tsx
 │   ├── auth/callback/
-│   │   └── route.ts        ← OAuth 콜백 처리
+│   │   └── route.ts        ← OAuth 콜백 처리 (✅ 완료)
 │   ├── login/
-│   │   └── page.tsx        ← 로그인 페이지
+│   │   └── page.tsx        ← 로그인 페이지 (✅ 완료)
 │   ├── layout.tsx
 │   ├── page.tsx
 │   └── globals.css
@@ -77,15 +84,16 @@ schedule_memo_app/
 │   ├── types.ts            ← 공통 타입 (수정 금지)
 │   ├── dateUtils.ts        ← 날짜 유틸 (수정 금지)
 │   ├── supabase/
-│   │   ├── client.ts       ← 브라우저용 클라이언트
-│   │   └── server.ts       ← 서버용 클라이언트
+│   │   ├── client.ts       ← 브라우저용 클라이언트 (✅ 완료)
+│   │   └── server.ts       ← 서버용 클라이언트 (✅ 완료)
 │   └── hooks/
-│       ├── useAuth.ts
-│       ├── useTabs.ts
-│       └── useSchedules.ts
+│       ├── useAuth.ts      ← ✅ 완료
+│       ├── useTabs.ts      ← ✅ 완료
+│       └── useSchedules.ts ← ✅ 완료
 ├── middleware.ts            ← 루트에 위치 (✅ 완료)
 ├── CLAUDE.md
 ├── PROJECT_SPEC.md
+├── SUPABASE_TABLE.md
 └── .env.local
 ```
 
@@ -175,11 +183,13 @@ if (error) {
 
 ## DB 테이블 구조 (Supabase)
 
+전체 컬럼 목록과 최신 규칙은 `SUPABASE_TABLE.md`를 참고하세요. 요약:
+
 ```
 auth.users
-  ├── user_settings  (1:1) language / theme
-  ├── tabs           (1:N) 탭 목록, sort_order, is_default
-  │     └── tab_labels (복합PK: tab_id + language) 다국어 이름
+  ├── user_settings  (1:1) language / theme — 테이블만 존재, 코드 미연동 (테마는 localStorage)
+  ├── tabs           (1:N) 탭 목록, sort_order, is_default, tab_type
+  │     └── tab_labels (복합PK: tab_id + language) 다국어 이름 — 테이블만 존재, 코드 미연동
   └── schedules      (1:N) tab_id 연결, started_at / ended_at / is_all_day
 ```
 
@@ -187,13 +197,20 @@ auth.users
 
 | 컬럼       | 타입        | 설명                         |
 | ---------- | ----------- | ---------------------------- |
-| tab_id     | uuid        | tabs.id 참조 (null = 전체탭) |
+| tab_id     | uuid        | tabs.id 참조 (null = 미분류) |
 | started_at | timestamptz | 시작 날짜+시간               |
 | ended_at   | timestamptz | 종료 날짜+시간 (null = 하루) |
 | is_all_day | boolean     | true = 시간 미표시           |
 | date_raw   | text        | 사용자 입력 원문             |
 | memo       | text        | 50자 이내                    |
 | is_done    | boolean     | 완료 여부                    |
+
+### 탭 판별 규칙 (중요)
+
+- 이름(`name`)이 아니라 **`tab_type` enum**(`all`/`personal`/`work`/`memo`/`null`) 기준으로 특수 탭을 찾습니다.
+  이름은 사용자가 자유롭게 바꿀 수 있어 이름 기준 매핑은 깨집니다.
+- 일정↔탭 매칭 자체는 `schedules.tab_id === tabs.id` (uuid) 직접 비교로 처리합니다.
+- `ScheduleItem.category` 필드는 완전히 제거되었습니다 (`tabId`로 대체).
 
 ---
 
@@ -232,25 +249,25 @@ export default MyComponent
 
 ---
 
-## 현재 진행 상태
+## 현재 진행 상태 (2026-07-07 기준)
 
 ### 완료
 
-- [x] UI 컴포넌트 전체 구현
-- [x] localStorage 기반 CRUD 동작
-- [x] Supabase 프로젝트 생성 + DB 스키마 적용
-- [x] Google OAuth 설정
-- [x] Vercel 환경변수 등록 (NEXT*PUBLIC* prefix)
-- [x] middleware.ts 생성 완료
+- [x] UI 컴포넌트 전체 구현 (모달 포함: MemoView, TabNameModal, TabMoveModal, TabSelectModal, HelpModal, PatchNoteModal, PWAInstallModal)
+- [x] Supabase 프로젝트 생성 + DB 스키마 적용 (`tabs`, `schedules`, `tab_labels`, `user_settings`)
+- [x] Google OAuth 설정 + 로그인/콜백/미들웨어 전체 연동
+- [x] lib/supabase/client.ts, server.ts 생성
+- [x] useAuth / useSchedules / useTabs 훅 생성 및 ScheduleApp.tsx 연동
+- [x] 사용자 정의 동적 탭 시스템 (추가/이름변경/삭제, `tab_type` 기준 특수 탭 판별)
+- [x] 메모 전용 뷰 및 탭 간 이동 로직
+- [x] PWA 설치 지원 (`@ducanh2912/next-pwa`)
+- [x] Vercel 환경변수 등록 (`NEXT_PUBLIC_` prefix)
 
-### 진행 중 (다음 작업)
+### 다음 작업 후보 (미구현)
 
-- [ ] lib/supabase/client.ts 생성
-- [ ] lib/supabase/server.ts 생성
-- [ ] app/auth/callback/route.ts 생성
-- [ ] app/login/page.tsx 생성
-- [ ] useAuth / useSchedules / useTabs 훅 생성
-- [ ] ScheduleApp.tsx Supabase 연동
+- [ ] `tab_labels` 다국어 탭 이름 연동
+- [ ] `user_settings` 서버 사이드 테마/언어 동기화
+- [ ] Realtime 구독 (현재는 수동 새로고침 방식)
 
 ---
 

@@ -1,58 +1,83 @@
 # ⚡ SETUP 가이드 — 할 일 메모장
-> 기준일: 2026-06-17
-> 스택: Next.js App Router + Supabase + Google OAuth
+
+> 기준일: 2026-07-07
+> 스택: Next.js 16 App Router + Supabase(`@supabase/ssr`) + Google OAuth + PWA
 > 배포: https://schedulememoapp.vercel.app
 
 ---
 
-## ✅ 완료된 작업 (건드리지 않아도 됩니다)
+## ✅ 현재 완료된 작업
 
-- [x] Next.js App Router 프로젝트 생성
-- [x] Tailwind CSS + @tabler/icons-react 설치
-- [x] UI 컴포넌트 전체 구현 (localStorage 기반 동작 중)
-- [x] lib/types.ts, lib/dateUtils.ts 완성
-- [x] GitHub 레포지토리 연결
-- [x] Vercel 배포 (Push → 자동 배포)
-- [x] Supabase 프로젝트 생성
-- [x] Supabase DB 스키마 적용 (4개 테이블)
+- [x] Next.js App Router 프로젝트 (16.2.9) + Tailwind CSS 4 + @tabler/icons-react
+- [x] UI 컴포넌트 전체 구현 (일정/메모 카드, 동적 탭, 각종 모달 — `PROJECT_SPEC.md` §6 참고)
+- [x] Supabase 프로젝트 생성 + DB 스키마 적용 (`schedules`, `tabs`, `tab_labels`, `user_settings`)
 - [x] Google OAuth 설정 (Supabase Providers)
-- [x] Vercel 환경변수 등록 (NEXT_PUBLIC_ prefix)
-- [x] .env.local 생성
+- [x] `@supabase/ssr` 기반 클라이언트/서버 클라이언트, 미들웨어, OAuth 콜백, 로그인 페이지
+- [x] `useAuth` / `useSchedules` / `useTabs` 훅 및 `ScheduleApp.tsx` 연동 완료
+- [x] 사용자 정의 동적 탭 시스템 (추가/이름변경/삭제)
+- [x] PWA 설치 지원 (`@ducanh2912/next-pwa`)
+- [x] Vercel 환경변수 등록 (`NEXT_PUBLIC_` prefix) + 자동 배포
+
+> 이 문서는 과거 "Supabase 연동 남은 작업" 가이드였습니다. 해당 작업은 모두 완료되었으며,
+> 지금은 **로컬 환경을 처음부터 재현하거나 신규 기여자가 온보딩할 때 참고하는 레퍼런스**로 용도가
+> 바뀌었습니다. 실제 구현된 내용은 `PROJECT_SPEC.md`, DB 스키마는 `SUPABASE_TABLE.md`를 확인하세요.
 
 ---
 
-## 🔲 남은 작업 — Supabase 코드 연동
-
----
-
-## Step 1. Supabase SSR 패키지 설치
-
-VSCode 터미널에서:
+## Step 1. 로컬 환경 준비
 
 ```bash
-npm install @supabase/ssr @supabase/supabase-js
+git clone <repo-url>
+cd schedule_memo_app
+npm install
 ```
 
-> ⚠️ Next.js App Router에서는 반드시 `@supabase/ssr` 패키지를 사용해야 합니다.
-> `@supabase/supabase-js` 단독으로 사용하면 세션이 유지되지 않습니다.
+`package.json`의 핵심 의존성:
+
+```json
+{
+  "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.108.2",
+    "@tabler/icons-react": "^3.44.0",
+    "next": "16.2.9",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  }
+}
+```
+
+> ⚠️ Next.js App Router에서는 반드시 `@supabase/ssr` 패키지를 사용합니다.
+> `@supabase/supabase-js` 단독으로는 세션이 유지되지 않습니다.
 
 ---
 
-## Step 2. .env.local 확인
+## Step 2. 환경 변수 설정
 
-프로젝트 루트 `.env.local` 내용 확인:
+루트에 `.env.local`을 생성합니다 (커밋되지 않음, `.gitignore`의 `.env*` 패턴에 포함):
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
 ```
 
-> ✅ `NEXT_PUBLIC_` prefix가 맞습니다. `VITE_`로 되어 있다면 수정하세요.
-> 접근 방법: `process.env.NEXT_PUBLIC_SUPABASE_URL`
+> ✅ 반드시 `NEXT_PUBLIC_` prefix를 사용합니다. `VITE_`는 이 프로젝트와 무관합니다.
+> 접근 방법: `process.env.NEXT_PUBLIC_SUPABASE_URL` (코드 전체에서 사용하는 커스텀 환경변수는 이 두 개뿐)
+
+Vercel에도 동일한 두 키가 Settings → Environment Variables에 등록되어 있어야 합니다.
 
 ---
 
-## Step 3. Supabase Redirect URL 추가 확인
+## Step 3. Supabase 프로젝트 설정 확인
+
+### 3-1. DB 스키마
+
+`schedules`, `tabs`, `tab_labels`, `user_settings` 4개 테이블이 필요합니다. 정확한 컬럼과
+제약조건은 `SUPABASE_TABLE.md`를 그대로 SQL Editor에서 재현하면 됩니다. RLS(Row Level Security)
+정책이 `user_id = auth.uid()` 기준으로 설정되어 있는지 확인하세요.
+
+### 3-2. Redirect URL
 
 Supabase 대시보드 → **Authentication** → **URL Configuration**
 
@@ -62,176 +87,47 @@ Supabase 대시보드 → **Authentication** → **URL Configuration**
 | Redirect URLs | `https://schedulememoapp.vercel.app/**` |
 | Redirect URLs (로컬) | `http://localhost:3000/**` |
 
-> 로컬 개발을 위해 `http://localhost:3000/**` 도 추가해 두세요.
+### 3-3. Google OAuth Provider
+
+Authentication → Providers → Google 활성화, Google Cloud Console에서 발급한 Client ID/Secret 등록.
 
 ---
 
-## Step 4. Claude Code 바이브코딩 순서
-
-VSCode 터미널:
-
-```bash
-cd schedule_memo_app
-claude
-```
-
-### 📋 권장 프롬프트 순서
-
-아래 순서대로 하나씩 입력하세요. 한 번에 다 요청하지 말고 **하나 완료 후 다음 진행**합니다.
-
----
-
-#### PROMPT 1 — Supabase 클라이언트 생성
-```
-@.cursorrules 를 읽고,
-lib/supabase/client.ts 와 lib/supabase/server.ts 를 만들어줘.
-Next.js App Router + @supabase/ssr 패키지 기준으로.
-환경변수는 NEXT_PUBLIC_ prefix 사용.
-```
-
----
-
-#### PROMPT 2 — Auth Callback 라우트 생성
-```
-Google OAuth 로그인 후 세션을 처리하는
-app/auth/callback/route.ts 를 만들어줘.
-@supabase/ssr 의 exchangeCodeForSession 사용.
-성공 시 / 로 리다이렉트.
-```
-
----
-
-#### PROMPT 3 — 미들웨어 생성
-```
-middleware.ts 를 프로젝트 루트에 만들어줘.
-- 미인증 사용자 → /login 리다이렉트
-- 인증 사용자가 /login 접근 → / 리다이렉트
-- @supabase/ssr createServerClient 사용
-- /login, /auth/callback, 정적 파일은 미들웨어 제외
-```
-
----
-
-#### PROMPT 4 — 로그인 페이지 생성
-```
-app/login/page.tsx 를 만들어줘.
-- 'use client' 컴포넌트
-- Google 로그인 버튼 하나
-- lib/supabase/client.ts 의 createClient 사용
-- signInWithOAuth provider: 'google'
-- redirectTo: window.location.origin + '/auth/callback'
-- 앱 타이틀 "📋 할 일 메모장" 표시
-- 기존 globals.css CSS 변수 활용한 심플한 디자인
-```
-
----
-
-#### PROMPT 5 — useAuth 훅 생성
-```
-lib/hooks/useAuth.ts 를 만들어줘.
-- 'use client' 훅
-- 현재 로그인 유저 상태 관리 (user, loading)
-- onAuthStateChange 로 실시간 세션 감지
-- signOut 함수 포함
-- lib/supabase/client.ts 사용
-```
-
----
-
-#### PROMPT 6 — useSchedules 훅 생성
-```
-lib/hooks/useSchedules.ts 를 만들어줘.
-Supabase schedules 테이블 CRUD 전체 포함:
-- fetchSchedules: tab_id 기준 필터, started_at 오름차순 정렬
-- addSchedule: 추가 (user_id 자동 포함)
-- updateSchedule: 수정
-- deleteSchedule: 삭제
-- toggleDone: is_done 토글
-lib/supabase/client.ts 사용.
-에러 처리 포함.
-```
-
----
-
-#### PROMPT 7 — useTabs 훅 생성
-```
-lib/hooks/useTabs.ts 를 만들어줘.
-Supabase tabs 테이블 관리:
-- fetchTabs: 현재 유저 탭 목록 sort_order 오름차순 조회
-- addTab: 탭 추가 (최대 10개 체크)
-- deleteTab: 탭 삭제 (is_default=true 삭제 불가)
-- updateTabOrder: sort_order 업데이트
-lib/supabase/client.ts 사용.
-```
-
----
-
-#### PROMPT 8 — ScheduleApp Supabase 연동
-```
-app/_components/ScheduleApp.tsx 를 수정해줘.
-기존 localStorage 로직을 Supabase 로 교체:
-- useAuth 로 로그인 유저 확인
-- useSchedules 로 일정 CRUD
-- useTabs 로 탭 목록 관리
-- 로딩 상태 표시 (스피너 또는 skeleton)
-- 로그아웃 버튼을 AppHeader에 전달
-기존 UI/UX는 그대로 유지.
-```
-
----
-
-#### PROMPT 9 — AppHeader 로그아웃 버튼 추가
-```
-app/_components/AppHeader.tsx 에
-로그아웃 버튼을 추가해줘.
-- 우상단 테마 버튼 옆에 위치
-- 아이콘: @tabler/icons-react 의 IconLogout
-- 클릭 시 signOut 실행 후 /login 으로 이동
-- 기존 UI 스타일과 동일하게
-```
-
----
-
-## Step 5. 로컬 동작 확인
+## Step 4. 로컬 실행 및 동작 확인
 
 ```bash
 npm run dev
-# http://localhost:3000 접속
+# http://localhost:3000
 ```
 
 확인 순서:
 ```
-1. http://localhost:3000 → /login 으로 자동 리다이렉트 되는지
-2. Google 로그인 버튼 클릭 → 구글 계정 선택
-3. 로그인 후 / 로 돌아오는지
-4. Supabase 대시보드 → Table Editor → user_settings, tabs 에 데이터 생성됐는지
-5. 일정 추가 → schedules 테이블에 저장되는지
-6. 새 탭에서 열어도 데이터 유지되는지 (멀티 디바이스 동기화)
+1. http://localhost:3000 → 미인증 상태면 /login 으로 자동 리다이렉트
+2. Google 로그인 버튼 클릭 → 계정 선택 → /auth/callback → / 로 복귀
+3. 일정/메모 추가 → Supabase 대시보드 Table Editor의 schedules 테이블에 반영 확인
+4. 탭 추가/이름변경/삭제 → tabs 테이블 반영 확인
+5. 새 브라우저 탭에서 열어도 데이터 유지되는지 확인 (실시간 구독은 없으므로 새로고침 필요)
+```
+
+다른 스크립트:
+```bash
+npm run build   # next build --webpack
+npm start        # 프로덕션 서버 실행
+npm run lint     # ESLint 검사
 ```
 
 ---
 
-## Step 6. Vercel 재배포
+## Step 5. 배포 (Vercel)
 
 ```bash
 git add .
-git commit -m "feat: Supabase 연동 완료"
+git commit -m "커밋 메시지"
 git push origin master
 ```
 
-> Push 하면 Vercel이 자동으로 배포합니다.
-> 배포 후 https://schedulememoapp.vercel.app 에서 동일하게 동작 확인.
-
----
-
-## 📐 DB 테이블 구조 요약
-
-```
-user_settings   언어(ko/en/ja/zh), 테마(light/dark) — 유저당 1행
-tabs            탭 목록, sort_order, is_default(삭제 불가)
-tab_labels      탭 이름 다국어 번역 (tab_id + language 복합 PK)
-schedules       일정 데이터, tab_id 연결, started_at/ended_at
-```
+Push하면 Vercel이 자동으로 빌드/배포합니다. 배포 후
+https://schedulememoapp.vercel.app 에서 동일하게 동작하는지 확인하세요.
 
 ---
 
@@ -240,27 +136,26 @@ schedules       일정 데이터, tab_id 연결, started_at/ended_at
 | 증상 | 원인 | 해결 |
 |------|------|------|
 | 로그인 후 `/` 안 돌아옴 | Redirect URL 미등록 | Supabase → URL Configuration 확인 |
-| 세션이 유지 안 됨 | `@supabase/ssr` 미사용 | PROMPT 1 다시 실행 |
-| 미들웨어 무한 루프 | matcher 설정 오류 | `/auth/callback` matcher 제외 확인 |
-| 데이터 저장 안 됨 | RLS 정책 누락 | Supabase SQL Editor에서 스키마 재실행 |
-| `process.env` undefined | 환경변수 prefix 오류 | `NEXT_PUBLIC_` prefix 확인 |
-| 탭 자동 생성 안 됨 | 트리거 미실행 | SQL Editor에서 트리거 함수 재실행 |
-| Claude Code가 Vite로 작성 | 프레임워크 혼동 | .cursorrules 의 ⚠️ 절대규칙 다시 강조 |
+| 세션이 유지 안 됨 | `@supabase/ssr` 미사용 | `lib/supabase/client.ts`/`server.ts` 패턴 확인 |
+| 미들웨어 무한 루프 | matcher 설정 오류 | `middleware.ts`의 matcher가 `/auth/callback`, 정적 파일을 제외하는지 확인 |
+| 데이터 저장 안 됨 | RLS 정책 누락 | Supabase SQL Editor에서 스키마·정책 재실행 |
+| `process.env` undefined | 환경변수 prefix 오류 | `NEXT_PUBLIC_` prefix 확인, `.env.local` 재시작(`npm run dev` 재기동) |
+| 탭이 5개 이상 추가 안 됨 | 의도된 제한 | `useTabs.ts`의 `MAX_TABS = 5` (메모 탭 제외) |
+| 탭 이름이 2자로 잘림 | 의도된 제한 | `useTabs.ts`의 `MAX_NAME_LENGTH = 2` |
+| 개발 모드에서 PWA 설치 안내 안 뜸 | 의도된 동작 | `next.config.ts`에서 `disable: NODE_ENV === 'development'` — 프로덕션 빌드에서 확인 |
+| 여러 기기에서 실시간 반영 안 됨 | Realtime 구독 미구현 | 새로고침 버튼 사용 (향후 과제, `PROJECT_SPEC.md` §9) |
 
 ---
 
-## ✅ 최종 완료 체크리스트
+## ✅ 온보딩 체크리스트
 
 ```
-□ npm install @supabase/ssr @supabase/supabase-js 완료
-□ lib/supabase/client.ts 생성
-□ lib/supabase/server.ts 생성
-□ app/auth/callback/route.ts 생성
-□ middleware.ts 생성 (루트에 위치)
-□ app/login/page.tsx 생성
-□ useAuth, useSchedules, useTabs 훅 생성
-□ ScheduleApp.tsx Supabase 연동 완료
-□ AppHeader.tsx 로그아웃 버튼 추가
-□ 로컬에서 Google 로그인 → 일정 추가 → DB 저장 확인
-□ git push → Vercel 자동 배포 → 배포 버전 동작 확인
+□ npm install 완료
+□ .env.local 생성 (NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY)
+□ Supabase Redirect URL에 localhost:3000 등록
+□ npm run dev → /login 리다이렉트 확인
+□ Google 로그인 → 일정/메모 추가 → DB 반영 확인
+□ 탭 추가/이름변경/삭제 동작 확인
+□ 라이트/다크 테마 전환 확인
+□ (선택) npm run build로 프로덕션 빌드 후 PWA 설치 프롬프트 확인
 ```

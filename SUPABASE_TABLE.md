@@ -1,7 +1,17 @@
 # SUPABASE_TABLE — DB 테이블 구조
 
-> 기준일: 2026-07-03
+> 기준일: 2026-07-07
 > 출처: Supabase SQL Query 직접 추출 (실제 DB 기준, CSV 재추출로 검증)
+
+## 0. 코드에서 실제 사용 중인 테이블
+
+- `schedules`, `tabs` — `lib/hooks/useSchedules.ts`, `lib/hooks/useTabs.ts`에서 전체 CRUD로 사용 중.
+- `tab_labels`, `user_settings` — **테이블은 존재하지만 현재 코드에서 읽거나 쓰지 않음.**
+  다국어 탭 이름과 서버 동기화 테마/언어 설정은 미구현 상태이며, 테마는 여전히
+  `localStorage('memo_theme')`로만 관리된다 (§5 참고). 이 두 테이블을 실제로 연동하려면
+  별도 훅(`useUserSettings` 등)과 UI가 필요하다.
+- 데이터 갱신 방식: Realtime 구독 없음. 수동 새로고침 버튼과 각 CRUD 작업 직후 refetch로
+  동기화한다 (멀티 디바이스 실시간 반영은 아직 없음).
 
 ---
 
