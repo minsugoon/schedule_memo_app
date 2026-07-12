@@ -74,17 +74,31 @@ body { display: flex; justify-content: center; align-items: flex-start; padding:
   flex: 1; display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 400; color: var(--text3); cursor: pointer;
   border-bottom: 2px solid transparent; white-space: nowrap;
-  padding: 0 10px; gap: 4px; min-width: 60px;
+  padding: 0 10px; gap: 4px; min-width: 0; overflow: hidden;
   transition: color 0.15s, border-color 0.15s;
   user-select: none; -webkit-tap-highlight-color: transparent;
 }
 .tab-item.active { color: var(--text); font-weight: 500; border-bottom: 2px solid var(--text); }
+.tab-item .tab-name { white-space: nowrap; flex-shrink: 0; }
 .tab-item .tab-count {
   font-size: 12px; background: var(--bg3); color: var(--text3);
   border-radius: 10px; padding: 0 5px; min-width: 16px;
   text-align: center; line-height: 16px;
 }
 .tab-item.active .tab-count { background: var(--text); color: var(--bg); }
+
+/* 5탭 이상일 때 탭 아이템 compact 모드 */
+.tab-item.tab-compact {
+  padding: 0 4px;      /* 기존 패딩보다 줄임 */
+  font-size: 11px;     /* 탭명 폰트 축소 */
+  gap: 2px;            /* 탭명-뱃지 간격 축소 */
+}
+.tab-item.tab-compact .tab-count {
+  font-size: 9px;       /* 뱃지 폰트 축소 */
+  padding: 0 3px;       /* 뱃지 패딩 축소 */
+  min-width: 14px;      /* 최소 너비 유지 */
+  line-height: 14px;
+}
 .tab-add-btn { flex: 0 0 36px; color: var(--text3); }
 .tab-add-btn:hover { color: var(--text); background: var(--bg3); }
 .tab-done-toggle {
@@ -114,7 +128,7 @@ input[type=text] {
   outline: none; -webkit-appearance: none;
 }
 input[type=text]:focus { border-color: var(--border2); }
-input[type=text]::placeholder { color: var(--text3); }
+input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
 
 .add-btn {
   background: var(--btn-bg); color: var(--btn-text);

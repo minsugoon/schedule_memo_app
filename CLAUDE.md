@@ -238,10 +238,8 @@ export default MyComponent
 아래 파일은 이미 완성되어 있습니다. 요청 없이 절대 수정하지 마세요:
 
 - `lib/types.ts` — 타입 정의 ✅
-- `app/globals.css` — CSS 변수 디자인 시스템 ✅
 - `middleware.ts` — 인증 미들웨어 ✅
 - `app/_components/AppHeader.tsx` ✅
-- `app/_components/TabBar.tsx` ✅
 - `app/_components/InputSection.tsx` ✅
 - `app/_components/ItemList.tsx` ✅
 

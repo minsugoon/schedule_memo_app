@@ -45,6 +45,8 @@ export default function TabBar({
     .filter(t => t.tab_type !== 'memo')
     .sort((a, b) => a.sort_order - b.sort_order);
 
+  const tabCount = tabBarTabs.length;
+
   const countFor = (tab: DbTab): number => {
     if (tab.tab_type === 'all') {
       return items.filter(i => !i.done && i.date !== null && i.tabId !== memoTab?.id).length;
@@ -125,7 +127,7 @@ export default function TabBar({
           return (
             <div
               key={tab.id}
-              className={`tab-item${currentTab === key ? ' active' : ''}`}
+              className={`tab-item${currentTab === key ? ' active' : ''}${tabCount >= 5 ? ' tab-compact' : ''}`}
               onClick={() => onSwitchTab(key)}
               onMouseDown={() => handlePressStart(tab)}
               onMouseUp={handlePressEnd}
@@ -135,7 +137,7 @@ export default function TabBar({
               onTouchCancel={handlePressEnd}
               style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
             >
-              {tab.name}
+              <span className="tab-name">{tab.name}</span>
               <span className="tab-count">{displayCount(countFor(tab))}</span>
             </div>
           );
