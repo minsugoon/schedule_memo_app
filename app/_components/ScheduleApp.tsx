@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ScheduleItem, ScheduleDate, TabKey, ViewMode } from '@/lib/types'
-import { parseDate, fmtShort, parseTime, timeToISO } from '@/lib/dateUtils'
+import { parseDate, parseTime, timeToISO } from '@/lib/dateUtils'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { useSchedules, type DbSchedule } from '@/lib/hooks/useSchedules'
 import { useTabs } from '@/lib/hooks/useTabs'
@@ -13,7 +13,6 @@ import InputSection from './InputSection'
 import ItemList from './ItemList'
 import MemoView from './MemoView'
 import PWAInstallModal from './PWAInstallModal'
-import TabMoveModal from './TabMoveModal'
 import HelpModal from './HelpModal'
 import PatchNoteModal from './PatchNoteModal'
 
@@ -75,12 +74,6 @@ export default function ScheduleApp() {
   const [showInstallModal, setShowInstallModal] = useState(false)
   const [showPatchNote, setShowPatchNote] = useState(false)
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
-  const [tabMoveTarget, setTabMoveTarget] = useState<{
-    id: number
-    dateRaw: string
-    dateEndRaw: string
-    memo: string
-  } | null>(null)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
@@ -151,13 +144,6 @@ export default function ScheduleApp() {
   const items = useMemo<ScheduleItem[]>(
     () => schedules.map(row => toScheduleItem(row)),
     [schedules]
-  )
-
-  const moveTargetTabs = useMemo(
-    () => tabs
-      .filter(t => t.tab_type !== 'memo' && t.tab_type !== 'all')
-      .map(t => ({ id: t.id, name: t.name })),
-    [tabs]
   )
 
   const availableTabs = useMemo(
@@ -261,11 +247,30 @@ export default function ScheduleApp() {
     dateEndRaw: string,
     timeEndRaw: string,
     memo: string,
-    tabId: string
+    tabId: string | null
   ) => {
     const schedule = findSchedule(id)
     if (!schedule) return
 
+    const hasDateOrTime =
+      dateRaw.trim() !== '' ||
+      dateEndRaw.trim() !== '' ||
+      timeRaw.trim() !== '' ||
+      timeEndRaw.trim() !== ''
+
+    // 날짜/시간 없음 → 메모탭 유지 저장
+    if (!hasDateOrTime) {
+      await updateSchedule(schedule.id, {
+        tab_id: tabId,   // 기존 tab_id 그대로
+        memo,
+        // started_at, ended_at 변경 없음
+      })
+      setEditingId(null)
+      setExpandedId(null)
+      return
+    }
+
+    // 날짜/시간 있음 → 파싱 후 저장
     const parsed = parseDate(dateRaw)
     const parsedEnd = dateEndRaw.trim() ? parseDate(dateEndRaw) : null
     const parsedTime = timeRaw.trim() ? parseTime(timeRaw) : null
@@ -287,6 +292,7 @@ export default function ScheduleApp() {
       ended_at: endedAt,
       is_all_day: !parsedTime,
     })
+
     setEditingId(null)
     setExpandedId(null)
   }
@@ -294,30 +300,6 @@ export default function ScheduleApp() {
   const handleCancelEdit = () => {
     setEditingId(null)
     setExpandedId(null)
-  }
-
-  const handleTabMoveSelect = async (tabId: string) => {
-    if (!tabMoveTarget) return
-    const schedule = findSchedule(tabMoveTarget.id)
-    if (!schedule) { setTabMoveTarget(null); return }
-
-    const parsed = parseDate(tabMoveTarget.dateRaw)
-    const parsedEnd = tabMoveTarget.dateEndRaw ? parseDate(tabMoveTarget.dateEndRaw) : null
-
-    await updateSchedule(schedule.id, {
-      tab_id: tabId,
-      date_raw: tabMoveTarget.dateRaw,
-      memo: tabMoveTarget.memo,
-      started_at: parsed ? toISODate(parsed) : undefined,
-      ended_at: parsedEnd ? toISODate(parsedEnd) : null,
-    })
-
-    setTabMoveTarget(null)
-    setEditingId(null)
-  }
-
-  const handleTabMoveCancel = () => {
-    setTabMoveTarget(null)
   }
 
   const handleToggleExpand = (id: number) => {
@@ -389,14 +371,6 @@ export default function ScheduleApp() {
           onClose={() => setHelpType(null)}
         />
       )}
-      <TabMoveModal
-        isOpen={tabMoveTarget !== null}
-        memo={tabMoveTarget?.memo ?? ''}
-        dateText={tabMoveTarget ? (fmtShort(parseDate(tabMoveTarget.dateRaw))?.text ?? tabMoveTarget.dateRaw) : ''}
-        tabs={moveTargetTabs}
-        onSelect={handleTabMoveSelect}
-        onCancel={handleTabMoveCancel}
-      />
       <AppHeader
         theme={theme}
         onToggleTheme={handleToggleTheme}

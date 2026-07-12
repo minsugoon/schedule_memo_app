@@ -25,7 +25,7 @@ interface ItemCardProps {
     dateEndRaw: string,
     timeEndRaw: string,
     memo: string,
-    tabId: string
+    tabId: string | null
   ) => void;
   onCancelEdit: (id: number) => void;
   onToggleExpand: (id: number) => void;
@@ -89,7 +89,36 @@ export default function ItemCard({
     const trimmed = editMemo.trim();
     if (!trimmed) { alert('메모를 입력해주세요.'); return; }
     if ([...trimmed].length > 50) { alert('50자 이내로 입력해주세요.'); return; }
-    setShowTabSelect(true);
+
+    // 날짜/시간 입력 여부 감지
+    const hasDateOrTime =
+      editDate.trim() !== '' ||
+      editDateEnd.trim() !== '' ||
+      editTime.trim() !== '' ||
+      editTimeEnd.trim() !== '';
+
+    if (!hasDateOrTime) {
+      // 날짜/시간 없음 → 메모탭에 바로 저장 (모달 없음)
+      handleSaveDirect();
+    } else {
+      // 날짜/시간 있음 → 탭 선택 모달 표시
+      setShowTabSelect(true);
+    }
+  };
+
+  const handleSaveDirect = () => {
+    // 메모탭 유지 (tab_id 변경 없이 현재 탭 그대로)
+    if (onSaveEditWithTime) {
+      onSaveEditWithTime(
+        item.id,
+        '',   // dateRaw 없음
+        '',   // timeRaw 없음
+        '',   // dateEndRaw 없음
+        '',   // timeEndRaw 없음
+        editMemo.trim(),
+        item.tabId ?? null  // 기존 tab_id 유지
+      );
+    }
   };
 
   const handleTabSelected = (tabId: string) => {

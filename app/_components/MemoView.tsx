@@ -23,7 +23,7 @@ interface MemoViewProps {
     dateEndRaw: string,
     timeEndRaw: string,
     memo: string,
-    tabId: string
+    tabId: string | null
   ) => void;
   onCancelEdit: (id: number) => void;
   onToggleExpand: (id: number) => void;
