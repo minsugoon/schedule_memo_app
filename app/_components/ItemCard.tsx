@@ -169,9 +169,9 @@ export default function ItemCard({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // 체크박스, 아이콘 버튼, 수정 폼 클릭은 무시
+    // 체크박스, 아이콘 버튼, 인라인 액션 버튼 클릭은 무시
     if ((e.target as HTMLElement).closest(
-      '.check-box, .icon-btn, .edit-row, .edit-input-row, .memo-input-wrap, .edit-action-btn'
+      '.check-box, .icon-btn, .edit-row, .card-action-inline'
     )) return;
     if (editing) return;
 
@@ -310,49 +310,86 @@ export default function ItemCard({
                 >
                   {item.memo}
                 </span>
+                {isContentExpanded && (
+                  <div className="item-badge-bottom">
+                    {isToday && !item.done && (
+                      <span className="item-badge today-badge-v2">오늘</span>
+                    )}
+                    {isOngoing && !item.done && (
+                      <span className="item-badge ongoing-badge">진행중</span>
+                    )}
+                    {showTabBadge && (
+                      <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                        {tabName}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
-              {(isToday || isOngoing || showTabBadge) && (
+              {(isContentExpanded || isToday || isOngoing || showTabBadge) && (
                 <div className="item-badge-col">
+                  {isContentExpanded ? (
+                    <>
+                      {/* 펼친 상태: 수정/삭제 버튼 */}
+                      <button
+                        className="card-action-inline edit"
+                        onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
+                        aria-label="수정"
+                      >
+                        <IconPencil size={13} aria-hidden />
+                      </button>
+                      <button
+                        className="card-action-inline del"
+                        onClick={e => { e.stopPropagation(); onDelete(item.id); }}
+                        aria-label="삭제"
+                      >
+                        <IconTrash size={13} aria-hidden />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {/* 1. 오늘 뱃지 */}
+                      {isToday && !item.done && (
+                        <span className="item-badge today-badge-v2">오늘</span>
+                      )}
 
-                  {/* 1. 오늘 뱃지 */}
-                  {isToday && !item.done && (
-                    <span className="item-badge today-badge-v2">오늘</span>
+                      {/* 2. 진행중 뱃지 */}
+                      {isOngoing && !item.done && (
+                        <span className="item-badge ongoing-badge">진행중</span>
+                      )}
+
+                      {/* 3. 탭이름 뱃지 (전체 탭에서만) */}
+                      {showTabBadge && (
+                        <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                          {tabName}
+                        </span>
+                      )}
+                    </>
                   )}
-
-                  {/* 2. 진행중 뱃지 */}
-                  {isOngoing && !item.done && (
-                    <span className="item-badge ongoing-badge">진행중</span>
-                  )}
-
-                  {/* 3. 탭이름 뱃지 (전체 탭에서만) */}
-                  {showTabBadge && (
-                    <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
-                      {tabName}
-                    </span>
-                  )}
-
                 </div>
               )}
             </div>
           </div>
 
-          {/* 편집/삭제 오버레이 */}
-          <div className="item-icons">
-            <button
-              className="icon-btn edit-btn"
-              onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
-              aria-label="수정"
-            >
-              <IconPencil size={15} aria-hidden />
-            </button>
-            <button
-              className="icon-btn del-btn"
-              onClick={e => { e.stopPropagation(); onDelete(item.id); }}
-              aria-label="삭제"
-            >
-              <IconTrash size={15} aria-hidden />
-            </button>
-          </div>
+          {/* 편집/삭제 오버레이 (펼친 상태에서는 인라인 버튼으로 대체되므로 숨김) */}
+          {!isContentExpanded && (
+            <div className="item-icons">
+              <button
+                className="icon-btn edit-btn"
+                onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
+                aria-label="수정"
+              >
+                <IconPencil size={15} aria-hidden />
+              </button>
+              <button
+                className="icon-btn del-btn"
+                onClick={e => { e.stopPropagation(); onDelete(item.id); }}
+                aria-label="삭제"
+              >
+                <IconTrash size={15} aria-hidden />
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

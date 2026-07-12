@@ -205,11 +205,11 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
 .check-box.checked .check-icon { display: block; }
 
 .item-main { display: flex; align-items: flex-start; gap: 8px; }
-.item-body-col { flex: 1; display: flex; align-items: center; gap: 0; min-width: 0; }
+.item-body-col { flex: 1; display: flex; align-items: center; gap: 0; min-width: 0; overflow: hidden; }
 .item.expanded .item-body-col { padding-right: 68px; }
-.item-lines { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.item-lines { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow: hidden; }
 .item-date-line { font-size: 13px; color: var(--text3); white-space: nowrap; font-variant-numeric: tabular-nums; line-height: 1.3; }
-.item-memo-line { font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; word-break: keep-all; line-height: 1.4; }
+.item-memo-line { font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; word-break: keep-all; line-height: 1.4; max-width: 100%; min-width: 0; }
 
 /* 펼쳐진 상태 — 말줄임 해제 */
 .item-memo-line.expanded {
@@ -233,6 +233,33 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
 .item.content-expanded .item-icons {
   top: 12px;            /* 펼쳐진 상태에서 상단 고정 */
   transform: none;      /* 기존 translateY(-50%) 해제 */
+}
+
+/* 펼친 상태 인라인 액션 버튼 */
+.card-action-inline {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.card-action-inline.edit { color: var(--edit-c); }
+.card-action-inline.edit:hover { background: var(--bg3); }
+.card-action-inline.del { color: var(--del); }
+.card-action-inline.del:hover { background: var(--bg3); }
+
+/* 펼친 상태 하단 뱃지 */
+.item-badge-bottom {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .item-badge-col { display: flex; align-items: center; flex-shrink: 0; margin-left: 6px; gap: 3px; }
