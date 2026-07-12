@@ -68,7 +68,6 @@ schedule_memo_app/
 │   │   ├── ItemCard.tsx
 │   │   ├── MemoView.tsx
 │   │   ├── TabNameModal.tsx
-│   │   ├── TabMoveModal.tsx
 │   │   ├── TabSelectModal.tsx
 │   │   ├── HelpModal.tsx
 │   │   ├── PatchNoteModal.tsx
@@ -245,17 +244,21 @@ export default MyComponent
 
 ---
 
-## 현재 진행 상태 (2026-07-07 기준)
+## 현재 진행 상태 (2026-07-12 기준)
 
 ### 완료
 
-- [x] UI 컴포넌트 전체 구현 (모달 포함: MemoView, TabNameModal, TabMoveModal, TabSelectModal, HelpModal, PatchNoteModal, PWAInstallModal)
+- [x] UI 컴포넌트 전체 구현 (모달 포함: MemoView, TabNameModal, TabSelectModal, HelpModal, PatchNoteModal, PWAInstallModal)
 - [x] Supabase 프로젝트 생성 + DB 스키마 적용 (`tabs`, `schedules`, `tab_labels`, `user_settings`)
 - [x] Google OAuth 설정 + 로그인/콜백/미들웨어 전체 연동
 - [x] lib/supabase/client.ts, server.ts 생성
 - [x] useAuth / useSchedules / useTabs 훅 생성 및 ScheduleApp.tsx 연동
+- [x] 탭-일정 매칭 구조를 `tab_type` enum 기반으로 전면 교체 (`category` 필드 제거, `tabId` uuid 직접 비교로 통일)
 - [x] 사용자 정의 동적 탭 시스템 (추가/이름변경/삭제, `tab_type` 기준 특수 탭 판별)
-- [x] 메모 전용 뷰 및 탭 간 이동 로직
+- [x] 메모 전용 뷰 및 탭 간 이동 로직 — `TabMoveModal` 삭제(중복 죽은 코드), `TabSelectModal`로 일원화
+- [x] 카드 UI 개선 — 아이콘 클릭 확장, 인라인 수정/삭제, 메모 내용 펼치기·접기(`isContentExpanded`, 잘림 자동 감지)
+- [x] 긴 메모(50자) 카드 오버플로우 수정 (`min-width: 0` + `overflow: hidden` 체인)
+- [x] "오늘"/"진행중" 뱃지 시스템 (`getBadgeInfo`), 날짜 표시 포맷 정리(`fmtDateLine`)
 - [x] PWA 설치 지원 (`@ducanh2912/next-pwa`)
 - [x] Vercel 환경변수 등록 (`NEXT_PUBLIC_` prefix)
 
