@@ -32,8 +32,8 @@ interface ItemCardProps {
 }
 
 export default function ItemCard({
-  item, currentTab, expanded, editing, availableTabs, tabName, tabType,
-  onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand,
+  item, currentTab, editing, availableTabs, tabName, tabType,
+  onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit,
 }: ItemCardProps) {
   const [editDate, setEditDate] = useState('');
   const [editTime, setEditTime] = useState('');
@@ -42,20 +42,7 @@ export default function ItemCard({
   const [editMemo, setEditMemo] = useState('');
   const [showTabSelect, setShowTabSelect] = useState(false);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
-  const [isTruncated, setIsTruncated] = useState(false);
   const memoLineRef = useRef<HTMLSpanElement>(null);
-
-  // item.memo가 바뀔 때마다 잘림 여부 재감지
-  useEffect(() => {
-    const el = memoLineRef.current;
-    if (!el) return;
-
-    // 한 프레임 후 측정 (렌더링 완료 후 정확한 값 얻기 위함)
-    const timer = setTimeout(() => {
-      setIsTruncated(el.scrollWidth > el.clientWidth);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [item.memo, isContentExpanded]);
 
   // editing이 true가 될 때 펼치기 상태 초기화
   useEffect(() => {
@@ -101,7 +88,6 @@ export default function ItemCard({
     isCardToday && !item.done ? 'today-item' : '',
     item.done ? 'done-item' : '',
     isPast ? 'past-item' : '',
-    expanded ? 'expanded' : '',
     isContentExpanded ? 'content-expanded' : '',
   ].filter(Boolean).join(' ');
 
@@ -169,22 +155,14 @@ export default function ItemCard({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // 체크박스, 아이콘 버튼, 인라인 액션 버튼 클릭은 무시
+    // 체크박스, 버튼 클릭은 무시
     if ((e.target as HTMLElement).closest(
       '.check-box, .icon-btn, .edit-row, .card-action-inline'
     )) return;
     if (editing) return;
 
-    if (isContentExpanded) {
-      // 펼쳐진 상태 → 접기
-      setIsContentExpanded(false);
-    } else if (isTruncated) {
-      // 잘린 내용 있음 → 펼치기
-      setIsContentExpanded(true);
-    } else {
-      // 잘린 내용 없음 → 기존 아이콘 오버레이 토글
-      onToggleExpand(item.id);
-    }
+    // 토글: 펼치기 / 접기
+    setIsContentExpanded(prev => !prev);
   };
 
   const isMemoMode = currentTab === 'memo';
@@ -308,9 +286,6 @@ export default function ItemCard({
                   >
                     {item.memo}
                   </span>
-                  {isTruncated && !isContentExpanded && (
-                    <span className="memo-expand-hint">더보기</span>
-                  )}
                   {(isContentExpanded || isToday || isOngoing || showTabBadge) && (
                     <div className="item-badge-col">
                       {isContentExpanded ? (
@@ -357,26 +332,6 @@ export default function ItemCard({
               </div>
             </div>
           </div>
-
-          {/* 편집/삭제 오버레이 (펼친 상태에서는 인라인 버튼으로 대체되므로 숨김) */}
-          {!isContentExpanded && (
-            <div className="item-icons">
-              <button
-                className="icon-btn edit-btn"
-                onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
-                aria-label="수정"
-              >
-                <IconPencil size={15} aria-hidden />
-              </button>
-              <button
-                className="icon-btn del-btn"
-                onClick={e => { e.stopPropagation(); onDelete(item.id); }}
-                aria-label="삭제"
-              >
-                <IconTrash size={15} aria-hidden />
-              </button>
-            </div>
-          )}
         </>
       )}
     </div>
