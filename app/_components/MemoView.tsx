@@ -42,7 +42,7 @@ export default function MemoView({
   );
 
   const charLen = [...memo].length;
-  const charClass = charLen > 50 ? 'char-over' : charLen > 40 ? 'char-warn' : 'char-ok';
+  const charClass = charLen > 40 ? 'char-over' : 'char-ok';
 
   const getTabName = (item: ScheduleItem): string | undefined => {
     if (!item.tabId) return undefined;
@@ -57,7 +57,7 @@ export default function MemoView({
   const handleAdd = () => {
     const trimmed = memo.trim();
     if (!trimmed) { alert('메모를 입력해주세요.'); return; }
-    if ([...trimmed].length > 50) { alert('50자 이내로 입력해주세요.'); return; }
+    if ([...trimmed].length > 40) { alert('40자 이내로 입력해주세요.'); return; }
     onAdd(trimmed);
     setMemo('');
   };
@@ -70,13 +70,13 @@ export default function MemoView({
             <IconClipboardText size={15} aria-hidden />
             메모 {sorted.length > 0 && <span className="memo-view-count">{sorted.length}개</span>}
           </span>
-          <span className={`char-count ${charClass}`}>{charLen} / 50</span>
+          <span className={`char-count ${charClass}`}>{charLen} / 40</span>
         </div>
         <div className="memo-view-add-row">
           <input
             type="text"
-            placeholder="메모 입력 (50자 이내)"
-            maxLength={55}
+            placeholder="메모 입력 (40자 이내)"
+            maxLength={44}
             value={memo}
             onChange={e => setMemo(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}

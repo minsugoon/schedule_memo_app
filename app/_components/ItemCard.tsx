@@ -106,12 +106,12 @@ export default function ItemCard({
   ].filter(Boolean).join(' ');
 
   const editMemoCharLen = [...editMemo].length;
-  const editMemoCharClass = editMemoCharLen > 50 ? 'char-over' : editMemoCharLen > 40 ? 'char-warn' : 'char-ok';
+  const editMemoCharClass = editMemoCharLen > 40 ? 'char-over' : 'char-ok';
 
   const handleSaveClick = () => {
     const trimmed = editMemo.trim();
     if (!trimmed) { alert('메모를 입력해주세요.'); return; }
-    if ([...trimmed].length > 50) { alert('50자 이내로 입력해주세요.'); return; }
+    if ([...trimmed].length > 40) { alert('40자 이내로 입력해주세요.'); return; }
 
     // 날짜/시간 입력 여부 감지
     const hasDateOrTime =
@@ -246,13 +246,13 @@ export default function ItemCard({
             <input
               type="text"
               placeholder="수정할 메모 내용"
-              maxLength={55}
+              maxLength={44}
               value={editMemo}
               onChange={e => setEditMemo(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleSaveClick(); }}
             />
             <span className={`memo-char-count ${editMemoCharClass}`}>
-              {editMemoCharLen} / 50
+              {editMemoCharLen} / 40
             </span>
           </div>
 
@@ -297,77 +297,64 @@ export default function ItemCard({
             <div className="item-body-col">
               <div className="item-lines">
                 {!isMemoMode && (
-                  <span className="item-date-line">
+                  <div className="item-date-line">
                     {dateLine}
-                    {isTruncated && !isContentExpanded && (
-                      <span className="memo-expand-hint">더보기</span>
-                    )}
-                  </span>
-                )}
-                <span
-                  ref={memoLineRef}
-                  className={`item-memo-line${isCardToday && !item.done ? ' font-bold' : ''}${isContentExpanded ? ' expanded' : ''}`}
-                >
-                  {item.memo}
-                </span>
-                {isContentExpanded && (
-                  <div className="item-badge-bottom">
-                    {isToday && !item.done && (
-                      <span className="item-badge today-badge-v2">오늘</span>
-                    )}
-                    {isOngoing && !item.done && (
-                      <span className="item-badge ongoing-badge">진행중</span>
-                    )}
-                    {showTabBadge && (
-                      <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
-                        {tabName}
-                      </span>
-                    )}
                   </div>
                 )}
-              </div>
-              {(isContentExpanded || isToday || isOngoing || showTabBadge) && (
-                <div className="item-badge-col">
-                  {isContentExpanded ? (
-                    <>
-                      {/* 펼친 상태: 수정/삭제 버튼 */}
-                      <button
-                        className="card-action-inline edit"
-                        onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
-                        aria-label="수정"
-                      >
-                        <IconPencil size={13} aria-hidden />
-                      </button>
-                      <button
-                        className="card-action-inline del"
-                        onClick={e => { e.stopPropagation(); onDelete(item.id); }}
-                        aria-label="삭제"
-                      >
-                        <IconTrash size={13} aria-hidden />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      {/* 1. 오늘 뱃지 */}
-                      {isToday && !item.done && (
-                        <span className="item-badge today-badge-v2">오늘</span>
-                      )}
+                <div className="item-memo-row">
+                  <span
+                    ref={memoLineRef}
+                    className={`item-memo-line${isCardToday && !item.done ? ' font-bold' : ''}${isContentExpanded ? ' expanded' : ''}`}
+                  >
+                    {item.memo}
+                  </span>
+                  {isTruncated && !isContentExpanded && (
+                    <span className="memo-expand-hint">더보기</span>
+                  )}
+                  {(isContentExpanded || isToday || isOngoing || showTabBadge) && (
+                    <div className="item-badge-col">
+                      {isContentExpanded ? (
+                        <>
+                          {/* 펼친 상태: 수정/삭제 버튼 */}
+                          <button
+                            className="card-action-inline edit"
+                            onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
+                            aria-label="수정"
+                          >
+                            <IconPencil size={13} aria-hidden />
+                          </button>
+                          <button
+                            className="card-action-inline del"
+                            onClick={e => { e.stopPropagation(); onDelete(item.id); }}
+                            aria-label="삭제"
+                          >
+                            <IconTrash size={13} aria-hidden />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {/* 1. 오늘 뱃지 */}
+                          {isToday && !item.done && (
+                            <span className="item-badge today-badge-v2">오늘</span>
+                          )}
 
-                      {/* 2. 진행중 뱃지 */}
-                      {isOngoing && !item.done && (
-                        <span className="item-badge ongoing-badge">진행중</span>
-                      )}
+                          {/* 2. 진행중 뱃지 */}
+                          {isOngoing && !item.done && (
+                            <span className="item-badge ongoing-badge">진행중</span>
+                          )}
 
-                      {/* 3. 탭이름 뱃지 (전체 탭에서만) */}
-                      {showTabBadge && (
-                        <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
-                          {tabName}
-                        </span>
+                          {/* 3. 탭이름 뱃지 (전체 탭에서만) */}
+                          {showTabBadge && (
+                            <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                              {tabName}
+                            </span>
+                          )}
+                        </>
                       )}
-                    </>
+                    </div>
                   )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
 

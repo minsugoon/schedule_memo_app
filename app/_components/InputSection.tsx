@@ -32,11 +32,11 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
   const memoRef = useRef<HTMLInputElement>(null);
 
   const charLen = [...memo].length;
-  const charClass = charLen > 50 ? 'char-over' : charLen > 40 ? 'char-warn' : 'char-ok';
+  const charClass = charLen > 40 ? 'char-over' : 'char-ok';
 
   const handleAdd = () => {
     if (!memo.trim()) { alert('메모를 입력해주세요.'); return; }
-    if ([...memo.trim()].length > 50) { alert('50자 이내로 입력해주세요.'); return; }
+    if ([...memo.trim()].length > 40) { alert('40자 이내로 입력해주세요.'); return; }
     onAdd(dateRaw, timeRaw, dateEndRaw, timeEndRaw, memo.trim());
     setDateRaw('');
     setTimeRaw('');
@@ -114,13 +114,13 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
         <input
           ref={memoRef}
           type="text"
-          placeholder="할 일 메모 (50자 이내)"
-          maxLength={55}
+          placeholder="할 일 메모 (40자 이내)"
+          maxLength={44}
           value={memo}
           onChange={e => setMemo(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
         />
-        <span className={`memo-char-count ${charClass}`}>{charLen} / 50</span>
+        <span className={`memo-char-count ${charClass}`}>{charLen} / 40</span>
       </div>
 
       {/* 추가 버튼 */}
