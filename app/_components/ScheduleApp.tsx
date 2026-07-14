@@ -394,6 +394,7 @@ export default function ScheduleApp() {
       {viewMode === 'memo' ? (
         <MemoView
           items={memoItems}
+          showDone={showDone}
           expandedId={expandedId}
           editingId={editingId}
           availableTabs={availableTabs}

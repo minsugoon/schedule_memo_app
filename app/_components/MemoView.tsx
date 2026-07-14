@@ -8,6 +8,7 @@ import ItemCard from './ItemCard';
 
 interface MemoViewProps {
   items: ScheduleItem[];
+  showDone: boolean;
   expandedId: number | null;
   editingId: number | null;
   availableTabs: Array<{ id: string; name: string; color: string | null }>;
@@ -31,15 +32,18 @@ interface MemoViewProps {
 }
 
 export default function MemoView({
-  items, expandedId, editingId, availableTabs, tabs,
+  items, showDone, expandedId, editingId, availableTabs, tabs,
   onToggleDone, onDelete, onStartEdit, onSaveEdit, onSaveEditWithTime, onCancelEdit, onToggleExpand, onAdd,
 }: MemoViewProps) {
   const [memo, setMemo] = useState('');
 
-  const sorted = useMemo(
-    () => [...items].sort((a, b) => b.createdAt - a.createdAt),
-    [items]
-  );
+  const sorted = useMemo(() => {
+    let result = [...items];
+    if (!showDone) {
+      result = result.filter(i => !i.done);
+    }
+    return result.sort((a, b) => b.createdAt - a.createdAt);
+  }, [items, showDone]);
 
   const charLen = [...memo].length;
   const charClass = charLen > 40 ? 'char-over' : 'char-ok';
