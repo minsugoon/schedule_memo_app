@@ -15,6 +15,7 @@ import MemoView from './MemoView'
 import PWAInstallModal from './PWAInstallModal'
 import HelpModal from './HelpModal'
 import PatchNoteModal from './PatchNoteModal'
+import OnboardingOverlay from './OnboardingOverlay'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -74,6 +75,7 @@ export default function ScheduleApp() {
   const [showInstallModal, setShowInstallModal] = useState(false)
   const [showPatchNote, setShowPatchNote] = useState(false)
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
+  const [showOnboarding, setShowOnboarding] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
@@ -134,6 +136,17 @@ export default function ScheduleApp() {
     if (!localStorage.getItem(key)) {
       setShowPatchNote(true)
     }
+  }, [hydrated])
+
+  useEffect(() => {
+    if (!hydrated) return
+    if (localStorage.getItem('onboarding_seen_v1')) return
+
+    const timer = setTimeout(() => {
+      setShowOnboarding(true)
+    }, 800)
+
+    return () => clearTimeout(timer)
   }, [hydrated])
 
   const memoTab = tabs.find(t => t.tab_type === 'memo')
@@ -338,6 +351,15 @@ export default function ScheduleApp() {
     setShowPatchNote(false)
   }
 
+  const handleShowOnboarding = () => {
+    setShowOnboarding(true)
+  }
+
+  const handleFinishOnboarding = () => {
+    localStorage.setItem('onboarding_seen_v1', 'true')
+    setShowOnboarding(false)
+  }
+
   const handleInstallPWA = async () => {
     if (!deferredPrompt.current) return
     await deferredPrompt.current.prompt()
@@ -356,6 +378,11 @@ export default function ScheduleApp() {
   return (
     <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
+
+      {/* 온보딩 가이드 오버레이 — 최우선 z-index */}
+      {showOnboarding && (
+        <OnboardingOverlay onFinish={handleFinishOnboarding} />
+      )}
 
       {/* 패치 노트 모달 — 최우선 z-index */}
       {showPatchNote && (
@@ -377,6 +404,7 @@ export default function ScheduleApp() {
         onSignOut={handleSignOut}
         onRefresh={handleRefresh}
         refreshing={refreshing}
+        onShowOnboarding={handleShowOnboarding}
       />
       <TabBar
         tabs={tabs}

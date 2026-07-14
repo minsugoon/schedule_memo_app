@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconMoon, IconSun, IconLogout } from '@tabler/icons-react';
+import { IconMoon, IconSun, IconLogout, IconQuestionMark } from '@tabler/icons-react';
 import { DAYS } from '@/lib/dateUtils';
 
 interface AppHeaderProps {
@@ -10,11 +10,12 @@ interface AppHeaderProps {
   onSignOut?: () => void;
   onRefresh?: () => void;
   refreshing?: boolean;
+  onShowOnboarding: () => void;
 }
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
 
-export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, refreshing }: AppHeaderProps) {
+export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, refreshing, onShowOnboarding }: AppHeaderProps) {
   const [clock, setClock] = useState('');
   const [todayDisplay, setTodayDisplay] = useState('');
 
@@ -35,6 +36,9 @@ export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, 
       <div className="header-top">
         <span className="title">📋 할 일 메모장</span>
         <div className="flex items-center gap-2">
+          <button className="theme-btn" onClick={onShowOnboarding} aria-label="사용법 안내">
+            <IconQuestionMark size={13} aria-hidden />
+          </button>
           {onRefresh && (
             <button className="theme-btn" onClick={onRefresh} aria-label="새로고침" disabled={refreshing}>
               <span className={refreshing ? 'animate-spin inline-block' : 'inline-block'}>🔄</span>

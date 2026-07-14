@@ -72,7 +72,7 @@ export default function ItemList({
   };
 
   return (
-    <div className="list-section">
+    <div id="onboarding-card-area" className="list-section">
       {filtered.length === 0 ? (
         <div className="list-empty">
           <IconNotebook size={32} aria-hidden style={{ display: 'block', margin: '0 auto 8px' }} />

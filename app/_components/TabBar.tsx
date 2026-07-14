@@ -106,6 +106,7 @@ export default function TabBar({
       )}
       <div className="tab-bar-actions">
         <button
+          id="onboarding-done-btn"
           className={`tab-action-btn${showDone ? ' done-on' : ''}`}
           onClick={onToggleShowDone}
           aria-label={showDone ? '완료 항목 숨기기' : '완료 항목 보기'}
@@ -114,6 +115,7 @@ export default function TabBar({
           <IconCircleCheck size={18} aria-hidden />
         </button>
         <button
+          id="onboarding-memo-btn"
           className={`tab-action-btn${viewMode === 'memo' ? ' active' : ''}`}
           onClick={onToggleViewMode}
           aria-label="메모"
@@ -144,6 +146,7 @@ export default function TabBar({
         })}
         {tabBarTabs.length < MAX_TABS && (
           <div
+            id="onboarding-add-tab-btn"
             className="tab-item tab-add-btn"
             onClick={() => setTabNameModal({ mode: 'add' })}
             aria-label="탭 추가"
