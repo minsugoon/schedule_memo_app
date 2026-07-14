@@ -666,37 +666,14 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
 
 .onboarding-tooltip {
   position: fixed;
+  width: 280px;
   background: var(--card-bg);
   border: 0.5px solid var(--border);
-  border-radius: 12px;
-  padding: 14px 16px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  border-radius: 16px;
+  padding: 16px 18px;
+  z-index: 102;
   cursor: default;
-}
-
-.onboarding-tooltip::before {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: var(--card-bg);
-  border-left: 0.5px solid var(--border);
-  border-top: 0.5px solid var(--border);
-  left: 24px;
-}
-
-.onboarding-tooltip.bottom::before {
-  top: -6px;
-  transform: rotate(45deg);
-}
-
-.onboarding-tooltip.top::before {
-  bottom: -6px;
-  transform: rotate(225deg);
-}
-
-.onboarding-tooltip.center::before {
-  display: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
 }
 
 .onboarding-tooltip-title {

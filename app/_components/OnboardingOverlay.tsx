@@ -38,6 +38,14 @@ const STEPS: OnboardingStep[] = [
 
 const TOOLTIP_WIDTH = 280;
 const HIGHLIGHT_PADDING = 6;
+const TOOLTIP_TOP = 80;
+
+const TOOLTIP_STYLE: CSSProperties = {
+  width: TOOLTIP_WIDTH,
+  top: TOOLTIP_TOP,
+  left: '50%',
+  transform: 'translateX(-50%)',
+};
 
 export default function OnboardingOverlay({ onFinish }: OnboardingOverlayProps) {
   const [stepIndex, setStepIndex] = useState(0);
@@ -76,35 +84,12 @@ export default function OnboardingOverlay({ onFinish }: OnboardingOverlayProps) 
       }
     : {};
 
-  let placement: 'bottom' | 'top' | 'center' = 'center';
-  let tooltipStyle: CSSProperties = {
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-  };
-
-  if (rect && typeof window !== 'undefined') {
-    const centerX = rect.left + rect.width / 2;
-    const left = Math.max(
-      12,
-      Math.min(centerX - TOOLTIP_WIDTH / 2, window.innerWidth - TOOLTIP_WIDTH - 12)
-    );
-
-    if (rect.top > window.innerHeight * 0.55) {
-      placement = 'top';
-      tooltipStyle = { left, top: rect.top - 14, transform: 'translateY(-100%)' };
-    } else {
-      placement = 'bottom';
-      tooltipStyle = { left, top: rect.bottom + 14 };
-    }
-  }
-
   return (
     <div className="onboarding-overlay" onClick={handleSkip}>
       {rect && <div className="onboarding-highlight" style={highlightStyle} />}
       <div
-        className={`onboarding-tooltip ${placement}`}
-        style={{ width: TOOLTIP_WIDTH, ...tooltipStyle }}
+        className="onboarding-tooltip"
+        style={TOOLTIP_STYLE}
         onClick={e => e.stopPropagation()}
       >
         <div className="onboarding-tooltip-title">{step.title}</div>
