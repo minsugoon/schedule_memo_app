@@ -166,6 +166,7 @@ export default function ItemCard({
   };
 
   const isMemoMode = currentTab === 'memo';
+  const hasDate = !!item.date;
 
   return (
     <div className={cls} onClick={handleCardClick}>
@@ -274,14 +275,49 @@ export default function ItemCard({
             </div>
             <div className="item-body-col">
               <div className="item-lines">
-                {(!isMemoMode || isContentExpanded) && (
-                  <div className={isContentExpanded ? 'item-date-row-expanded' : undefined}>
-                    {!isMemoMode && (
+                {!isContentExpanded && (
+                  <>
+                    {/* 날짜줄 — 날짜 있을 때만 */}
+                    {hasDate && (
                       <div className="item-date-line">
                         {dateLine}
                       </div>
                     )}
-                    {isContentExpanded && (
+
+                    {/* 메모+뱃지 한 줄 */}
+                    <div className="item-memo-row">
+                      <span
+                        ref={memoLineRef}
+                        className={`item-memo-line${isCardToday && !item.done ? ' font-bold' : ''}`}
+                      >
+                        {item.memo}
+                      </span>
+                      {(isToday || isOngoing || showTabBadge) && (
+                        <div className="item-badge-col">
+                          {isToday && !item.done && (
+                            <span className="item-badge today-badge-v2">오늘</span>
+                          )}
+                          {isOngoing && !item.done && (
+                            <span className="item-badge ongoing-badge">진행중</span>
+                          )}
+                          {showTabBadge && (
+                            <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                              {tabName}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* 펼친 상태: 날짜 있는 카드 */}
+                {isContentExpanded && hasDate && (
+                  <>
+                    <div className="item-date-row-expanded">
+                      <div className="item-date-line">
+                        {dateLine}
+                      </div>
                       <div className="item-action-col">
                         <button
                           className="card-action-inline edit"
@@ -298,40 +334,7 @@ export default function ItemCard({
                           <IconTrash size={13} aria-hidden />
                         </button>
                       </div>
-                    )}
-                  </div>
-                )}
-
-                {/* 메모+뱃지 한 줄 (접힌 상태) */}
-                {!isContentExpanded && (
-                  <div className="item-memo-row">
-                    <span
-                      ref={memoLineRef}
-                      className={`item-memo-line${isCardToday && !item.done ? ' font-bold' : ''}`}
-                    >
-                      {item.memo}
-                    </span>
-                    {(isToday || isOngoing || showTabBadge) && (
-                      <div className="item-badge-col">
-                        {isToday && !item.done && (
-                          <span className="item-badge today-badge-v2">오늘</span>
-                        )}
-                        {isOngoing && !item.done && (
-                          <span className="item-badge ongoing-badge">진행중</span>
-                        )}
-                        {showTabBadge && (
-                          <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
-                            {tabName}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* 펼친 상태: 메모 전체 + 하단 뱃지 */}
-                {isContentExpanded && (
-                  <>
+                    </div>
                     <div className="item-memo-expanded">
                       {item.memo}
                     </div>
@@ -348,6 +351,40 @@ export default function ItemCard({
                         </span>
                       )}
                     </div>
+                  </>
+                )}
+
+                {/* 펼친 상태: 날짜 없는 메모 카드 */}
+                {isContentExpanded && !hasDate && (
+                  <>
+                    <div className="item-memo-row-expanded-no-date">
+                      <div className="item-memo-expanded">
+                        {item.memo}
+                      </div>
+                      <div className="item-action-col">
+                        <button
+                          className="card-action-inline edit"
+                          onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
+                          aria-label="수정"
+                        >
+                          <IconPencil size={13} aria-hidden />
+                        </button>
+                        <button
+                          className="card-action-inline del"
+                          onClick={e => { e.stopPropagation(); onDelete(item.id); }}
+                          aria-label="삭제"
+                        >
+                          <IconTrash size={13} aria-hidden />
+                        </button>
+                      </div>
+                    </div>
+                    {showTabBadge && (
+                      <div className="item-badge-bottom">
+                        <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                          {tabName}
+                        </span>
+                      </div>
+                    )}
                   </>
                 )}
               </div>

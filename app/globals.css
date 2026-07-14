@@ -272,6 +272,18 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
   margin-top: 6px;
 }
 
+/* 메모 카드 펼친 상태: 메모+버튼 한 줄 (날짜 없음) */
+.item-memo-row-expanded-no-date {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.item-memo-row-expanded-no-date .item-memo-expanded {
+  flex: 1;
+  min-width: 0;
+}
+
 /* 펼친 상태 날짜줄 + 버튼 래퍼 */
 .item-date-row-expanded {
   display: flex;
