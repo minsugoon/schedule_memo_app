@@ -274,75 +274,81 @@ export default function ItemCard({
             </div>
             <div className="item-body-col">
               <div className="item-lines">
-                {!isMemoMode && (
-                  <div className="item-date-line">
-                    {dateLine}
+                {(!isMemoMode || isContentExpanded) && (
+                  <div className={isContentExpanded ? 'item-date-row-expanded' : undefined}>
+                    {!isMemoMode && (
+                      <div className="item-date-line">
+                        {dateLine}
+                      </div>
+                    )}
+                    {isContentExpanded && (
+                      <div className="item-action-col">
+                        <button
+                          className="card-action-inline edit"
+                          onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
+                          aria-label="수정"
+                        >
+                          <IconPencil size={13} aria-hidden />
+                        </button>
+                        <button
+                          className="card-action-inline del"
+                          onClick={e => { e.stopPropagation(); onDelete(item.id); }}
+                          aria-label="삭제"
+                        >
+                          <IconTrash size={13} aria-hidden />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
-                <div className="item-memo-row">
-                  <span
-                    ref={memoLineRef}
-                    className={`item-memo-line${isCardToday && !item.done ? ' font-bold' : ''}${isContentExpanded ? ' expanded' : ''}`}
-                  >
-                    {item.memo}
-                  </span>
-                  {(isContentExpanded || isToday || isOngoing || showTabBadge) && (
-                    <div className="item-badge-col">
-                      {isContentExpanded ? (
-                        <>
-                          {/* 펼친 상태: 수정/삭제 버튼 */}
-                          <button
-                            className="card-action-inline edit"
-                            onClick={e => { e.stopPropagation(); onStartEdit(item.id); }}
-                            aria-label="수정"
-                          >
-                            <IconPencil size={13} aria-hidden />
-                          </button>
-                          <button
-                            className="card-action-inline del"
-                            onClick={e => { e.stopPropagation(); onDelete(item.id); }}
-                            aria-label="삭제"
-                          >
-                            <IconTrash size={13} aria-hidden />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {/* 1. 오늘 뱃지 */}
-                          {isToday && !item.done && (
-                            <span className="item-badge today-badge-v2">오늘</span>
-                          )}
 
-                          {/* 2. 진행중 뱃지 */}
-                          {isOngoing && !item.done && (
-                            <span className="item-badge ongoing-badge">진행중</span>
-                          )}
-
-                          {/* 3. 탭이름 뱃지 (전체 탭에서만) */}
-                          {showTabBadge && (
-                            <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
-                              {tabName}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {isContentExpanded && (
-                  <div className="item-badge-bottom">
-                    {isToday && !item.done && (
-                      <span className="item-badge today-badge-v2">오늘</span>
-                    )}
-                    {isOngoing && !item.done && (
-                      <span className="item-badge ongoing-badge">진행중</span>
-                    )}
-                    {showTabBadge && (
-                      <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
-                        {tabName}
-                      </span>
+                {/* 메모+뱃지 한 줄 (접힌 상태) */}
+                {!isContentExpanded && (
+                  <div className="item-memo-row">
+                    <span
+                      ref={memoLineRef}
+                      className={`item-memo-line${isCardToday && !item.done ? ' font-bold' : ''}`}
+                    >
+                      {item.memo}
+                    </span>
+                    {(isToday || isOngoing || showTabBadge) && (
+                      <div className="item-badge-col">
+                        {isToday && !item.done && (
+                          <span className="item-badge today-badge-v2">오늘</span>
+                        )}
+                        {isOngoing && !item.done && (
+                          <span className="item-badge ongoing-badge">진행중</span>
+                        )}
+                        {showTabBadge && (
+                          <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                            {tabName}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
+                )}
+
+                {/* 펼친 상태: 메모 전체 + 하단 뱃지 */}
+                {isContentExpanded && (
+                  <>
+                    <div className="item-memo-expanded">
+                      {item.memo}
+                    </div>
+                    <div className="item-badge-bottom">
+                      {isToday && !item.done && (
+                        <span className="item-badge today-badge-v2">오늘</span>
+                      )}
+                      {isOngoing && !item.done && (
+                        <span className="item-badge ongoing-badge">진행중</span>
+                      )}
+                      {showTabBadge && (
+                        <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                          {tabName}
+                        </span>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
             </div>

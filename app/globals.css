@@ -272,6 +272,39 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
   margin-top: 6px;
 }
 
+/* 펼친 상태 날짜줄 + 버튼 래퍼 */
+.item-date-row-expanded {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+}
+.item-date-row-expanded .item-date-line {
+  flex: 1;
+  min-width: 0;
+}
+.item-action-col {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* 펼친 상태 메모 전체 표시 — 전체 너비 사용 */
+.item-memo-expanded {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.55;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  width: 100%;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
 .item-badge-col { display: flex; align-items: center; flex-shrink: 0; margin-left: 6px; gap: 3px; }
 .today-badge { font-size: 12px; background: var(--today-border); color: #4A1B0C; border-radius: 4px; padding: 2px 6px; font-weight: 500; white-space: nowrap; }
 [data-theme="dark"] .today-badge { background: #BA7517; color: #FAF0D8; }
