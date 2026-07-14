@@ -201,7 +201,7 @@ auth.users
 | ended_at   | timestamptz | 종료 날짜+시간 (null = 하루) |
 | is_all_day | boolean     | true = 시간 미표시           |
 | date_raw   | text        | 사용자 입력 원문             |
-| memo       | text        | 50자 이내                    |
+| memo       | text        | 40자 이내                    |
 | is_done    | boolean     | 완료 여부                    |
 
 ### 탭 판별 규칙 (중요)
@@ -244,7 +244,7 @@ export default MyComponent
 
 ---
 
-## 현재 진행 상태 (2026-07-12 기준)
+## 현재 진행 상태 (2026-07-14 기준)
 
 ### 완료
 
@@ -256,8 +256,9 @@ export default MyComponent
 - [x] 탭-일정 매칭 구조를 `tab_type` enum 기반으로 전면 교체 (`category` 필드 제거, `tabId` uuid 직접 비교로 통일)
 - [x] 사용자 정의 동적 탭 시스템 (추가/이름변경/삭제, `tab_type` 기준 특수 탭 판별)
 - [x] 메모 전용 뷰 및 탭 간 이동 로직 — `TabMoveModal` 삭제(중복 죽은 코드), `TabSelectModal`로 일원화
-- [x] 카드 UI 개선 — 아이콘 클릭 확장, 인라인 수정/삭제, 메모 내용 펼치기·접기(`isContentExpanded`, 잘림 자동 감지)
-- [x] 긴 메모(50자) 카드 오버플로우 수정 (`min-width: 0` + `overflow: hidden` 체인)
+- [x] 메모 최대 글자수 50자 → 40자로 축소 (`InputSection`/`ItemCard`/`MemoView` 입력·카운터·유효성 검사 전체 반영)
+- [x] 카드 UI 전면 개편 — 날짜/시간 줄과 메모+뱃지 줄을 분리하고, 날짜·시간은 말줄임 없이 항상 전체 표시(`.item-date-line` white-space: normal). 메모는 기본 상태에서 CSS 말줄임(40자 초과 시 `...`) 처리
+- [x] 카드 클릭 인터랙션 단순화 — 잘림 자동 감지(`isTruncated`)와 구 아이콘 오버레이(`.item-icons`)를 완전히 제거하고, `isContentExpanded` 단일 상태로 클릭 시 펼치기/접기 토글만 수행. 펼친 상태에서는 메모 옆 자리에 수정/삭제 버튼(`.card-action-inline`)이 나타나고, 오늘/진행중/탭 뱃지는 메모 하단(`.item-badge-bottom`)으로 이동. `expanded`/`onToggleExpand` prop은 `ItemList.tsx`(수정 금지 파일) 하위 호환을 위해 인터페이스에만 남기고 `ItemCard` 내부에서는 더 이상 사용하지 않음
 - [x] "오늘"/"진행중" 뱃지 시스템 (`getBadgeInfo`), 날짜 표시 포맷 정리(`fmtDateLine`)
 - [x] PWA 설치 지원 (`@ducanh2912/next-pwa`)
 - [x] Vercel 환경변수 등록 (`NEXT_PUBLIC_` prefix)
