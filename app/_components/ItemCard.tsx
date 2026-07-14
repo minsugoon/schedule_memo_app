@@ -329,6 +329,21 @@ export default function ItemCard({
                     </div>
                   )}
                 </div>
+                {isContentExpanded && (
+                  <div className="item-badge-bottom">
+                    {isToday && !item.done && (
+                      <span className="item-badge today-badge-v2">오늘</span>
+                    )}
+                    {isOngoing && !item.done && (
+                      <span className="item-badge ongoing-badge">진행중</span>
+                    )}
+                    {showTabBadge && (
+                      <span className={`item-badge cat-badge tab-type-${tabType ?? 'custom'}`}>
+                        {tabName}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
