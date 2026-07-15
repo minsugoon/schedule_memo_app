@@ -4,8 +4,10 @@ import { useState, useRef } from 'react';
 import { IconPlus, IconQuestionMark, IconCalendar, IconClock } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
 import type { DbTab } from '@/lib/hooks/useTabs';
+import { validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
 import DatePickerModal from './DatePickerModal';
 import TimePickerModal from './TimePickerModal';
+import DateErrorModal from './DateErrorModal';
 
 interface InputSectionProps {
   currentTab: TabKey;
@@ -28,6 +30,7 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
   const [memo, setMemo] = useState('');
   const [datePickerTarget, setDatePickerTarget] = useState<'start' | 'end' | null>(null);
   const [timePickerTarget, setTimePickerTarget] = useState<'start' | 'end' | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
 
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
@@ -41,6 +44,13 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
   const handleAdd = () => {
     if (!memo.trim()) { alert('메모를 입력해주세요.'); return; }
     if ([...memo.trim()].length > 40) { alert('40자 이내로 입력해주세요.'); return; }
+
+    const validationError = validateDateRange(dateRaw, timeRaw, dateEndRaw, timeEndRaw);
+    if (validationError) {
+      setDateError(getDateValidationMessage(validationError));
+      return;
+    }
+
     onAdd(dateRaw, timeRaw, dateEndRaw, timeEndRaw, memo.trim());
     setDateRaw('');
     setTimeRaw('');
@@ -56,6 +66,13 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
 
   return (
     <div className="input-section">
+
+      {dateError !== null && (
+        <DateErrorModal
+          message={dateError}
+          onClose={() => setDateError(null)}
+        />
+      )}
 
       {datePickerTarget !== null && (
         <DatePickerModal

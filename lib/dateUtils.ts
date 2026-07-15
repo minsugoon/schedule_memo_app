@@ -317,3 +317,63 @@ export const fmtDateLine = (
     : endDayStr;
   return `${startPart} ~ ${endPart}`;
 };
+
+// ── 날짜/시간 범위 유효성 검사 ──
+
+export type DateValidationError =
+  | 'END_BEFORE_START'      // 종료일이 시작일보다 과거
+  | 'END_TIME_BEFORE_START' // 같은 날, 종료시간 < 시작시간
+  | 'SAME_TIME'             // 같은 날, 시작시간 = 종료시간
+  | null;
+
+export const validateDateRange = (
+  dateRaw: string,
+  timeRaw: string,
+  dateEndRaw: string,
+  timeEndRaw: string,
+): DateValidationError => {
+  // 종료일 없으면 검사 불필요
+  if (!dateEndRaw.trim()) return null;
+
+  const startDate = parseDate(dateRaw);
+  const endDate = parseDate(dateEndRaw);
+  if (!startDate || !endDate) return null;
+
+  // 날짜를 숫자로 비교 (y*10000 + m*100 + d)
+  const startNum = startDate.y * 10000 + startDate.m * 100 + startDate.d;
+  const endNum = endDate.y * 10000 + endDate.m * 100 + endDate.d;
+
+  // 종료일이 시작일보다 과거
+  if (endNum < startNum) return 'END_BEFORE_START';
+
+  // 같은 날짜일 때 시간 비교
+  if (endNum === startNum && timeRaw.trim() && timeEndRaw.trim()) {
+    const startTime = parseTime(timeRaw);
+    const endTime = parseTime(timeEndRaw);
+
+    if (startTime && endTime) {
+      const startMin = startTime.h * 60 + startTime.m;
+      const endMin = endTime.h * 60 + endTime.m;
+
+      if (endMin < startMin) return 'END_TIME_BEFORE_START';
+      if (endMin === startMin) return 'SAME_TIME';
+    }
+  }
+
+  return null;
+};
+
+export const getDateValidationMessage = (
+  error: DateValidationError
+): string => {
+  switch (error) {
+    case 'END_BEFORE_START':
+      return '종료일은 시작일 이후여야 합니다.';
+    case 'END_TIME_BEFORE_START':
+      return '종료 시간은 시작 시간 이후여야 합니다.';
+    case 'SAME_TIME':
+      return '시작 시간과 종료 시간이 같습니다.';
+    default:
+      return '';
+  }
+};

@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isRange, extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, fmtShortNoPad } from '@/lib/dateUtils';
+import { isRange, extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, fmtShortNoPad, validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
 import TabSelectModal from './TabSelectModal';
+import DateErrorModal from './DateErrorModal';
 
 interface ItemCardProps {
   item: ScheduleItem;
@@ -42,6 +43,7 @@ export default function ItemCard({
   const [editMemo, setEditMemo] = useState('');
   const [showTabSelect, setShowTabSelect] = useState(false);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const [dateError, setDateError] = useState<string | null>(null);
   const memoLineRef = useRef<HTMLSpanElement>(null);
 
   // editing이 true가 될 때 펼치기 상태 초기화
@@ -98,6 +100,12 @@ export default function ItemCard({
     const trimmed = editMemo.trim();
     if (!trimmed) { alert('메모를 입력해주세요.'); return; }
     if ([...trimmed].length > 40) { alert('40자 이내로 입력해주세요.'); return; }
+
+    const validationError = validateDateRange(editDate, editTime, editDateEnd, editTimeEnd);
+    if (validationError) {
+      setDateError(getDateValidationMessage(validationError));
+      return;
+    }
 
     // 날짜/시간 입력 여부 감지
     const hasDateOrTime =
@@ -170,6 +178,12 @@ export default function ItemCard({
 
   return (
     <div className={cls} onClick={handleCardClick}>
+      {dateError !== null && (
+        <DateErrorModal
+          message={dateError}
+          onClose={() => setDateError(null)}
+        />
+      )}
       {editing ? (
         <>
           {/* 읽기 전용: 저장된 날짜+메모 표시 */}
