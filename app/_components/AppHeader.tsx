@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { IconMoon, IconSun, IconLogout, IconQuestionMark } from '@tabler/icons-react';
+import {
+  IconMoon,
+  IconSun,
+  IconLogout,
+  IconRefresh,
+  IconQuestionMark,
+} from '@tabler/icons-react';
 import { DAYS } from '@/lib/dateUtils';
 
 interface AppHeaderProps {
@@ -19,6 +25,9 @@ export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, 
   const [clock, setClock] = useState('');
   const [todayDisplay, setTodayDisplay] = useState('');
 
+  const isDark = theme === 'dark';
+  const isRefreshing = !!refreshing;
+
   useEffect(() => {
     const update = () => {
       const n = new Date();
@@ -35,26 +44,55 @@ export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, 
     <div className="header">
       <div className="header-top">
         <span className="title">📋 할 일 메모장</span>
-        <div className="flex items-center gap-2">
-          <button className="theme-btn" onClick={onShowOnboarding} aria-label="사용법 안내">
-            <IconQuestionMark size={13} aria-hidden />
+        <div className="header-btns">
+
+          {/* ? 온보딩 가이드 버튼 */}
+          <button
+            className="header-btn"
+            onClick={onShowOnboarding}
+            aria-label="사용 가이드"
+            title="사용 가이드"
+          >
+            <IconQuestionMark size={15} aria-hidden />
           </button>
+
+          {/* 새로고침 버튼 — onRefresh prop 있을 때만 */}
           {onRefresh && (
-            <button className="theme-btn" onClick={onRefresh} aria-label="새로고침" disabled={refreshing}>
-              <span className={refreshing ? 'animate-spin inline-block' : 'inline-block'}>🔄</span>
+            <button
+              className={`header-btn${isRefreshing ? ' spinning' : ''}`}
+              onClick={onRefresh}
+              aria-label="새로고침"
+              title="새로고침"
+            >
+              <IconRefresh size={15} aria-hidden />
             </button>
           )}
-          <button className="theme-btn" onClick={onToggleTheme} aria-label="테마 전환">
-            {theme === 'dark'
-              ? <><IconSun size={13} aria-hidden /> 밝음</>
-              : <><IconMoon size={13} aria-hidden /> 어둠</>
+
+          {/* 테마 전환 버튼 */}
+          <button
+            className="header-btn"
+            onClick={onToggleTheme}
+            aria-label={isDark ? '라이트 모드' : '다크 모드'}
+            title={isDark ? '라이트 모드' : '다크 모드'}
+          >
+            {isDark
+              ? <IconSun size={15} aria-hidden />
+              : <IconMoon size={15} aria-hidden />
             }
           </button>
+
+          {/* 로그아웃 버튼 — onSignOut prop 있을 때만 */}
           {onSignOut && (
-            <button className="theme-btn" onClick={onSignOut} aria-label="로그아웃">
-              <IconLogout size={13} aria-hidden /> 로그아웃
+            <button
+              className="header-btn"
+              onClick={onSignOut}
+              aria-label="로그아웃"
+              title="로그아웃"
+            >
+              <IconLogout size={15} aria-hidden />
             </button>
           )}
+
         </div>
       </div>
       <div className="today-info">
