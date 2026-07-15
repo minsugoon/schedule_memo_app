@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { IconPlus, IconQuestionMark } from '@tabler/icons-react';
+import { IconPlus, IconQuestionMark, IconCalendar } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
 import type { DbTab } from '@/lib/hooks/useTabs';
+import DatePickerModal from './DatePickerModal';
 
 interface InputSectionProps {
   currentTab: TabKey;
@@ -24,6 +25,7 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
   const [dateEndRaw, setDateEndRaw] = useState('');
   const [timeEndRaw, setTimeEndRaw] = useState('');
   const [memo, setMemo] = useState('');
+  const [datePickerTarget, setDatePickerTarget] = useState<'start' | 'end' | null>(null);
 
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
@@ -53,27 +55,61 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
   return (
     <div className="input-section">
 
+      {datePickerTarget !== null && (
+        <DatePickerModal
+          isOpen={datePickerTarget !== null}
+          value={datePickerTarget === 'start' ? dateRaw : dateEndRaw}
+          label={datePickerTarget === 'start' ? '시작일' : '종료일'}
+          onSelect={(val) => {
+            if (datePickerTarget === 'start') setDateRaw(val);
+            else setDateEndRaw(val);
+            setDatePickerTarget(null);
+          }}
+          onClose={() => setDatePickerTarget(null)}
+        />
+      )}
+
       {/* 1줄: 날짜 */}
       <div className="date-time-row">
-        <input
-          ref={dateRef}
-          type="text"
-          style={{ fontSize: '11px' }}
-          placeholder="시작일 (0609…)"
-          value={dateRaw}
-          onChange={e => setDateRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') timeRef.current?.focus(); }}
-        />
+        <div className="date-input-wrap">
+          <input
+            ref={dateRef}
+            type="text"
+            style={{ fontSize: '11px' }}
+            placeholder="시작일 (0609…)"
+            value={dateRaw}
+            onChange={e => setDateRaw(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') timeRef.current?.focus(); }}
+          />
+          <button
+            className="date-icon-btn"
+            onClick={() => setDatePickerTarget('start')}
+            aria-label="달력에서 시작일 선택"
+            type="button"
+          >
+            <IconCalendar size={14} aria-hidden />
+          </button>
+        </div>
         <span className="row-sep">~</span>
-        <input
-          ref={dateEndRef}
-          type="text"
-          style={{ fontSize: '11px' }}
-          placeholder="종료일 (선택)"
-          value={dateEndRaw}
-          onChange={e => setDateEndRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') timeRef.current?.focus(); }}
-        />
+        <div className="date-input-wrap">
+          <input
+            ref={dateEndRef}
+            type="text"
+            style={{ fontSize: '11px' }}
+            placeholder="종료일 (선택)"
+            value={dateEndRaw}
+            onChange={e => setDateEndRaw(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') timeRef.current?.focus(); }}
+          />
+          <button
+            className="date-icon-btn"
+            onClick={() => setDatePickerTarget('end')}
+            aria-label="달력에서 종료일 선택"
+            type="button"
+          >
+            <IconCalendar size={14} aria-hidden />
+          </button>
+        </div>
         <button
           className="help-btn"
           onClick={() => onHelp('date')}

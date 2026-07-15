@@ -643,6 +643,142 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
 .date-time-row input { flex: 1; min-width: 0; }
 .row-sep { font-size: 13px; color: var(--text3); flex-shrink: 0; }
 
+/* 날짜 input + 아이콘 버튼 래퍼 */
+.date-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.date-input-wrap input {
+  width: 100%;
+  padding-right: 32px;
+}
+
+/* 달력/시계 아이콘 버튼 */
+.date-icon-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--text3);
+  cursor: pointer;
+  padding: 0;
+  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+.date-icon-btn:hover { color: var(--text); background: var(--bg3); }
+
+/* 달력 모달 오버레이 */
+.datepicker-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* 달력 모달 카드 */
+.datepicker-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+  max-width: 340px;
+  border: 0.5px solid var(--border);
+}
+
+.datepicker-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.datepicker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.datepicker-nav-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: none;
+  color: var(--text2); cursor: pointer; border-radius: 6px;
+}
+.datepicker-nav-btn:hover { background: var(--bg3); }
+.datepicker-month-label {
+  font-size: 15px; font-weight: 500; color: var(--text);
+}
+
+.datepicker-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+.datepicker-weekday {
+  text-align: center; font-size: 11px; padding: 4px 0;
+  color: var(--text3);
+}
+.datepicker-weekday.sunday { color: var(--del); }
+.datepicker-weekday.saturday { color: var(--edit-c); }
+
+.datepicker-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.datepicker-cell {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; border-radius: 50%;
+  cursor: pointer; border: none; background: none;
+  color: var(--text); margin: 0 auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.datepicker-cell:hover { background: var(--bg3); }
+.datepicker-cell.today {
+  border: 1.5px solid var(--today-border);
+}
+.datepicker-cell.selected {
+  background: var(--btn-bg); color: var(--btn-text);
+}
+.datepicker-cell.other-month {
+  color: var(--text3); opacity: 0.4;
+}
+.datepicker-cell.sunday { color: var(--del); }
+.datepicker-cell.saturday { color: var(--edit-c); }
+.datepicker-cell.selected.sunday,
+.datepicker-cell.selected.saturday {
+  color: var(--btn-text);
+}
+
+.datepicker-footer {
+  display: flex; gap: 8px; margin-top: 14px;
+}
+.datepicker-today-btn {
+  flex: 1; padding: 9px; border-radius: 9px;
+  border: 0.5px solid var(--border);
+  background: none; color: var(--text2);
+  font-size: 13px; cursor: pointer;
+}
+.datepicker-cancel-btn {
+  padding: 9px 16px; border-radius: 9px;
+  border: none; background: none;
+  color: var(--text3); font-size: 13px; cursor: pointer;
+}
+.datepicker-today-btn:hover { background: var(--bg3); }
+
 /* ── 메모 입력 글자수 오버레이 ── */
 .memo-input-wrap { position: relative; margin-bottom: 7px; }
 .memo-input-wrap input { padding-right: 52px; width: 100%; }
