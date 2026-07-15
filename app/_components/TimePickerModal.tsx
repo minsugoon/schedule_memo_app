@@ -12,6 +12,8 @@ interface TimePickerModalProps {
 }
 
 const CELL_H = 44;
+const COL_H = 200;
+const SPACER = (COL_H / 2) - (CELL_H / 2); // = 78
 
 export default function TimePickerModal({ isOpen, value, label, onSelect, onClose }: TimePickerModalProps) {
   const hourRef = useRef<HTMLDivElement>(null);
@@ -90,7 +92,7 @@ export default function TimePickerModal({ isOpen, value, label, onSelect, onClos
               className="timepicker-scroll"
               onScroll={handleHourScroll}
             >
-              <div className="timepicker-spacer" />
+              <div className="timepicker-spacer" style={{ height: SPACER }} />
               {Array.from({ length: 24 }, (_, i) => (
                 <div
                   key={i}
@@ -100,7 +102,7 @@ export default function TimePickerModal({ isOpen, value, label, onSelect, onClos
                   {String(i).padStart(2, '0')}
                 </div>
               ))}
-              <div className="timepicker-spacer" />
+              <div className="timepicker-spacer" style={{ height: SPACER }} />
             </div>
           </div>
 
@@ -116,7 +118,7 @@ export default function TimePickerModal({ isOpen, value, label, onSelect, onClos
               className="timepicker-scroll"
               onScroll={handleMinScroll}
             >
-              <div className="timepicker-spacer" />
+              <div className="timepicker-spacer" style={{ height: SPACER }} />
               {Array.from({ length: 12 }, (_, i) => (
                 <div
                   key={i}
@@ -126,7 +128,7 @@ export default function TimePickerModal({ isOpen, value, label, onSelect, onClos
                   {String(i * 5).padStart(2, '0')}
                 </div>
               ))}
-              <div className="timepicker-spacer" />
+              <div className="timepicker-spacer" style={{ height: SPACER }} />
             </div>
           </div>
         </div>

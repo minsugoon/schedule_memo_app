@@ -842,6 +842,7 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
   scrollbar-width: none;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
+  padding: 0;
 }
 .timepicker-scroll::-webkit-scrollbar { display: none; }
 
@@ -854,14 +855,18 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
   font-size: 20px;
   font-variant-numeric: tabular-nums;
   color: var(--text);
-  scroll-snap-align: start;
+  scroll-snap-align: center;
   cursor: pointer;
   border-radius: 8px;
   font-weight: 400;
+  flex-shrink: 0;
 }
 
 /* 상하 여백 */
-.timepicker-spacer { height: 78px; }
+.timepicker-spacer {
+  height: 78px;
+  flex-shrink: 0;
+}
 
 /* 선택 영역 — 배경 투명, 테두리 선만 */
 .timepicker-selector {
