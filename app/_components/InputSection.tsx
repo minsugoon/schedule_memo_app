@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconQuestionMark } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
 import type { DbTab } from '@/lib/hooks/useTabs';
 
@@ -78,7 +78,9 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
           className="help-btn"
           onClick={() => onHelp('date')}
           aria-label="날짜 입력 방법 안내"
-        >❓</button>
+        >
+          <IconQuestionMark size={14} aria-hidden />
+        </button>
       </div>
 
       {/* 2줄: 시간 */}
@@ -106,7 +108,9 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
           className="help-btn"
           onClick={() => onHelp('time')}
           aria-label="시간 입력 방법 안내"
-        >❓</button>
+        >
+          <IconQuestionMark size={14} aria-hidden />
+        </button>
       </div>
 
       {/* 3줄: 메모 */}
