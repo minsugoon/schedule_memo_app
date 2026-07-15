@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { IconPlus, IconQuestionMark, IconCalendar } from '@tabler/icons-react';
+import { IconPlus, IconQuestionMark, IconCalendar, IconClock } from '@tabler/icons-react';
 import type { TabKey } from '@/lib/types';
 import type { DbTab } from '@/lib/hooks/useTabs';
 import DatePickerModal from './DatePickerModal';
+import TimePickerModal from './TimePickerModal';
 
 interface InputSectionProps {
   currentTab: TabKey;
@@ -26,6 +27,7 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
   const [timeEndRaw, setTimeEndRaw] = useState('');
   const [memo, setMemo] = useState('');
   const [datePickerTarget, setDatePickerTarget] = useState<'start' | 'end' | null>(null);
+  const [timePickerTarget, setTimePickerTarget] = useState<'start' | 'end' | null>(null);
 
   const dateRef = useRef<HTMLInputElement>(null);
   const timeRef = useRef<HTMLInputElement>(null);
@@ -66,6 +68,20 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
             setDatePickerTarget(null);
           }}
           onClose={() => setDatePickerTarget(null)}
+        />
+      )}
+
+      {timePickerTarget !== null && (
+        <TimePickerModal
+          isOpen={timePickerTarget !== null}
+          value={timePickerTarget === 'start' ? timeRaw : timeEndRaw}
+          label={timePickerTarget === 'start' ? '시작시간' : '종료시간'}
+          onSelect={(val) => {
+            if (timePickerTarget === 'start') setTimeRaw(val);
+            else setTimeEndRaw(val);
+            setTimePickerTarget(null);
+          }}
+          onClose={() => setTimePickerTarget(null)}
         />
       )}
 
@@ -121,25 +137,45 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
 
       {/* 2줄: 시간 */}
       <div className="date-time-row">
-        <input
-          ref={timeRef}
-          type="text"
-          style={{ fontSize: '11px' }}
-          placeholder="시작시간 (선택)"
-          value={timeRaw}
-          onChange={e => setTimeRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') timeEndRef.current?.focus(); }}
-        />
+        <div className="date-input-wrap">
+          <input
+            ref={timeRef}
+            type="text"
+            style={{ fontSize: '11px' }}
+            placeholder="시작시간 (선택)"
+            value={timeRaw}
+            onChange={e => setTimeRaw(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') timeEndRef.current?.focus(); }}
+          />
+          <button
+            className="date-icon-btn"
+            onClick={() => setTimePickerTarget('start')}
+            aria-label="시작시간 선택"
+            type="button"
+          >
+            <IconClock size={14} aria-hidden />
+          </button>
+        </div>
         <span className="row-sep">~</span>
-        <input
-          ref={timeEndRef}
-          type="text"
-          style={{ fontSize: '11px' }}
-          placeholder="종료시간 (선택)"
-          value={timeEndRaw}
-          onChange={e => setTimeEndRaw(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') memoRef.current?.focus(); }}
-        />
+        <div className="date-input-wrap">
+          <input
+            ref={timeEndRef}
+            type="text"
+            style={{ fontSize: '11px' }}
+            placeholder="종료시간 (선택)"
+            value={timeEndRaw}
+            onChange={e => setTimeEndRaw(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') memoRef.current?.focus(); }}
+          />
+          <button
+            className="date-icon-btn"
+            onClick={() => setTimePickerTarget('end')}
+            aria-label="종료시간 선택"
+            type="button"
+          >
+            <IconClock size={14} aria-hidden />
+          </button>
+        </div>
         <button
           className="help-btn"
           onClick={() => onHelp('time')}
