@@ -407,6 +407,9 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
   flex: 1;
   min-width: 0;
 }
+.edit-input-row input::placeholder {
+  font-size: 11px;
+}
 .edit-action-btn {
   flex: 1;
   padding: 9px;
@@ -641,6 +644,9 @@ input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
 /* ── 날짜/시간 입력 행 (방안 C) ── */
 .date-time-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
 .date-time-row input { flex: 1; min-width: 0; }
+.date-time-row input::placeholder {
+  font-size: 11px;
+}
 .row-sep { font-size: 13px; color: var(--text3); flex-shrink: 0; }
 
 /* 날짜 input + 아이콘 버튼 래퍼 */

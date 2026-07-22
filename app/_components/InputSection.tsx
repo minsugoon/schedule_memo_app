@@ -108,7 +108,6 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
           <input
             ref={dateRef}
             type="text"
-            style={{ fontSize: '11px' }}
             placeholder="시작일 (0609…)"
             value={dateRaw}
             onChange={e => setDateRaw(e.target.value)}
@@ -128,7 +127,6 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
           <input
             ref={dateEndRef}
             type="text"
-            style={{ fontSize: '11px' }}
             placeholder="종료일 (선택)"
             value={dateEndRaw}
             onChange={e => setDateEndRaw(e.target.value)}
@@ -158,7 +156,6 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
           <input
             ref={timeRef}
             type="text"
-            style={{ fontSize: '11px' }}
             placeholder="시작시간 (선택)"
             value={timeRaw}
             onChange={e => setTimeRaw(e.target.value)}
@@ -178,7 +175,6 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
           <input
             ref={timeEndRef}
             type="text"
-            style={{ fontSize: '11px' }}
             placeholder="종료시간 (선택)"
             value={timeEndRaw}
             onChange={e => setTimeEndRaw(e.target.value)}

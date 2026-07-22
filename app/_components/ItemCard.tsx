@@ -53,20 +53,22 @@ export default function ItemCard({
     }
   }, [editing]);
 
+  // editing이 false → true로 전환되는 순간에만 초기화 (item 재참조로 인한 편집 중 데이터 유실 방지)
   useEffect(() => {
-    if (editing) {
-      setEditDate(item.dateRaw || '');
-      setEditDateEnd(item.dateEndRaw || '');
-      setEditMemo(item.memo);
-      setShowTabSelect(false);
+    if (!editing) return;
 
-      const st = item.isAllDay === false ? extractTime(item.startedAt) : null;
-      setEditTime(st ? `${String(st.h).padStart(2, '0')}:${String(st.m).padStart(2, '0')}` : '');
+    setEditDate(item.dateRaw || '');
+    setEditDateEnd(item.dateEndRaw || '');
+    setEditMemo(item.memo);
+    setShowTabSelect(false);
 
-      const et = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null;
-      setEditTimeEnd(et ? `${String(et.h).padStart(2, '0')}:${String(et.m).padStart(2, '0')}` : '');
-    }
-  }, [editing, item]);
+    const st = item.isAllDay === false ? extractTime(item.startedAt) : null;
+    setEditTime(st ? `${String(st.h).padStart(2, '0')}:${String(st.m).padStart(2, '0')}` : '');
+
+    const et = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null;
+    setEditTimeEnd(et ? `${String(et.h).padStart(2, '0')}:${String(et.m).padStart(2, '0')}` : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing]);
 
   const { isToday, isOngoing } = getBadgeInfo(item);
   const showTabBadge = currentTab === 'all' && !!tabName;
@@ -200,7 +202,6 @@ export default function ItemCard({
           <div className="edit-input-row">
             <input
               type="text"
-              style={{ fontSize: '11px' }}
               placeholder="시작일 (0609…)"
               value={editDate}
               onChange={e => setEditDate(e.target.value)}
@@ -208,7 +209,6 @@ export default function ItemCard({
             <span className="row-sep">~</span>
             <input
               type="text"
-              style={{ fontSize: '11px' }}
               placeholder="종료일 (선택)"
               value={editDateEnd}
               onChange={e => setEditDateEnd(e.target.value)}
@@ -219,7 +219,6 @@ export default function ItemCard({
           <div className="edit-input-row">
             <input
               type="text"
-              style={{ fontSize: '11px' }}
               placeholder="시작시간 (선택)"
               value={editTime}
               onChange={e => setEditTime(e.target.value)}
@@ -227,7 +226,6 @@ export default function ItemCard({
             <span className="row-sep">~</span>
             <input
               type="text"
-              style={{ fontSize: '11px' }}
               placeholder="종료시간 (선택)"
               value={editTimeEnd}
               onChange={e => setEditTimeEnd(e.target.value)}
