@@ -261,20 +261,25 @@ export default MyComponent
 - [x] 오늘/진행중 뱃지: getBadgeInfo()
 - [x] 달력 모달: DatePickerModal.tsx
 - [x] 시간 스크롤 모달: TimePickerModal.tsx
-- [x] 날짜 유효성 검사: validateDateRange + DateErrorModal.tsx
+- [x] 날짜 유효성 검사: validateDateRange + DateErrorModal.tsx (종료일만 입력 시 우회 케이스 포함)
 - [x] 온보딩 오버레이: OnboardingOverlay.tsx
 - [x] 헤더 아이콘 전용화: header-btn 패턴
-- [x] iOS 줌 버그 수정: InputSection/ItemCard font-size (커밋 d5ee80a)
-- [x] 편집 중 데이터 유실 버그 수정 (커밋 d5ee80a)
-- [x] PWA: @ducanh2912/next-pwa
+- [x] iOS 줌 버그 수정: InputSection/ItemCard/TabNameModal font-size
+- [x] 편집 중 데이터 유실 버그 수정 + 편집 취소 시 카드 자동 접힘 (ItemCard.tsx)
+- [x] 스플래시 화면: SplashScreen.tsx (인증 대기 중 표시)
+- [x] 로딩 오버레이: LoadingOverlay.tsx (tabs/schedules 로딩 중 표시)
+- [x] 저장/수정/삭제 실패 토스트 알림: ToastMessage.tsx
+- [x] PWA: @ducanh2912/next-pwa, 설치 모달 레이아웃 수정(PWAInstallModal), 정적 자산이 인증 미들웨어에 걸리지 않도록 예외 경로 처리
+- [x] Supabase 보안 점검: 전 테이블 RLS 활성화 확인, 탭 삭제 시 FK ON DELETE SET NULL로 연결 일정 자동 처리 확인
 
 ### 미구현 (추후 예정)
 
 - [ ] tab_labels 다국어 연동
 - [ ] user_settings 서버 사이드 동기화
 - [ ] Realtime 구독
+- [ ] 탭 순서 드래그 정렬 UI (`useTabs.ts`에 `updateTabOrder`가 주석 처리된 상태로 보존됨, 연결할 UI 없음)
 
-> 남은 미조치 버그/개선 항목의 상세 목록과 작업 순서는 `WORK_ROADMAP.md`를 참고하세요.
+> 남은 개선 항목이나 새로 발견된 이슈의 상세 목록과 작업 순서는 `WORK_ROADMAP.md`를 참고하세요.
 
 ---
 

@@ -13,9 +13,9 @@
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 0건 (미사용 코드 4건, ItemCard.tsx 로직 정리 2건, console.error 정리, CLAUDE.md 파일 구조 업데이트 완료) |
+| 🟢 코드 정리 필요 | 2건 (신규 발견 #15, #16 — 기존 4+2+1건은 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
-| 예상 총 소요 | 전체 14개 작업 완료 |
+| 예상 총 소요 | #1~#14 전체 완료, #15~#16 약 1~1.5시간 |
 
 ### 조치 완료된 버그 (재착수 불필요)
 - ✅ ItemCard.tsx — 편집 중 데이터 유실 (useEffect 의존성 수정)
@@ -251,6 +251,41 @@ CLAUDE.md의 파일 구조 섹션에 누락된 파일 추가 완료:
 
 수정 금지 파일 목록에서 middleware.ts 제거
 (ROADMAP #8에서 명시적으로 수정 허용·완료됨)
+```
+
+---
+
+### 15. useEffect 내 setState 동기 호출 정리 🟢 🆕
+**우선순위: 낮음 | 난이도: ★★☆ | 소요: 30분~1시간**
+
+`npm run lint` 재실행 중 새로 발견. `eslint-plugin-react-hooks`가 "Calling setState
+synchronously within an effect can trigger cascading renders" 에러로 6곳을 지적함.
+전부 마운트 시 외부 상태(localStorage/props)를 동기화하는 기존 패턴이라 런타임 버그는
+아니며 `npm run build`도 정상 통과하지만, `npm run lint` 결과에는 error로 집계됨.
+
+```
+① app/_components/ScheduleApp.tsx L91-98 — localStorage 테마 읽어 setTheme/setHydrated
+② app/_components/ScheduleApp.tsx L143-149 — 패치노트 최초 노출 여부 setShowPatchNote
+③ app/_components/TabNameModal.tsx L34-36 — edit 모드 진입 시 setCustomName
+④ app/_components/TimePickerModal.tsx L25-32 — value prop 파싱해 setSelH/setSelM
+⑤⑥ app/_components/ItemCard.tsx L50-54 — editing 시 setIsContentExpanded(false)
+   (ROADMAP #12에서 다룬 편집 취소 로직과 같은 effect, 별도 버그 아님)
+
+권장 방향: 마운트 시 1회성 동기화는 useState 초기값 함수로, prop 변경 추적은
+key prop으로 컴포넌트를 리마운트하는 방식으로 리팩터링 검토
+```
+
+---
+
+### 16. PWAInstallModal `<img>` → `next/image` 전환 검토 🟢 🆕
+**우선순위: 낮음 | 난이도: ★☆☆ | 소요: 15분**
+
+`npm run lint` 재실행 중 새로 발견. `@next/next/no-img-element` 경고.
+
+```
+파일: app/_components/PWAInstallModal.tsx L25
+현황: <img src="/icon-192x192.png" ... /> 사용
+권장: next/image의 <Image />로 교체해 LCP·대역폭 최적화
 ```
 
 ---
