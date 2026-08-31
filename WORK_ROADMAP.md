@@ -12,7 +12,7 @@
 | 구현된 컴포넌트 | 16개 (app/_components/) |
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
-| 🟡 미조치 버그 | 3건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed 완료) |
+| 🟡 미조치 버그 | 2건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로 완료) |
 | 🟢 코드 정리 필요 | 10건 |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
 | 예상 총 소요 | 약 6시간 |
@@ -161,7 +161,7 @@ CURRENT_STATUS.md에서 "사용자 체감 영향이 가장 큰 항목"으로 명
 
 ---
 
-### 8. middleware.ts PWA 경로 제외 🟡
+### 8. middleware.ts PWA 경로 제외 🟡 ✅ 완료
 **우선순위: 보통 | 난이도: ★☆☆ | 소요: 10분**
 
 미인증 상태에서 PWA 정적 파일 요청 시 /login으로 리다이렉트될 수 있음.
@@ -308,7 +308,7 @@ CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
 | 8 | 🟡 | TabNameModal.tsx L158 | iOS 줌 font-size 14px | ROADMAP #3 ✅ 완료 |
 | 9 | 🟡 | useTabs.ts L112 | 탭 삭제 시 일정 미처리 | ROADMAP #9 |
 | 10 | 🟡 | useTabs.ts/useSchedules.ts | RLS 전적 의존 | ROADMAP #10 |
-| 11 | 🟡 | middleware.ts L41 | PWA 경로 미제외 | ROADMAP #8 |
+| 11 | 🟡 | middleware.ts L41 | PWA 경로 미제외 | ROADMAP #8 ✅ 완료 |
 | 12 | 🟢 | ItemCard.tsx L6 | 미사용 import | ROADMAP #11 |
 | 13 | 🟢 | ScheduleApp.tsx L154 | 미사용 변수 | ROADMAP #11 |
 | 14 | 🟢 | useTabs.ts L126 | 미사용 export | ROADMAP #11 |
