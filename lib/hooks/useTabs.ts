@@ -31,7 +31,9 @@ export function useTabs() {
       .order('sort_order', { ascending: true })
 
     if (error) {
-      console.error('tabs fetch error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('tabs fetch error:', error.message)
+      }
       setLoading(false)
       return
     }
@@ -75,7 +77,9 @@ export function useTabs() {
       .single()
 
     if (error || !data) {
-      console.error('tab insert error:', error?.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('tab insert error:', error?.message)
+      }
       return false
     }
 
@@ -102,7 +106,9 @@ export function useTabs() {
       .eq('id', tabId)
 
     if (error) {
-      console.error('tab name update error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('tab name update error:', error.message)
+      }
       return false
     }
     setTabs(prev => prev.map(t => t.id === tabId ? { ...t, name: trimmed } : t))
@@ -116,7 +122,9 @@ export function useTabs() {
     const supabase = createClient()
     const { error } = await supabase.from('tabs').delete().eq('id', id)
     if (error) {
-      console.error('tab delete error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('tab delete error:', error.message)
+      }
       return false
     }
     setTabs(prev => prev.filter(t => t.id !== id))

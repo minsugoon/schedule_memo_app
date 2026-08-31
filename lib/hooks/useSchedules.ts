@@ -47,7 +47,9 @@ export function useSchedules() {
       .order('started_at', { ascending: true, nullsFirst: false })
 
     if (error) {
-      console.error('schedules fetch error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('schedules fetch error:', error.message)
+      }
       setLoading(false)
       return
     }
@@ -71,7 +73,9 @@ export function useSchedules() {
       is_done: false,
     })
     if (error) {
-      console.error('schedule insert error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('schedule insert error:', error.message)
+      }
       return false
     }
     await fetchSchedules()
@@ -85,7 +89,9 @@ export function useSchedules() {
       .update(input)
       .eq('id', id)
     if (error) {
-      console.error('schedule update error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('schedule update error:', error.message)
+      }
       return false
     }
     await fetchSchedules()
@@ -96,7 +102,9 @@ export function useSchedules() {
     const supabase = createClient()
     const { error } = await supabase.from('schedules').delete().eq('id', id)
     if (error) {
-      console.error('schedule delete error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('schedule delete error:', error.message)
+      }
       return false
     }
     setSchedules(prev => prev.filter(s => s.id !== id))
@@ -110,7 +118,9 @@ export function useSchedules() {
       .update({ is_done: !currentValue })
       .eq('id', id)
     if (error) {
-      console.error('schedule toggle error:', error.message)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('schedule toggle error:', error.message)
+      }
       return false
     }
     setSchedules(prev =>

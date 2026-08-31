@@ -13,7 +13,7 @@
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 4건 (미사용 코드 4건, ItemCard.tsx 로직 정리 2건 완료) |
+| 🟢 코드 정리 필요 | 1건 (미사용 코드 4건, ItemCard.tsx 로직 정리 2건, console.error 정리 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
 | 예상 총 소요 | 약 6시간 |
 
@@ -223,7 +223,7 @@ RLS 모두 활성화 확인됨. 코드 수정 불필요.
 
 ---
 
-### 13. console.error 정리 🟢
+### 13. console.error 정리 🟢 ✅ 완료
 **우선순위: 낮음 | 난이도: ★☆☆ | 소요: 10분**
 
 ```
@@ -290,4 +290,4 @@ CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
 | 15 | 🟢 | useSchedules.ts L41 | 미사용 파라미터 | ROADMAP #11 ✅ 완료 |
 | 16 | 🟢 | ItemCard.tsx L49 | 편집 취소 펼침 미복원 | ROADMAP #12 ✅ 완료 |
 | 17 | 🟢 | ItemCard.tsx L169 | 죽은 셀렉터 | ROADMAP #12 ✅ 완료 |
-| 18 | 🟢 | useTabs.ts 외 2곳 | console.error 노출 | ROADMAP #13 |
+| 18 | 🟢 | useTabs.ts 외 2곳 | console.error 노출 | ROADMAP #13 ✅ 완료 |
