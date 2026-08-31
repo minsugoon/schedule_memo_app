@@ -12,7 +12,7 @@
 | 구현된 컴포넌트 | 16개 (app/_components/) |
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
-| 🟡 미조치 버그 | 1건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리 완료) |
+| 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
 | 🟢 코드 정리 필요 | 10건 |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
 | 예상 총 소요 | 약 6시간 |
@@ -184,20 +184,10 @@ CURRENT_STATUS.md에서 "사용자 체감 영향이 가장 큰 항목"으로 명
 
 ---
 
-### 10. Supabase RLS 확인 🟡
-**우선순위: 보통 | 난이도: ★☆☆ | 소요: 10분 (대시보드)**
+### 10. Supabase RLS 확인 🟡 ✅ 완료
 
-```
-Supabase SQL Editor에서 실행:
-SELECT tablename, rowsecurity
-FROM pg_tables
-WHERE schemaname = 'public';
-
-확인: schedules, tabs, tab_labels, user_settings
-모두 rowsecurity = true 인지 확인
-false 항목 있으면 즉시:
-ALTER TABLE public.{테이블명} ENABLE ROW LEVEL SECURITY;
-```
+✅ 완료 — 4개 테이블(schedules, tabs, tab_labels, user_settings)
+RLS 모두 활성화 확인됨. 코드 수정 불필요.
 
 ---
 
@@ -292,7 +282,7 @@ CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
 | 7 | 🟡 | PWAInstallModal.tsx L11 | position: fixed 위반 | ROADMAP #7 ✅ 완료 |
 | 8 | 🟡 | TabNameModal.tsx L158 | iOS 줌 font-size 14px | ROADMAP #3 ✅ 완료 |
 | 9 | 🟡 | useTabs.ts L112 | 탭 삭제 시 일정 미처리 | ROADMAP #9 ✅ 완료 |
-| 10 | 🟡 | useTabs.ts/useSchedules.ts | RLS 전적 의존 | ROADMAP #10 |
+| 10 | 🟡 | useTabs.ts/useSchedules.ts | RLS 전적 의존 | ROADMAP #10 ✅ 완료 |
 | 11 | 🟡 | middleware.ts L41 | PWA 경로 미제외 | ROADMAP #8 ✅ 완료 |
 | 12 | 🟢 | ItemCard.tsx L6 | 미사용 import | ROADMAP #11 |
 | 13 | 🟢 | ScheduleApp.tsx L154 | 미사용 변수 | ROADMAP #11 |
