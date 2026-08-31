@@ -9,13 +9,13 @@
 
 | 항목 | 수치 |
 |------|------|
-| 구현된 컴포넌트 | 16개 (app/_components/) |
+| 구현된 컴포넌트 | 19개 (app/_components/) |
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 1건 (미사용 코드 4건, ItemCard.tsx 로직 정리 2건, console.error 정리 완료) |
+| 🟢 코드 정리 필요 | 0건 (미사용 코드 4건, ItemCard.tsx 로직 정리 2건, console.error 정리, CLAUDE.md 파일 구조 업데이트 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
-| 예상 총 소요 | 약 6시간 |
+| 예상 총 소요 | 전체 14개 작업 완료 |
 
 ### 조치 완료된 버그 (재착수 불필요)
 - ✅ ItemCard.tsx — 편집 중 데이터 유실 (useEffect 의존성 수정)
@@ -237,14 +237,20 @@ RLS 모두 활성화 확인됨. 코드 수정 불필요.
 
 ---
 
-### 14. CLAUDE.md 파일 구조 업데이트 🟢
+### 14. CLAUDE.md 파일 구조 업데이트 🟢 ✅ 완료
 **우선순위: 낮음 | 난이도: ★☆☆ | 소요: 5분**
 
 ```
-CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
-- app/_components/DatePickerModal.tsx
-- app/_components/TimePickerModal.tsx
-- app/_components/DateErrorModal.tsx
+CLAUDE.md의 파일 구조 섹션에 누락된 파일 추가 완료:
+- app/_components/DatePickerModal.tsx (이전 작업에서 이미 반영)
+- app/_components/TimePickerModal.tsx (이전 작업에서 이미 반영)
+- app/_components/DateErrorModal.tsx (이전 작업에서 이미 반영)
+- app/_components/SplashScreen.tsx (신규 추가)
+- app/_components/LoadingOverlay.tsx (신규 추가)
+- app/_components/ToastMessage.tsx (신규 추가)
+
+수정 금지 파일 목록에서 middleware.ts 제거
+(ROADMAP #8에서 명시적으로 수정 허용·완료됨)
 ```
 
 ---
