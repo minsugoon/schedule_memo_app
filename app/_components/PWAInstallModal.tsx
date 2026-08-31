@@ -8,7 +8,7 @@ interface PWAInstallModalProps {
 const PWAInstallModal = ({ onInstall, onClose }: PWAInstallModalProps) => {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center pb-8 px-4"
+      className="absolute inset-0 z-50 flex items-end justify-center pb-8 px-4"
       style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}
     >

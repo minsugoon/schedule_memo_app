@@ -12,7 +12,7 @@
 | 구현된 컴포넌트 | 16개 (app/_components/) |
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
-| 🟡 미조치 버그 | 4건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회 완료) |
+| 🟡 미조치 버그 | 3건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed 완료) |
 | 🟢 코드 정리 필요 | 10건 |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
 | 예상 총 소요 | 약 6시간 |
@@ -147,7 +147,7 @@ CURRENT_STATUS.md에서 "사용자 체감 영향이 가장 큰 항목"으로 명
 
 ---
 
-### 7. PWAInstallModal fixed → absolute 🟡
+### 7. PWAInstallModal fixed → absolute 🟡 ✅ 완료
 **우선순위: 보통 | 난이도: ★☆☆ | 소요: 10분**
 
 유일한 position: fixed 규칙 위반 파일.
@@ -304,7 +304,7 @@ CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
 | 4 | 🟡 | useAuth.ts L14 | .catch() 누락 | ROADMAP #4 ✅ 완료 |
 | 5 | 🟡 | ScheduleApp.tsx L219 | 저장 실패 피드백 없음 | ROADMAP #5 ✅ 완료 |
 | 6 | 🟡 | ScheduleApp.tsx L170 | 종료일만 입력 시 우회 | ROADMAP #6 ✅ 완료 |
-| 7 | 🟡 | PWAInstallModal.tsx L11 | position: fixed 위반 | ROADMAP #7 |
+| 7 | 🟡 | PWAInstallModal.tsx L11 | position: fixed 위반 | ROADMAP #7 ✅ 완료 |
 | 8 | 🟡 | TabNameModal.tsx L158 | iOS 줌 font-size 14px | ROADMAP #3 ✅ 완료 |
 | 9 | 🟡 | useTabs.ts L112 | 탭 삭제 시 일정 미처리 | ROADMAP #9 |
 | 10 | 🟡 | useTabs.ts/useSchedules.ts | RLS 전적 의존 | ROADMAP #10 |
