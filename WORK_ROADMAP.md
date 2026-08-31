@@ -12,7 +12,7 @@
 | 구현된 컴포넌트 | 16개 (app/_components/) |
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
-| 🟡 미조치 버그 | 2건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로 완료) |
+| 🟡 미조치 버그 | 1건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리 완료) |
 | 🟢 코드 정리 필요 | 10건 |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
 | 예상 총 소요 | 약 6시간 |
@@ -177,25 +177,10 @@ CURRENT_STATUS.md에서 "사용자 체감 영향이 가장 큰 항목"으로 명
 
 ---
 
-### 9. 탭 삭제 시 일정 처리 🟡
-**우선순위: 보통 | 난이도: ★★☆ | 소요: 30분**
+### 9. 탭 삭제 시 일정 처리 🟡 ✅ 완료
 
-탭 삭제 시 해당 tab_id를 참조하는 schedules 처리가 코드 레벨에 없음.
-DB FK 설정 확인 후 코드 레벨 보완 결정.
-
-```
-1단계: Supabase SQL Editor에서 FK ON DELETE 동작 확인
-SELECT conname, confdeltype
-FROM pg_constraint
-WHERE conrelid = 'public.schedules'::regclass
-AND contype = 'f';
-
-confdeltype = 'n' 이면 ON DELETE SET NULL (안전)
-confdeltype = 'a' 이면 추가 처리 필요
-
-2단계: 필요 시 useTabs.ts deleteTab 함수에
-탭 삭제 전 schedules.tab_id → null 업데이트 추가
-```
+✅ 완료 — DB FK 확인 결과 ON DELETE SET NULL 설정됨
+탭 삭제 시 연결 일정 tab_id 자동 null 처리되므로 코드 수정 불필요.
 
 ---
 
@@ -306,7 +291,7 @@ CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
 | 6 | 🟡 | ScheduleApp.tsx L170 | 종료일만 입력 시 우회 | ROADMAP #6 ✅ 완료 |
 | 7 | 🟡 | PWAInstallModal.tsx L11 | position: fixed 위반 | ROADMAP #7 ✅ 완료 |
 | 8 | 🟡 | TabNameModal.tsx L158 | iOS 줌 font-size 14px | ROADMAP #3 ✅ 완료 |
-| 9 | 🟡 | useTabs.ts L112 | 탭 삭제 시 일정 미처리 | ROADMAP #9 |
+| 9 | 🟡 | useTabs.ts L112 | 탭 삭제 시 일정 미처리 | ROADMAP #9 ✅ 완료 |
 | 10 | 🟡 | useTabs.ts/useSchedules.ts | RLS 전적 의존 | ROADMAP #10 |
 | 11 | 🟡 | middleware.ts L41 | PWA 경로 미제외 | ROADMAP #8 ✅ 완료 |
 | 12 | 🟢 | ItemCard.tsx L6 | 미사용 import | ROADMAP #11 |
