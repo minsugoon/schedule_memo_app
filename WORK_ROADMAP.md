@@ -13,9 +13,9 @@
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 2건 (신규 발견 #15, #16 — 기존 4+2+1건은 완료) |
+| 🟢 코드 정리 필요 | 4건 (신규 발견 #15~#18 — 기존 4+2+1건은 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
-| 예상 총 소요 | #1~#14 전체 완료, #15~#16 약 1~1.5시간 |
+| 예상 총 소요 | #1~#14 전체 완료, #15~#18 약 2~3시간 |
 
 ### 조치 완료된 버그 (재착수 불필요)
 - ✅ ItemCard.tsx — 편집 중 데이터 유실 (useEffect 의존성 수정)
@@ -286,6 +286,46 @@ key prop으로 컴포넌트를 리마운트하는 방식으로 리팩터링 검�
 파일: app/_components/PWAInstallModal.tsx L25
 현황: <img src="/icon-192x192.png" ... /> 사용
 권장: next/image의 <Image />로 교체해 LCP·대역폭 최적화
+```
+
+---
+
+### 17. PROJECT_SPEC.md 컴포넌트 목록 동기화 🟢 🆕
+**우선순위: 낮음 | 난이도: ★☆☆ | 소요: 10분**
+
+코드베이스 전체 점검 중 새로 발견. 실제 `app/_components/` 19개 파일 대비
+PROJECT_SPEC.md §4 폴더 구조·§6 주요 컴포넌트 표에 6개 컴포넌트 누락.
+그 외 내용(40자 메모 제한, TabMoveModal 삭제 등)은 이미 정확함.
+
+```
+파일: PROJECT_SPEC.md §4(폴더 구조), §6(주요 컴포넌트 표)
+누락 항목:
+- DatePickerModal.tsx
+- TimePickerModal.tsx
+- DateErrorModal.tsx
+- SplashScreen.tsx
+- LoadingOverlay.tsx
+- ToastMessage.tsx
+```
+
+---
+
+### 18. DESIGN_SPEC.md 문서 드리프트 정리 🟢 🆕
+**우선순위: 낮음 | 난이도: ★★☆ | 소요: 30분~1시간**
+
+코드베이스 전체 점검 중 새로 발견. DESIGN_SPEC.md가 3개 문서 중 실제 코드와
+가장 크게 어긋나 있음(grep으로 실제 코드에 해당 클래스/컴포넌트가 없음을 확인).
+
+```
+① §5-6, §8 — 이미 삭제된 TabMoveModal이 컴포넌트/인터랙션 목록에 여전히 등장
+② §5-4 ItemCard — 구버전 아이콘 오버레이 방식(.item-icons, .icon-btn.edit-btn/.del-btn,
+   .item.expanded)으로 서술됨. 실제는 isContentExpanded + .card-action-inline
+   펼치기/접기 방식으로 완전히 교체됨(ROADMAP #12 이전에 이미 교체)
+③ §5-3 InputSection 예시 — "50자 이내" 표기, 실제는 40자
+④ SplashScreen/LoadingOverlay/ToastMessage 미반영,
+   PWAInstallModal position: fixed → absolute 변경(ROADMAP #7) 미반영
+
+권장: PROJECT_SPEC.md/코드 기준으로 §5-4, §5-6, §8 전면 재작성 필요
 ```
 
 ---
