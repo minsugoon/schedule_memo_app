@@ -335,6 +335,17 @@ export const validateDateRange = (
   // 종료일 없으면 검사 불필요
   if (!dateEndRaw.trim()) return null;
 
+  // 시작일이 비어있고 종료일만 입력된 경우
+  // → 저장 시 시작일이 현재 시각으로 자동 대입되므로, 종료일이 오늘보다 과거인지 검사
+  if (!dateRaw.trim()) {
+    const endDateOnly = parseDate(dateEndRaw);
+    if (endDateOnly) {
+      const diff = calcDayDiff(endDateOnly);
+      if (diff < 0) return 'END_BEFORE_START';
+    }
+    return null;
+  }
+
   const startDate = parseDate(dateRaw);
   const endDate = parseDate(dateEndRaw);
   if (!startDate || !endDate) return null;
