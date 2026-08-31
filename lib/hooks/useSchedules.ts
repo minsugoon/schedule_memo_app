@@ -63,7 +63,7 @@ export function useSchedules() {
   const addSchedule = useCallback(async (input: AddScheduleInput) => {
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    if (!session) return false
 
     const { error } = await supabase.from('schedules').insert({
       user_id: session.user.id,
@@ -77,9 +77,10 @@ export function useSchedules() {
     })
     if (error) {
       console.error('schedule insert error:', error.message)
-      return
+      return false
     }
     await fetchSchedules()
+    return true
   }, [fetchSchedules])
 
   const updateSchedule = useCallback(async (id: string, input: UpdateScheduleInput) => {
@@ -90,9 +91,10 @@ export function useSchedules() {
       .eq('id', id)
     if (error) {
       console.error('schedule update error:', error.message)
-      return
+      return false
     }
     await fetchSchedules()
+    return true
   }, [fetchSchedules])
 
   const deleteSchedule = useCallback(async (id: string) => {
@@ -100,9 +102,10 @@ export function useSchedules() {
     const { error } = await supabase.from('schedules').delete().eq('id', id)
     if (error) {
       console.error('schedule delete error:', error.message)
-      return
+      return false
     }
     setSchedules(prev => prev.filter(s => s.id !== id))
+    return true
   }, [])
 
   const toggleDone = useCallback(async (id: string, currentValue: boolean) => {
@@ -113,11 +116,12 @@ export function useSchedules() {
       .eq('id', id)
     if (error) {
       console.error('schedule toggle error:', error.message)
-      return
+      return false
     }
     setSchedules(prev =>
       prev.map(s => s.id === id ? { ...s, is_done: !currentValue } : s)
     )
+    return true
   }, [])
 
   return { schedules, loading, fetchSchedules, addSchedule, updateSchedule, deleteSchedule, toggleDone }

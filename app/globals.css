@@ -97,6 +97,19 @@ body { display: flex; justify-content: center; align-items: flex-start; padding:
 .loading-spinner {
   animation: spin 0.8s linear infinite;
 }
+.toast-message {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+}
 .today-date { font-size: 14px; color: var(--text2); }
 .today-time { font-size: 14px; color: var(--text3); font-variant-numeric: tabular-nums; }
 

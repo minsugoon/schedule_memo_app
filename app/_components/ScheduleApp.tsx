@@ -18,6 +18,7 @@ import PatchNoteModal from './PatchNoteModal'
 import OnboardingOverlay from './OnboardingOverlay'
 import SplashScreen from './SplashScreen'
 import LoadingOverlay from './LoadingOverlay'
+import ToastMessage from './ToastMessage'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -80,7 +81,12 @@ export default function ScheduleApp() {
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type })
+  }
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('memo_theme')
@@ -210,7 +216,7 @@ export default function ScheduleApp() {
           : toISODate(parsedEnd))
       : null
 
-    await addSchedule({
+    const success = await addSchedule({
       tab_id: tabId,
       started_at: startedAt,
       ended_at: endedAt,
@@ -218,19 +224,22 @@ export default function ScheduleApp() {
       date_raw: dateRaw,
       memo,
     })
+    if (!success) showToast('일정 저장에 실패했습니다', 'error')
   }
 
   const handleToggleDone = async (id: number) => {
     const schedule = findSchedule(id)
     if (!schedule) return
-    await toggleDone(schedule.id, schedule.is_done)
+    const success = await toggleDone(schedule.id, schedule.is_done)
+    if (!success) showToast('상태 변경에 실패했습니다', 'error')
   }
 
   const handleDelete = async (id: number) => {
     if (!confirm('삭제하시겠습니까?')) return
     const schedule = findSchedule(id)
     if (!schedule) return
-    await deleteSchedule(schedule.id)
+    const success = await deleteSchedule(schedule.id)
+    if (!success) showToast('삭제에 실패했습니다', 'error')
     setExpandedId(null)
   }
 
@@ -246,13 +255,14 @@ export default function ScheduleApp() {
     const parsed = parseDate(dateRaw)
     const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
 
-    await updateSchedule(schedule.id, {
+    const success = await updateSchedule(schedule.id, {
       tab_id: tabId,
       date_raw: dateRaw,
       memo,
       started_at: parsed ? toISODate(parsed) : undefined,
       ended_at: parsedEnd ? toISODate(parsedEnd) : null,
     })
+    if (!success) showToast('수정에 실패했습니다', 'error')
     setEditingId(null)
     setExpandedId(null)
   }
@@ -394,6 +404,15 @@ export default function ScheduleApp() {
 
       {/* 데이터 로딩 오버레이 */}
       {isLoading && <LoadingOverlay />}
+
+      {/* 저장/수정/삭제 결과 토스트 */}
+      {toast && (
+        <ToastMessage
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
 
       {/* 온보딩 가이드 오버레이 — 최우선 z-index */}
       {showOnboarding && (
