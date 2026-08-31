@@ -155,6 +155,7 @@ export default function ItemCard({
   };
 
   const handleCancelEdit = () => {
+    setIsContentExpanded(false);
     setEditDate('');
     setEditTime('');
     setEditDateEnd('');
@@ -167,7 +168,7 @@ export default function ItemCard({
   const handleCardClick = (e: React.MouseEvent) => {
     // 체크박스, 버튼 클릭은 무시
     if ((e.target as HTMLElement).closest(
-      '.check-box, .icon-btn, .edit-row, .card-action-inline'
+      '.check-box, .card-action-inline'
     )) return;
     if (editing) return;
 
