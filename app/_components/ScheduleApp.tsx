@@ -17,6 +17,7 @@ import HelpModal from './HelpModal'
 import PatchNoteModal from './PatchNoteModal'
 import OnboardingOverlay from './OnboardingOverlay'
 import SplashScreen from './SplashScreen'
+import LoadingOverlay from './LoadingOverlay'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -60,10 +61,11 @@ export default function ScheduleApp() {
   const router = useRouter()
   const { user, loading: authLoading, signOut } = useAuth()
   const {
-    schedules, fetchSchedules,
+    schedules, loading: schedulesLoading, fetchSchedules,
     addSchedule, updateSchedule, deleteSchedule, toggleDone,
   } = useSchedules()
-  const { tabs, fetchTabs, addTab, updateTabName, deleteTab } = useTabs()
+  const { tabs, loading: tabsLoading, fetchTabs, addTab, updateTabName, deleteTab } = useTabs()
+  const isLoading = tabsLoading || schedulesLoading
 
   const [currentTab, setCurrentTab] = useState<TabKey>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('tabs')
@@ -389,6 +391,9 @@ export default function ScheduleApp() {
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
+
+      {/* 데이터 로딩 오버레이 */}
+      {isLoading && <LoadingOverlay />}
 
       {/* 온보딩 가이드 오버레이 — 최우선 z-index */}
       {showOnboarding && (
