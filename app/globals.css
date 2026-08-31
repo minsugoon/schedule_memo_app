@@ -169,6 +169,7 @@ input[type=text] {
 }
 input[type=text]:focus { border-color: var(--border2); }
 input[type=text]::placeholder { color: var(--text3); font-size: 11px; }
+.tab-name-input::placeholder { font-size: 12px; }
 
 .add-btn {
   background: var(--btn-bg); color: var(--btn-text);

@@ -144,6 +144,7 @@ export default function TabNameModal({
           </div>
           <input
             type="text"
+            className="tab-name-input"
             value={customName}
             maxLength={2}
             onChange={e => setCustomName(e.target.value)}
@@ -155,7 +156,7 @@ export default function TabNameModal({
               border: '0.5px solid var(--border)',
               background: 'var(--input-bg)',
               color: 'var(--text)',
-              fontSize: '14px',
+              fontSize: '16px',
             }}
           />
         </div>

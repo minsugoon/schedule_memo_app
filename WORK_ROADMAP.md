@@ -12,7 +12,7 @@
 | 구현된 컴포넌트 | 16개 (app/_components/) |
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
-| 🟡 미조치 버그 | 8건 |
+| 🟡 미조치 버그 | 7건 (TabNameModal iOS 줌 완료) |
 | 🟢 코드 정리 필요 | 10건 |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
 | 예상 총 소요 | 약 6시간 |
@@ -68,7 +68,7 @@ tabs/schedules fetch 중 전체 화면 오버레이 스피너.
 
 ---
 
-### 3. TabNameModal iOS 줌 수정 🟡
+### 3. TabNameModal iOS 줌 수정 🟡 ✅ 완료
 **우선순위: 높음 | 난이도: ★☆☆ | 소요: 5분**
 
 CURRENT_STATUS.md에서 "가장 먼저 시작할 작업"으로 지정된 항목.
@@ -305,7 +305,7 @@ CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
 | 5 | 🟡 | ScheduleApp.tsx L219 | 저장 실패 피드백 없음 | ROADMAP #5 |
 | 6 | 🟡 | ScheduleApp.tsx L170 | 종료일만 입력 시 우회 | ROADMAP #6 |
 | 7 | 🟡 | PWAInstallModal.tsx L11 | position: fixed 위반 | ROADMAP #7 |
-| 8 | 🟡 | TabNameModal.tsx L158 | iOS 줌 font-size 14px | ROADMAP #3 |
+| 8 | 🟡 | TabNameModal.tsx L158 | iOS 줌 font-size 14px | ROADMAP #3 ✅ 완료 |
 | 9 | 🟡 | useTabs.ts L112 | 탭 삭제 시 일정 미처리 | ROADMAP #9 |
 | 10 | 🟡 | useTabs.ts/useSchedules.ts | RLS 전적 의존 | ROADMAP #10 |
 | 11 | 🟡 | middleware.ts L41 | PWA 경로 미제외 | ROADMAP #8 |
