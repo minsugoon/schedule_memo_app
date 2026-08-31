@@ -1,5 +1,5 @@
 # WORK_ROADMAP — 전체 작업 스케줄
-> 기준일: 2026-08-31
+> 기준일: 2026-09-01
 > 참고 문서: CLAUDE.md / PROJECT_SPEC.md / SUPABASE_TABLE.md
 > 완료 항목 제거, 미완료 작업만 정리
 
@@ -13,9 +13,10 @@
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 1건 (#18 — #15~#17 및 기존 4+2+1건은 완료) |
+| 🟢 코드 정리 필요 | 0건 (#11~#18 전체 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
-| 예상 총 소요 | #1~#17 전체 완료, #18 약 30분~1시간 |
+| 예상 총 소요 | #1~#18 전체 완료 — 모든 항목 조치 완료 |
+| ⚠️ 확인 필요 | `npm run build` 시 `EISDIR: illegal operation on a directory, readlink 'app/auth/callback/route.ts'` — 코드 변경과 무관한 Windows/webpack 환경 이슈로 추정(#18 참고), 별도 확인 필요 |
 
 ### 조치 완료된 버그 (재착수 불필요)
 - ✅ ItemCard.tsx — 편집 중 데이터 유실 (useEffect 의존성 수정)
@@ -337,23 +338,37 @@ trigger cascading renders" 에러 6곳을 모두 해소. `npm run lint` 재실�
 
 ---
 
-### 18. DESIGN_SPEC.md 문서 드리프트 정리 🟢 🆕
-**우선순위: 낮음 | 난이도: ★★☆ | 소요: 30분~1시간**
+### 18. DESIGN_SPEC.md 문서 드리프트 정리 🟢 ✅ 완료
 
-코드베이스 전체 점검 중 새로 발견. DESIGN_SPEC.md가 3개 문서 중 실제 코드와
-가장 크게 어긋나 있음(grep으로 실제 코드에 해당 클래스/컴포넌트가 없음을 확인).
+코드베이스 전체 점검 중 새로 발견됐던 DESIGN_SPEC.md 드리프트를 코드(`ItemCard.tsx`,
+`ScheduleApp.tsx`, `AppHeader.tsx`, `TabBar.tsx`, `InputSection.tsx`, `globals.css`) 기준으로
+전면 재작성 완료. 코드 파일은 수정하지 않음.
 
 ```
-① §5-6, §8 — 이미 삭제된 TabMoveModal이 컴포넌트/인터랙션 목록에 여전히 등장
-② §5-4 ItemCard — 구버전 아이콘 오버레이 방식(.item-icons, .icon-btn.edit-btn/.del-btn,
-   .item.expanded)으로 서술됨. 실제는 isContentExpanded + .card-action-inline
-   펼치기/접기 방식으로 완전히 교체됨(ROADMAP #12 이전에 이미 교체)
-③ §5-3 InputSection 예시 — "50자 이내" 표기, 실제는 40자
-④ SplashScreen/LoadingOverlay/ToastMessage 미반영,
-   PWAInstallModal position: fixed → absolute 변경(ROADMAP #7) 미반영
-
-권장: PROJECT_SPEC.md/코드 기준으로 §5-4, §5-6, §8 전면 재작성 필요
+① §5-6, §8 — 삭제된 TabMoveModal 언급 전부 제거, TabSelectModal로 통합됐다고 명시
+② §5-4 ItemCard — isContentExpanded 토글 + .card-action-inline 펼치기/접기 방식으로 전면
+   재작성. 구버전 .item-icons/.icon-btn/.item.expanded는 "죽은 CSS"로 명시(마크업 없음)
+③ §5-3 "50자 이내" → "40자 이내"로 전체 교체. §3-5 글자수 카운터도 3단계(ok/warn/over)에서
+   실제 코드가 쓰는 2단계(ok/over, 40자 기준)로 수정, .char-warn은 죽은 CSS로 명시
+④ §5-7 신규 추가: SplashScreen(fixed, var(--btn-bg), 800ms 유지 후 페이드아웃)/
+   LoadingOverlay(absolute, rgba(0,0,0,0.3), IconLoader2)/ToastMessage(absolute top 60px,
+   성공 #E8F5E9/실패 #FCEBEB)/PWAInstallModal(fixed→absolute 명시)
+⑤ 추가로 발견한 드리프트도 코드 기준 수정:
+   - §5-1 AppHeader — 텍스트형 .theme-btn 등 구버전 서술 → 실제 아이콘 전용 .header-btn
+     32×32 정사각형 + 순서(?, 새로고침, 테마, 로그아웃)로 교체
+   - §5-2 TabBar — 실제 DOM 순서는 액션 버튼(완료/메모)이 왼쪽, 탭 목록+추가 버튼이
+     오른쪽(기존 문서는 반대로 서술)
+   - §5-3 InputSection — 날짜 4칸 한 줄이 아니라 날짜 줄/시간 줄로 분리된 2행 구조이며
+     각 입력칸에 DatePickerModal/TimePickerModal을 여는 아이콘 버튼이 붙음, 키보드 흐름도
+     실제 코드(시작일·종료일 Enter 모두 → 시작시간으로 이동)로 정정
+   - §9 아이콘 표 — IconLoader2/IconAlertTriangle 추가, IconPencil/IconTrash 실제 크기(13px/14px)로 정정
 ```
+
+**빌드 확인:** `npm run build` 실행 결과 `EISDIR: illegal operation on a directory, readlink
+'app/auth/callback/route.ts'` 에러로 실패 — `git status` 확인 결과 이번 작업에서 변경된 파일은
+`DESIGN_SPEC.md`뿐이므로 문서 수정과 무관한 기존 Windows/webpack 환경 이슈로 판단됨(캐시 삭제 후
+재시도에도 동일하게 재현). 코드 파일을 건드리지 않았으므로 문서 작업 자체는 완료로 처리하되,
+빌드 이슈는 별도로 확인 필요.
 
 ---
 

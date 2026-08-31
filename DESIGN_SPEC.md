@@ -1,6 +1,6 @@
 # DESIGN_SPEC — 할 일 메모장 디자인 기술서
 
-> 기준일: 2026-07-07
+> 기준일: 2026-09-01 (ROADMAP #18 문서 드리프트 정리)
 > 대상: `globals.css` + `app/_components/` 전체 컴포넌트
 
 ---
@@ -122,8 +122,11 @@
 | 범위 | 클래스 | 색상 |
 |---|---|---|
 | 0 ~ 40자 | `.char-ok` | `var(--text3)` (#888780) |
-| 41 ~ 50자 | `.char-warn` | `#BA7517` |
-| 51자 이상 | `.char-over` | `#A32D2D` |
+| 41자 이상 | `.char-over` | `#A32D2D` |
+
+> `globals.css`에는 3단계였던 시절의 `.char-warn`(`#BA7517`) 클래스가 여전히 정의돼 있으나,
+> `InputSection.tsx`/`ItemCard.tsx`의 실제 판정 로직(`charLen > 40 ? 'char-over' : 'char-ok'`)은
+> 40자 기준 2단계만 사용합니다 — `.char-warn`은 코드에서 참조되지 않는 죽은 스타일입니다.
 
 ---
 
@@ -158,48 +161,57 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 ### 5-1. AppHeader
 
 ```
-┌─────────────────────────────────────────┐
-│  할 일 메모장       [🔄] [🌙 어둠] [로그아웃] │  ← header-top
+┌───────────────────────────────────────────┐
+│  📋 할 일 메모장         [?][🔄][🌙][⎋]     │  ← header-top
 │  2026년 07월 07일 (화)  14:32:07              │  ← today-info
-└─────────────────────────────────────────┘
+└───────────────────────────────────────────┘
 ```
 
 **클래스 구조:**
 - `.header` — `background: var(--bg2)`, `border-bottom: 0.5px solid var(--border)`, `padding: 14px 18px 12px`
 - `.header-top` — `flex; justify-content: space-between; align-items: center; margin-bottom: 6px`
-- `.title` — 17px, weight 500
-- `.theme-btn` — `border: 0.5px solid var(--border2)`, `border-radius: 8px`, `padding: 4px 10px`, `font-size: 13px`, 호버 시 `background: var(--bg3)`
+- `.title` — 17px, weight 500, "📋 할 일 메모장" (제목 앞에 이모지 포함)
+- `.header-btns` — 우상단 버튼 그룹, `flex; align-items: center; gap: 4px`
+- `.header-btn` — 아이콘 전용 정사각형 버튼 `32×32px`, `border: 0.5px solid var(--border2); border-radius: 8px`,
+  호버 시 `background: var(--bg3); color: var(--text)`, 새로고침 로딩 중엔 `.header-btn.spinning`으로
+  내부 svg에 `spin` 키프레임 회전 적용 (과거의 텍스트형 `.theme-btn`은 더 이상 사용되지 않음)
 - `.today-info` — `align-items: baseline; gap: 8px`
 - `.today-date` — 14px, `var(--text2)`
 - `.today-time` — 14px, `var(--text3)`, tabular-nums
 
-**버튼 목록 (우상단, 조건부 렌더링):**
-1. `새로고침` — `onRefresh` prop 존재 시. 로딩 중 `animate-spin` 적용
-2. `IconMoon` / `IconSun` — 항상 표시, 다크/라이트 전환 (13px)
-3. `IconLogout` — `onSignOut` prop 존재 시 (13px)
+**버튼 목록 (우상단, 왼쪽부터 순서대로, 모두 `.header-btn` 아이콘 15px):**
+1. `IconQuestionMark` — 항상 표시, 온보딩 가이드(`OnboardingOverlay`) 재실행
+2. `IconRefresh` — `onRefresh` prop 존재 시. 새로고침 중 `.spinning`으로 회전 애니메이션
+3. `IconMoon` / `IconSun` — 항상 표시, 다크/라이트 전환
+4. `IconLogout` — `onSignOut` prop 존재 시
 
 ---
 
 ### 5-2. TabBar + 탭 액션 바 (`.tab-bar-wrapper`)
 
 ```
-┌────┬──────────┬──────────┬──────────┬────┬────────────┐
-│ [+]│  전체 [5] │  개인 [3] │  회사 [2] │... │ [완료][메모]│  height: 42px
-└────┴──────────┴──────────┴──────────┴────┴────────────┘
+┌────────────┬────┬──────────┬──────────┬──────────┬────┐
+│ [완료][메모] │전체[5]│  개인 [3] │  회사 [2] │... │ [+]│  height: 42px
+└────────────┴────┴──────────┴──────────┴──────────┴────┘
      ↑ 활성 탭: 굵은 텍스트 + 하단 2px 실선
 ```
 
+> **DOM/시각 순서 주의:** `TabBar.tsx`에서 `.tab-bar-actions`(완료 보기/메모 뷰 버튼)가
+> `.tab-bar`(탭 목록 + 추가 버튼)보다 먼저 렌더링되며, CSS에도 순서를 뒤집는 규칙이 없어
+> **왼쪽에 완료/메모 액션 버튼, 오른쪽에 탭 목록+추가 버튼** 순서로 표시됩니다.
+
 **클래스 구조:**
-- `.tab-bar-wrapper` — 탭 스트립(`.tab-bar`) + 우측 액션 버튼(`.tab-bar-actions`)을 감싸는 flex 컨테이너, `height: var(--tab-h)`
-- `.tab-bar` — `display: flex; overflow-x: auto; scrollbar-width: none` (스크롤 가능 시 `.scrollable`로 각 탭 `flex: 0 0 65px` 고정)
+- `.tab-bar-wrapper` — 좌측 액션 버튼(`.tab-bar-actions`) + 탭 스트립(`.tab-bar`)을 감싸는 flex 컨테이너, `height: var(--tab-h)`
+- `.tab-bar` — `flex: 1; display: flex; overflow-x: auto; scrollbar-width: none` (탭 5개 이상이면 `.scrollable`로 각 탭 `flex: 0 0 65px` 고정 + `.tab-item.tab-compact`로 폰트/패딩 축소)
 - `.tab-item` — `flex: 1; font-size: 14px; border-bottom: 2px solid transparent; transition: 0.15s`
 - `.tab-item.active` — `font-weight: 500; border-bottom: 2px solid var(--text)`
 - `.tab-count` — `font-size: 12px; background: var(--bg3); border-radius: 10px; padding: 0 5px; line-height: 16px`
 - `.tab-item.active .tab-count` — `background: var(--text); color: var(--bg)` (반전)
-- `.tab-add-btn` — 탭 추가 버튼(`TabNameModal` 오픈), `flex: 0 0 36px`
-- `.tab-bar-actions` — 우측 액션 그룹, `border-right: 0.5px solid var(--border)`로 탭 스트립과 분리
-- `.tab-action-btn` — 완료 보기/메모 뷰 토글 등 32×32 아이콘 버튼. `.active`/`.done-on` 상태로 강조
+- `.tab-add-btn` — 탭 추가 버튼(`TabNameModal` 오픈), 탭 스트립 맨 끝에 위치, 탭이 5개 미만일 때만 표시
+- `.tab-bar-actions` — 좌측 액션 그룹, `border-right: 0.5px solid var(--border)`로 탭 스트립과 분리
+- `.tab-action-btn` — 완료 보기(`IconCircleCheck`)/메모 뷰(`IconNotes`) 토글, 18px 아이콘의 32×32 버튼. `.active`/`.done-on` 상태로 강조
 - `.tab-bar.faded` — 메모 뷰 진입 시 탭 바를 흐리게 처리 (`opacity: 0.4; pointer-events: none`)
+- 탭 롱프레스(500ms, `is_default`가 아닌 탭만) → `TabNameModal`(`mode: 'edit'`) 오픈
 
 **탭 순서:** `sort_order` 오름차순 (기본: 전체 → 개인 → 회사 → 커스텀 탭들). `memo` 타입 탭은 `TabBar`에서 제외되고 별도 액션 버튼으로 `MemoView`를 토글합니다.
 
@@ -209,13 +221,19 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 
 ### 5-3. InputSection
 
+날짜 행과 시간 행이 **별도의 두 줄**로 분리되어 있으며, 각 입력칸 옆에는
+`DatePickerModal`/`TimePickerModal`을 여는 아이콘 버튼이 함께 붙습니다.
+
 ```
-┌─────────────┬─────┬─────────────┬─────┐
-│  시작일       │시작시간│  종료일(선택) │종료시간│  ← date-time-row
-└─────────────┴─────┴─────────────┴─────┘
- 메모                                0 / 50   ← memo-label-row
+┌───────────┬──┬───┬───────────┬──┬───┐
+│ 시작일  [📅]│~ │   │종료일(선택)[📅]│~ │[?]│  ← date-time-row (1줄, 날짜)
+└───────────┴──┴───┴───────────┴──┴───┘
+┌───────────┬──┬───┬───────────┬──┬───┐
+│시작시간[🕐]│~ │   │종료시간(선택)[🕐]│~ │[?]│  ← date-time-row (2줄, 시간)
+└───────────┴──┴───┴───────────┴──┴───┘
+                                  0 / 40
 ┌─────────────────────────────────────┐
-│  할 일 메모 (50자 이내)          [12]  │  ← memo-input-wrap (글자수 오버레이)
+│  할 일 메모 (40자 이내)          [12]  │  ← memo-input-wrap (글자수 오버레이)
 └─────────────────────────────────────┘
 ┌─────────────────────────────────────┐
 │  +  개인 일정 추가 (Enter)            │  ← add-btn
@@ -224,19 +242,23 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 
 **클래스 구조:**
 - `.input-section` — `padding: 11px 18px 10px; border-bottom: 0.5px solid var(--border)`
-- `.date-time-row` — `display: flex; gap: 8px; align-items: center; margin-bottom: 6px`, 구분자 `.row-sep`(예: `~`)
+- `.date-time-row` — 날짜 줄과 시간 줄에 각각 사용, `display: flex; gap: 8px; align-items: center; margin-bottom: 6px`, 구분자 `.row-sep`(예: `~`)
+- `.date-input-wrap` — 입력칸 + 피커 아이콘 버튼(`.date-icon-btn`)을 감싸는 wrapper
+- `.date-icon-btn` — 날짜 줄엔 `IconCalendar`(14px), 시간 줄엔 `IconClock`(14px). 클릭 시 각각 `DatePickerModal`/`TimePickerModal` 오픈
+- `.help-btn` — 날짜 줄/시간 줄 끝에 각각 1개씩 배치(`IconQuestionMark` 14px), 클릭 시 `onHelp('date' | 'time')`로 `HelpModal` 오픈 (날짜용/시간용 도움말이 별도로 존재)
 - `input[type=text]` — `background: var(--input-bg); border: 0.5px solid var(--border); border-radius: 9px; padding: 9px 11px; font-size: 16px` (16px 미만이면 iOS에서 자동 확대되므로 유지)
 - `input:focus` — `border-color: var(--border2)`
 - `.memo-input-wrap` — `position: relative`, 내부 input에 `padding-right: 52px`로 글자수 오버레이 공간 확보
 - `.memo-char-count` — `position: absolute; right: 10px; top: 50%; transform: translateY(-50%)`, 색상은 §3-5 기준
 - `.add-btn` — `background: var(--btn-bg); border-radius: 9px; padding: 9px; width: 100%; display: flex; align-items: center; gap: 5px`
-- `.help-btn` / `.help-spacer` — 입력 필드 옆 도움말 아이콘, 클릭 시 `HelpModal` 오픈
 
 **추가 버튼 라벨 로직:**
 - `all` 탭 → `"추가 (개인 탭에 저장)"`
 - 사용자 정의 탭 → `"{탭 이름} 일정 추가 (Enter)"`
 
-**키보드 흐름:** 시작일 → 시작시간 → 종료일 → 종료시간 → 메모 → Enter로 저장
+**키보드 흐름 (실제 `onKeyDown` 배선 기준):** 시작일/종료일 입력칸에서 Enter → 시작시간으로 포커스 이동
+(종료일 칸을 거치지 않고 바로 시간 줄로 건너뜀) → 시작시간 Enter → 종료시간 → 종료시간 Enter →
+메모 → 메모 Enter로 저장 + 전체 입력 초기화
 
 ---
 
@@ -250,47 +272,73 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 | 오늘(미완료) | `.item.today-item` | `background: var(--today-bg)`, `border-color: var(--today-border)` |
 | 완료 | `.item.done-item` | `opacity: 0.68`, 메모 취소선, 날짜·메모 모두 `--done-text` |
 | 과거(미완료, 지난 일정) | `.item.past-item` | `opacity: 0.45` |
-| 확장(아이콘 표시) | `.item.expanded` | 수정/삭제 아이콘 오버레이 노출 |
-| 편집 중 | `.item.expanded` + 인라인 편집 폼 | 아이콘 오버레이 + 하단 편집 폼(날짜/시간/메모) |
+| 펼침 | `.item.content-expanded` | 메모 전체 표시 + 인라인 수정/삭제 버튼 노출 (아래 "펼치기/접기" 참고) |
+| 편집 중 | 카드 내부가 `editing` 분기로 완전히 치환 | 읽기 전용 요약 + 날짜/시간/메모 입력 폼으로 전환 |
 
-**카드 내부 구조:**
+**카드 내부 구조 (`ItemCard.tsx` 기준, 실제 렌더 분기):**
 ```
-.item
-└── .item-main
-    ├── .check-box (체크박스)
-    └── .item-body-col
-        ├── .item-lines
-        │   ├── .item-date-line  (날짜·시간 텍스트)
-        │   └── .item-memo-line  (메모, 텍스트 오버플로우 ellipsis)
-        └── .item-badge-col
-            ├── .cat-badge       (전체 탭에서만 표시, tab-type 색상)
-            └── .item-badge      (today-badge-v2 / ongoing-badge, getBadgeInfo 결과)
-.item-icons (확장 시 오버레이)
-    ├── .icon-btn.edit-btn  (IconPencil 15px)
-    └── .icon-btn.del-btn   (IconTrash 15px)
-.edit-current-info (편집 진입 시 현재 값 표시)
-.edit-input-row (편집 폼: 날짜/시간/메모 입력)
-    ├── .edit-save-btn
-    └── .edit-cancel-btn
+.item (onClick → handleCardClick, isContentExpanded 토글)
+├── editing === true
+│   ├── .edit-current-info      (저장된 날짜·메모 읽기 전용 요약)
+│   ├── .edit-input-row × 2     (시작/종료 날짜, 시작/종료 시간)
+│   ├── .memo-input-wrap        (메모 입력 + .memo-char-count)
+│   ├── .edit-action-btn.edit-save-btn / .edit-cancel-btn
+│   └── <TabSelectModal>        (저장 클릭 시 날짜/시간 있으면 오픈, 없으면 바로 저장)
+└── editing === false
+    └── .item-main
+        ├── .check-box (체크박스)
+        └── .item-body-col
+            └── .item-lines
+                ├── isContentExpanded === false (접힌 상태)
+                │   ├── .item-date-line          (item.date 있을 때만)
+                │   └── .item-memo-row
+                │       ├── .item-memo-line      (말줄임 ellipsis)
+                │       └── .item-badge-col      (오늘/진행중/탭 뱃지)
+                ├── isContentExpanded === true && hasDate (펼친 일정 카드)
+                │   ├── .item-date-row-expanded
+                │   │   ├── .item-date-line
+                │   │   └── .item-action-col → .card-action-inline.edit / .del
+                │   ├── .item-memo-expanded      (메모 전체 텍스트)
+                │   └── .item-badge-bottom       (오늘/진행중/탭 뱃지)
+                └── isContentExpanded === true && !hasDate (펼친 메모 카드)
+                    ├── .item-memo-row-expanded-no-date
+                    │   ├── .item-memo-expanded
+                    │   └── .item-action-col → .card-action-inline.edit / .del
+                    └── .item-badge-bottom       (탭 뱃지만, showTabBadge일 때)
 ```
 
-편집 저장 시 `TabSelectModal`이 열려 저장 대상 탭을 확인/변경할 수 있습니다.
+> **구버전 방식은 완전히 삭제됨:** `.item-icons`/`.icon-btn.edit-btn`/`.icon-btn.del-btn`
+> (카드 우측에 겹쳐 뜨는 아이콘 오버레이)과 `.item.expanded` 클래스는 더 이상
+> `ItemCard.tsx`에서 사용되지 않습니다. `globals.css`에는 해당 규칙이 여전히 남아있지만
+> 대응하는 마크업이 없어 죽은 스타일입니다 — 지울 때는 `.item.content-expanded .item-icons`
+> 규칙(§296 부근)도 함께 정리해야 합니다.
+
+**펼치기/접기 (`isContentExpanded`):**
+- 카드 클릭(체크박스·`.card-action-inline` 제외 영역) → `isContentExpanded` 토글
+- `editing`이 `true`가 되는 순간 `isContentExpanded`는 자동으로 `false`로 초기화되고,
+  편집 취소(`handleCancelEdit`) 시에도 다시 `false`로 초기화됨
+- `item.date` 유무(`hasDate`)로 펼친 레이아웃이 완전히 분기: 날짜가 있으면
+  `.item-date-row-expanded`(날짜줄 옆에 버튼), 없으면 `.item-memo-row-expanded-no-date`
+  (메모 옆에 버튼)
+- 뱃지(오늘/진행중/탭)는 접힌 상태에서는 메모 옆(`.item-badge-col`), 펼친 상태에서는
+  하단(`.item-badge-bottom`)으로 이동
 
 **체크박스:**
 - 기본: `width: 19px; height: 19px; border: 1.5px solid var(--border2); border-radius: 5px`
 - 호버: `border-color: var(--check-done)`
 - 완료: `background: var(--check-done); border-color: var(--check-done)` + 흰색 체크 SVG 표시
 
-**아이콘 오버레이:**
-- 위치: `absolute; right: 9px; top: 50%; transform: translateY(-50%)`
-- 배경: `var(--card-bg)` / 오늘 항목은 `var(--today-bg)`
-- `border: 0.5px solid var(--border); border-radius: 8px; padding: 2px`
-- 아이콘 버튼: `width: 28px; height: 28px; border-radius: 5px`
-- 수정: `color: var(--edit-c)` / 삭제: `color: var(--del)`
+**인라인 액션 버튼 (`.card-action-inline`):**
+- `width: 26px; height: 26px; border-radius: 5px; background: none; border: none`
+- 수정: `color: var(--edit-c)`, 아이콘 `IconPencil` 13px / 삭제: `color: var(--del)`, 아이콘 `IconTrash` 13px
+- 호버 시 둘 다 `background: var(--bg3)`
+- 날짜줄(펼친 일정 카드) 또는 메모 옆(펼친 메모 카드)에 `.item-action-col`로 묶여 배치
 
 **편집 폼 (`.edit-input-row`, `.edit-action-btn`):**
 - `.edit-save-btn` — `background: var(--btn-bg); color: var(--btn-text)`
 - `.edit-cancel-btn` — `background: var(--bg3); color: var(--text2)`
+- 저장 클릭 시 날짜/시간 입력이 하나라도 있으면 `TabSelectModal`을 열어 저장 대상 탭을 확인/변경,
+  전부 비어 있으면(메모만 수정) 모달 없이 기존 `tab_id`를 유지한 채 바로 저장
 
 ---
 
@@ -306,19 +354,54 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 
 ### 5-6. 모달 공통 패턴
 
-`TabSelectModal`, `TabMoveModal`, `TabNameModal`, `HelpModal`, `PatchNoteModal`, `PWAInstallModal`은 아래 오버레이 패턴을 공유합니다.
+`TabSelectModal`, `TabNameModal`, `HelpModal`, `PatchNoteModal`, `DatePickerModal`, `TimePickerModal`, `DateErrorModal`은 아래 오버레이 패턴을 공유합니다. (`PWAInstallModal`은 §5-7 참고 — 배치만 다르고 나머지 패턴은 동일)
 
 ```css
-.{prefix}-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4~0.45); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px; }
-.{prefix}-card { background:var(--card-bg); border-radius:14px; padding:20px; width:100%; max-width:320px; border:0.5px solid var(--border); }
+.{prefix}-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4~0.45); display:flex; align-items:center; justify-content:center; z-index:50~60; padding:20px; }
+.{prefix}-card { background:var(--card-bg); border-radius:14px~16px; padding:20px~22px; width:100%; max-width:300~320px; border:0.5px solid var(--border); }
 ```
 
-- **TabSelectModal** — `.tab-select-option`(탭 목록), 현재 탭엔 `.current` + `.tab-select-current-badge`
-- **TabMoveModal** — `.tab-move-preview`로 이동 대상 항목(날짜·메모) 미리보기 후 `.tab-move-option-btn` 목록
+- **TabSelectModal** — `.tab-select-option`(탭 목록), 현재 탭엔 `.current` + `.tab-select-current-badge`.
+  `ItemCard`의 편집 저장 시(날짜/시간이 하나라도 있을 때) 저장 대상 탭을 확인/변경하는 용도로
+  사용되며, 메모에 날짜/시간이 새로 추가되는 경우의 탭 이동도 이 모달 하나로 처리합니다
+  (과거 존재했던 `TabMoveModal`은 죽은 코드로 판명되어 삭제됨 — 기능은 `TabSelectModal`로 통합)
 - **TabNameModal** — 추천 이름 칩, `.tab-name-confirm-btn`/`.tab-name-cancel-btn`, 기본 탭이 아니면 `.tab-name-delete-btn`(hover 시 연한 빨강 배경)
 - **HelpModal** — 별도 오버레이 대신 인풋 하단에 `.help-card`로 인라인 확장, `.help-table`로 입력 형식 예시 표
 - **PatchNoteModal** — `.patch-section` 단위로 버전별 변경사항을 `.patch-list`(불릿)로 표시
-- **PWAInstallModal** — 홈 화면 추가 유도, `beforeinstallprompt` 이벤트 기반으로 노출 여부 결정
+- **DatePickerModal** — `.datepicker-overlay`/`.datepicker-card`, 달력 그리드(`.datepicker-grid`)로
+  날짜 선택, 상단 `.datepicker-header`에 월 이동(`.datepicker-nav-btn`), 하단
+  `.datepicker-footer`에 오늘(`.datepicker-today-btn`)/취소(`.datepicker-cancel-btn`) 버튼
+- **TimePickerModal** — `.timepicker-overlay`/`.timepicker-card`, 시·분 두 열의 스크롤 휠
+  (`.timepicker-wheels` → `.timepicker-col` → `.timepicker-scroll`/`.timepicker-cell`)로
+  24시간 형식 시간 선택, 상단에 미리보기 텍스트(`.timepicker-preview`)
+- **DateErrorModal** — 날짜/시간 유효성 오류 안내 전용, `IconAlertTriangle` 32px + 메시지 +
+  확인 버튼 단일 구성 (별도 클래스 없이 인라인 스타일로 구현되어 있음)
+
+---
+
+### 5-7. 신규 오버레이 컴포넌트 (SplashScreen / LoadingOverlay / ToastMessage / PWAInstallModal)
+
+**SplashScreen** — 앱 최초 진입 시 `authLoading` 동안 표시되는 전체 화면 스플래시
+- `position: fixed; inset: 0; z-index: 200` (전체 화면을 덮어야 하므로 유일하게 `fixed`를 쓰는 예외 — PWAInstallModal은 반대로 `absolute`로 바뀌었으니 혼동 주의)
+- `background: var(--btn-bg)`, `display: flex; flex-direction: column; align-items: center; justify-content: center`
+- 중앙: 📋 이모지(52px) + "할 일 메모장" 타이틀(20px, 600, `var(--btn-text)`) + 부제(13px, opacity 0.75)
+- 800ms 유지 후 `opacity 1→0`(0.4s 트랜지션) 페이드아웃, 완료 시 `onFinish` 콜백으로 언마운트
+
+**LoadingOverlay** — tabs/schedules fetch 중(`isLoading = tabsLoading || schedulesLoading`) 표시
+- `position: absolute; inset: 0; z-index: 90; background: rgba(0,0,0,0.3)`
+- 중앙에 `IconLoader2`(32px, 흰색) + `.loading-spinner` 클래스로 `spin` 키프레임 회전 애니메이션
+
+**ToastMessage** — 저장/수정/삭제 성공·실패 피드백, `.toast-message` 클래스
+- `position: absolute; top: 60px; left: 50%; transform: translateX(-50%); z-index: 80`
+- `border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 500; white-space: nowrap; pointer-events: none`
+- 색상은 인라인 스타일로 지정: 성공 `background #E8F5E9 / color #2E7D32`(2초 후 자동 소멸),
+  실패 `background #FCEBEB / color #A32D2D`(3초 후 자동 소멸)
+
+**PWAInstallModal** — 홈 화면 추가 유도
+- **`position: absolute`** (다른 대부분의 모달과 동일한 규칙) — 과거 `position: fixed`였던 것이
+  데스크톱에서 `#app`(430px) 밖 전체 뷰포트를 덮는 문제로 `absolute`로 수정됨
+- `inset: 0; z-index: 50; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px)`
+- `beforeinstallprompt` 이벤트를 캐치해 표시, `localStorage.pwa_installed`로 재노출 여부 제어
 
 ---
 
@@ -330,7 +413,7 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 | 완료 처리 | `done === true` | `opacity: 0.68`, 날짜·메모 `color: --done-text`, 메모 `text-decoration: line-through` |
 | 과거 처리 | 지난 날짜 & 미완료 | `opacity: 0.45` (`.past-item`) |
 | 호버 | `:hover` | `border-color: var(--border2)` |
-| 카드 확장 | click (비-인터랙티브 영역) | `.expanded` 클래스 → 아이콘 오버레이 `display: flex` |
+| 카드 펼침 | click (체크박스·`.card-action-inline` 제외 영역) | `isContentExpanded` 토글 → `.item.content-expanded`, 메모 전체 표시 + 인라인 수정/삭제 버튼 노출 |
 | 오늘 + 완료 | 동시 | 완료 스타일 우선 (today-item 클래스 미적용) |
 
 ---
@@ -365,11 +448,13 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 
 ### 카드 인터랙션
 ```
-카드 클릭 (비-인터랙티브 영역) → expanded 토글 (아이콘 오버레이 ON/OFF)
+카드 클릭 (비-인터랙티브 영역) → isContentExpanded 토글 (펼치기/접기, 재클릭 시 원복)
 체크박스 클릭  → done 토글 (이벤트 버블링 차단)
-연필 아이콘    → 인라인 편집 모드 진입 (메모 input 자동 포커스 + 전체 선택)
-휴지통 아이콘  → confirm 후 삭제
-편집 저장      → TabSelectModal 오픈 → 탭 확인/변경 후 최종 저장
+연필 아이콘(.card-action-inline.edit, 펼친 상태에서만 노출) → 인라인 편집 모드 진입
+휴지통 아이콘(.card-action-inline.del, 펼친 상태에서만 노출) → confirm 후 삭제
+편집 저장      → 날짜/시간 있으면 TabSelectModal 오픈 → 탭 확인/변경 후 최종 저장
+              → 날짜/시간 없으면(메모만 수정) 모달 없이 기존 탭 유지한 채 바로 저장
+편집 취소      → isContentExpanded false로 초기화하며 편집 폼 종료
 ```
 
 ### 탭 인터랙션
@@ -377,7 +462,7 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 탭 클릭        → 해당 탭으로 필터 전환
 탭 롱프레스     → TabNameModal (이름 수정/삭제)
 탭 추가 버튼    → TabNameModal (신규 탭 생성, 추천 이름 칩 제공)
-메모에 날짜 추가 → TabMoveModal (이동할 실제 탭 선택)
+메모에 날짜 추가 → TabSelectModal (이동할 실제 탭 선택 — 과거 TabMoveModal 기능 통합)
 ```
 
 ### 접근성
@@ -400,8 +485,10 @@ font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 | 해 | `IconSun` | 13px | AppHeader — 라이트 모드 전환 버튼 |
 | 로그아웃 | `IconLogout` | 13px | AppHeader — 로그아웃 버튼 |
 | 플러스 | `IconPlus` | 15px | InputSection, TabBar — 추가 버튼 |
-| 연필 | `IconPencil` | 15px | ItemCard — 수정 버튼 |
-| 휴지통 | `IconTrash` | 15px | ItemCard, TabNameModal — 삭제 버튼 |
+| 연필 | `IconPencil` | 13px | ItemCard — 펼친 카드의 `.card-action-inline.edit` 수정 버튼 |
+| 휴지통 | `IconTrash` | 13px / 14px | ItemCard `.card-action-inline.del`(13px), TabNameModal 삭제 버튼(14px) |
+| 로딩 | `IconLoader2` | 32px | LoadingOverlay — fetch 중 회전 스피너 |
+| 경고 | `IconAlertTriangle` | 32px | DateErrorModal — 날짜/시간 유효성 오류 안내 |
 
 ---
 
