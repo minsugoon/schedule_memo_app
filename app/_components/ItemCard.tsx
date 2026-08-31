@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isRange, extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, fmtShortNoPad, validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
+import { isRange, extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
 import TabSelectModal from './TabSelectModal';
 import DateErrorModal from './DateErrorModal';
 

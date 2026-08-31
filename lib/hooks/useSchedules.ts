@@ -38,19 +38,14 @@ export function useSchedules() {
   const [schedules, setSchedules] = useState<DbSchedule[]>([])
   const [loading, setLoading] = useState(false)
 
-  const fetchSchedules = useCallback(async (tabId?: string | null) => {
+  const fetchSchedules = useCallback(async () => {
     setLoading(true)
     const supabase = createClient()
-    let query = supabase
+    const { data, error } = await supabase
       .from('schedules')
       .select('*')
       .order('started_at', { ascending: true, nullsFirst: false })
 
-    if (tabId !== undefined && tabId !== null) {
-      query = query.eq('tab_id', tabId)
-    }
-
-    const { data, error } = await query
     if (error) {
       console.error('schedules fetch error:', error.message)
       setLoading(false)

@@ -161,8 +161,6 @@ export default function ScheduleApp() {
 
   const memoTab = tabs.find(t => t.tab_type === 'memo')
   const personalTab = tabs.find(t => t.tab_type === 'personal')
-  const workTab = tabs.find(t => t.tab_type === 'work')
-  const allTab = tabs.find(t => t.tab_type === 'all')
 
   const items = useMemo<ScheduleItem[]>(
     () => schedules.map(row => toScheduleItem(row)),

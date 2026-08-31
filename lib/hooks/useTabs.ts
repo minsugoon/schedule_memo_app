@@ -123,16 +123,17 @@ export function useTabs() {
     return true
   }, [tabs])
 
-  const updateTabOrder = useCallback(async (orderedIds: string[]) => {
-    const supabase = createClient()
-    const updates = orderedIds.map((id, index) => ({ id, sort_order: index }))
-    const { error } = await supabase.from('tabs').upsert(updates)
-    if (error) {
-      console.error('tab order update error:', error.message)
-      return
-    }
-    await fetchTabs()
-  }, [fetchTabs])
+  // 탭 드래그 순서 정렬 UI 미구현으로 미사용 — 추후 구현 시 주석 해제
+  // const updateTabOrder = useCallback(async (orderedIds: string[]) => {
+  //   const supabase = createClient()
+  //   const updates = orderedIds.map((id, index) => ({ id, sort_order: index }))
+  //   const { error } = await supabase.from('tabs').upsert(updates)
+  //   if (error) {
+  //     console.error('tab order update error:', error.message)
+  //     return
+  //   }
+  //   await fetchTabs()
+  // }, [fetchTabs])
 
-  return { tabs, loading, fetchTabs, addTab, updateTabName, deleteTab, updateTabOrder }
+  return { tabs, loading, fetchTabs, addTab, updateTabName, deleteTab }
 }
