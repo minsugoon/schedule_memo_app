@@ -16,6 +16,7 @@ import PWAInstallModal from './PWAInstallModal'
 import HelpModal from './HelpModal'
 import PatchNoteModal from './PatchNoteModal'
 import OnboardingOverlay from './OnboardingOverlay'
+import SplashScreen from './SplashScreen'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -76,6 +77,7 @@ export default function ScheduleApp() {
   const [showPatchNote, setShowPatchNote] = useState(false)
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
@@ -371,12 +373,21 @@ export default function ScheduleApp() {
     setShowInstallModal(false)
   }
 
-  if (!hydrated || authLoading) return <div id="app" />
+  if (!hydrated || authLoading) {
+    return (
+      <>
+        {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+        <div id="app" />
+      </>
+    )
+  }
 
   const memoItems = items.filter(i => i.date === null)
 
   return (
-    <div id="app">
+    <>
+      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      <div id="app">
       <h2 className="sr-only">할 일 메모장</h2>
 
       {/* 온보딩 가이드 오버레이 — 최우선 z-index */}
@@ -468,6 +479,7 @@ export default function ScheduleApp() {
           onClose={() => setShowInstallModal(false)}
         />
       )}
-    </div>
+      </div>
+    </>
   )
 }
