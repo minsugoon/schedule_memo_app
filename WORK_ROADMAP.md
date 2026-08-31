@@ -13,9 +13,9 @@
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 2건 (#17~#18 — #15~#16 및 기존 4+2+1건은 완료) |
+| 🟢 코드 정리 필요 | 1건 (#18 — #15~#17 및 기존 4+2+1건은 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
-| 예상 총 소요 | #1~#16 전체 완료, #17~#18 약 1~1.5시간 |
+| 예상 총 소요 | #1~#17 전체 완료, #18 약 30분~1시간 |
 
 ### 조치 완료된 버그 (재착수 불필요)
 - ✅ ItemCard.tsx — 편집 중 데이터 유실 (useEffect 의존성 수정)
@@ -317,22 +317,22 @@ trigger cascading renders" 에러 6곳을 모두 해소. `npm run lint` 재실�
 
 ---
 
-### 17. PROJECT_SPEC.md 컴포넌트 목록 동기화 🟢 🆕
+### 17. PROJECT_SPEC.md 컴포넌트 목록 동기화 🟢 ✅ 완료
 **우선순위: 낮음 | 난이도: ★☆☆ | 소요: 10분**
 
-코드베이스 전체 점검 중 새로 발견. 실제 `app/_components/` 19개 파일 대비
-PROJECT_SPEC.md §4 폴더 구조·§6 주요 컴포넌트 표에 6개 컴포넌트 누락.
-그 외 내용(40자 메모 제한, TabMoveModal 삭제 등)은 이미 정확함.
+실제 `app/_components/` 19개 파일과 PROJECT_SPEC.md §4 폴더 구조·§6 주요
+컴포넌트 표를 대조해 누락됐던 6개 컴포넌트 추가 완료. 추가 후 재대조 결과
+19개 파일과 정확히 일치, 더 누락된 파일 없음(코드 파일은 수정하지 않음).
 
 ```
 파일: PROJECT_SPEC.md §4(폴더 구조), §6(주요 컴포넌트 표)
-누락 항목:
-- DatePickerModal.tsx
-- TimePickerModal.tsx
-- DateErrorModal.tsx
-- SplashScreen.tsx
-- LoadingOverlay.tsx
-- ToastMessage.tsx
+추가 완료:
+- DatePickerModal.tsx   — 달력 UI 날짜 선택 모달
+- TimePickerModal.tsx   — 스크롤 휠 시간 선택 모달 (24시간)
+- DateErrorModal.tsx    — 날짜/시간 유효성 오류 안내 모달
+- SplashScreen.tsx      — 앱 최초 진입 시 로고+이름 스플래시
+- LoadingOverlay.tsx    — 데이터 fetch 중 전체 화면 로딩 스피너
+- ToastMessage.tsx      — 저장/수정/삭제 성공·실패 토스트 알림
 ```
 
 ---

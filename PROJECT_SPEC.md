@@ -70,7 +70,13 @@ schedule_memo_app/
 │   │   ├── HelpModal.tsx         # 날짜/시간 입력 형식 도움말 모달
 │   │   ├── PatchNoteModal.tsx    # 업데이트 내역(패치노트) 모달
 │   │   ├── PWAInstallModal.tsx   # PWA 설치 유도 모달
-│   │   └── OnboardingOverlay.tsx # 최초 사용자 온보딩 가이드 오버레이 (4단계 스포트라이트 툴팁)
+│   │   ├── OnboardingOverlay.tsx # 최초 사용자 온보딩 가이드 오버레이 (4단계 스포트라이트 툴팁)
+│   │   ├── DatePickerModal.tsx   # 달력 UI 날짜 선택 모달
+│   │   ├── TimePickerModal.tsx   # 스크롤 휠 시간 선택 모달 (24시간)
+│   │   ├── DateErrorModal.tsx    # 날짜/시간 유효성 오류 안내 모달
+│   │   ├── SplashScreen.tsx      # 앱 최초 진입 시 로고+이름 스플래시
+│   │   ├── LoadingOverlay.tsx    # 데이터 fetch 중 전체 화면 로딩 스피너
+│   │   └── ToastMessage.tsx      # 저장/수정/삭제 성공·실패 토스트 알림
 │   ├── auth/callback/route.ts    # OAuth 콜백 처리 (서버, exchangeCodeForSession)
 │   ├── login/page.tsx            # 로그인 페이지 (Google OAuth, 계정 전환)
 │   ├── layout.tsx                # 루트 레이아웃 (테마 플리커 방지 스크립트 포함)
@@ -148,6 +154,12 @@ export type ViewMode = 'tabs' | 'memo'; // 탭 목록 화면 vs 메모 전용 �
 | `TabSelectModal` | 카드 편집 저장 시 목적지 탭 선택 (all/memo 제외). 메모에 날짜/시간이 추가될 때 이동할 탭 선택도 겸함 (구 `TabMoveModal` 기능 흡수, 죽은 코드였던 `TabMoveModal`은 삭제됨) |
 | `HelpModal` / `PatchNoteModal` / `PWAInstallModal` | 날짜 입력 도움말, 패치노트, PWA 설치 유도 |
 | `OnboardingOverlay` | 최초 진입 800ms 후 자동(또는 헤더 `?` 버튼으로 언제든) 표시되는 4단계 안내 오버레이. `targetId`로 실제 DOM 요소를 찾아 `getBoundingClientRect()`로 스포트라이트(`box-shadow` 방식) 강조, 화면 상단 고정 위치에 말풍선(제목+설명+N/4 진행+건너뛰기/다음·완료 버튼) 표시. 배경 클릭 시 종료와 동일하게 처리 |
+| `DatePickerModal` | 달력 UI 날짜 선택 모달 |
+| `TimePickerModal` | 스크롤 휠 시간 선택 모달 (24시간) |
+| `DateErrorModal` | 날짜/시간 유효성 오류 안내 모달 |
+| `SplashScreen` | 앱 최초 진입 시 로고+이름 스플래시 |
+| `LoadingOverlay` | 데이터 fetch 중 전체 화면 로딩 스피너 |
+| `ToastMessage` | 저장/수정/삭제 성공·실패 토스트 알림 |
 
 ---
 
