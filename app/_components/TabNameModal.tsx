@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { IconX, IconTrash } from '@tabler/icons-react'
 
 interface RecommendedCategory {
@@ -29,11 +29,9 @@ interface TabNameModalProps {
 export default function TabNameModal({
   mode, currentName, existingNames, onConfirm, onDelete, onCancel,
 }: TabNameModalProps) {
-  const [customName, setCustomName] = useState('')
-
-  useEffect(() => {
-    if (mode === 'edit' && currentName) setCustomName(currentName)
-  }, [mode, currentName])
+  const [customName, setCustomName] = useState(
+    mode === 'edit' ? (currentName ?? '') : ''
+  )
 
   const handleConfirm = () => {
     const trimmed = customName.trim()

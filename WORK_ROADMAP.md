@@ -13,9 +13,9 @@
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 4건 (신규 발견 #15~#18 — 기존 4+2+1건은 완료) |
+| 🟢 코드 정리 필요 | 3건 (#16~#18 — #15 및 기존 4+2+1건은 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
-| 예상 총 소요 | #1~#14 전체 완료, #15~#18 약 2~3시간 |
+| 예상 총 소요 | #1~#15 전체 완료, #16~#18 약 1.5~2.5시간 |
 
 ### 조치 완료된 버그 (재착수 불필요)
 - ✅ ItemCard.tsx — 편집 중 데이터 유실 (useEffect 의존성 수정)
@@ -255,24 +255,47 @@ CLAUDE.md의 파일 구조 섹션에 누락된 파일 추가 완료:
 
 ---
 
-### 15. useEffect 내 setState 동기 호출 정리 🟢 🆕
+### 15. useEffect 내 setState 동기 호출 정리 🟢 ✅ 완료
 **우선순위: 낮음 | 난이도: ★★☆ | 소요: 30분~1시간**
 
-`npm run lint` 재실행 중 새로 발견. `eslint-plugin-react-hooks`가 "Calling setState
-synchronously within an effect can trigger cascading renders" 에러로 6곳을 지적함.
-전부 마운트 시 외부 상태(localStorage/props)를 동기화하는 기존 패턴이라 런타임 버그는
-아니며 `npm run build`도 정상 통과하지만, `npm run lint` 결과에는 error로 집계됨.
+`eslint-plugin-react-hooks`의 "Calling setState synchronously within an effect can
+trigger cascading renders" 에러 6곳을 모두 해소. `npm run lint` 재실행 결과 소스
+파일 기준 0 errors(기존 6 errors → 0), `npm run build`도 정상 통과.
 
 ```
-① app/_components/ScheduleApp.tsx L91-98 — localStorage 테마 읽어 setTheme/setHydrated
-② app/_components/ScheduleApp.tsx L143-149 — 패치노트 최초 노출 여부 setShowPatchNote
-③ app/_components/TabNameModal.tsx L34-36 — edit 모드 진입 시 setCustomName
-④ app/_components/TimePickerModal.tsx L25-32 — value prop 파싱해 setSelH/setSelM
-⑤⑥ app/_components/ItemCard.tsx L50-54 — editing 시 setIsContentExpanded(false)
-   (ROADMAP #12에서 다룬 편집 취소 로직과 같은 effect, 별도 버그 아님)
+① app/_components/ScheduleApp.tsx — localStorage 테마 읽어 setTheme/setHydrated
+   → theme/hydrated를 useState 지연 초기화 함수로 전환, 해당 useEffect 제거.
+   document.documentElement.setAttribute('data-theme', ...)는 layout.tsx의
+   플리커 방지 인라인 스크립트가 이미 동일하게 처리하고 있어 중복 제거해도
+   기능 손실 없음(코드 확인으로 검증).
 
-권장 방향: 마운트 시 1회성 동기화는 useState 초기값 함수로, prop 변경 추적은
-key prop으로 컴포넌트를 리마운트하는 방식으로 리팩터링 검토
+② app/_components/ScheduleApp.tsx — 패치노트 최초 노출 여부 setShowPatchNote
+   → showPatchNote를 useState 지연 초기화 함수로 전환, 해당 useEffect 제거.
+   ①②는 모두 authLoading 게이트(로그인 확인 전엔 빈 셸만 렌더링) 뒤에서만
+   실제 UI에 반영되므로 SSR-클라이언트 하이드레이션 불일치 없음(직접 추적 확인).
+
+③ app/_components/TabNameModal.tsx — edit 모드 진입 시 setCustomName
+   → useEffect 제거, customName을 useState(mode==='edit' ? currentName ?? '' : '')로
+   직접 초기화. app/_components/TabBar.tsx의 <TabNameModal> 렌더에
+   key={`${tabNameModal.mode}-${tabNameModal.tabId ?? 'new'}`} 추가해 모드/대상
+   탭이 바뀌면 완전히 새 인스턴스로 마운트되도록 보강(스펙 제안은 currentName
+   기반 key였으나, 이름이 같은 탭이 생길 가능성을 배제하기 위해 고유한 tabId
+   기준으로 변경 — 실제로는 이 모달이 이미 {tabNameModal && <TabNameModal/>}로
+   null을 거쳐 조건부 렌더링되고 있어 key 없이도 매번 새로 마운트되지만, 안전망
+   차원에서 명시적으로 추가함)
+
+④ app/_components/TimePickerModal.tsx — value prop 파싱해 setSelH/setSelM
+   → useEffect 제거, selH/selM을 각각 useState 지연 초기화 함수로 전환(parseTime
+   파싱 로직 그대로 이동). InputSection.tsx(수정 금지 파일)가 이미
+   {timePickerTarget !== null && <TimePickerModal/>}로 열 때마다 새로 마운트하므로
+   value는 마운트 시점에만 유효하면 충분 — 별도 key prop 추가 불필요.
+
+⑤⑥ app/_components/ItemCard.tsx — editing 시 setIsContentExpanded(false) 등 폼 초기화
+   → 두 useEffect를 제거하고 React 공식 "렌더 중 상태 조정" 패턴으로 교체
+   (prevEditing 상태와 비교해 editing이 false→true로 바뀌는 순간에만 조건부로
+   setState 호출). editing은 리스트 아이템이 유지된 채 반복적으로 토글되는 prop이라
+   useState 지연 초기화(마운트 1회성)로는 두 번째 이후 편집 진입을 처리할 수 없고,
+   key remount는 카드 자체를 매번 새로 만드는 과한 방식이라 부적합해 이 방식을 선택.
 ```
 
 ---

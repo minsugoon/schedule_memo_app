@@ -73,11 +73,17 @@ export default function ScheduleApp() {
   const [showDone, setShowDone] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
-  const [hydrated, setHydrated] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light'
+    return localStorage.getItem('memo_theme') === 'dark' ? 'dark' : 'light'
+  })
+  const [hydrated, setHydrated] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
-  const [showPatchNote, setShowPatchNote] = useState(false)
+  const [showPatchNote, setShowPatchNote] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    return !localStorage.getItem('patch_seen_20260702')
+  })
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
@@ -87,15 +93,6 @@ export default function ScheduleApp() {
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
   }
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('memo_theme')
-    if (savedTheme === 'dark') {
-      document.documentElement.setAttribute('data-theme', 'dark')
-      setTheme('dark')
-    }
-    setHydrated(true)
-  }, [])
 
   useEffect(() => {
     const handleBeforeInstall = (e: Event) => {
@@ -139,14 +136,6 @@ export default function ScheduleApp() {
       fetchSchedules()
     }
   }, [user, fetchTabs, fetchSchedules])
-
-  useEffect(() => {
-    if (!hydrated) return
-    const key = 'patch_seen_20260702'
-    if (!localStorage.getItem(key)) {
-      setShowPatchNote(true)
-    }
-  }, [hydrated])
 
   useEffect(() => {
     if (!hydrated) return

@@ -85,6 +85,7 @@ export default function TabBar({
     <div className="tab-bar-wrapper">
       {tabNameModal && (
         <TabNameModal
+          key={`${tabNameModal.mode}-${tabNameModal.tabId ?? 'new'}`}
           mode={tabNameModal.mode}
           currentName={tabNameModal.currentName}
           existingNames={tabs.map(t => t.name)}

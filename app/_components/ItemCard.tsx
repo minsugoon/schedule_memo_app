@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
 import { isRange, extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
@@ -46,29 +46,28 @@ export default function ItemCard({
   const [dateError, setDateError] = useState<string | null>(null);
   const memoLineRef = useRef<HTMLSpanElement>(null);
 
-  // editing이 true가 될 때 펼치기 상태 초기화
-  useEffect(() => {
+  // editing이 false → true로 전환되는 순간에만 편집 폼을 초기화 (item 재참조로 인한
+  // 편집 중 데이터 유실 방지). useEffect 대신 렌더 중 상태 조정 패턴 사용 —
+  // editing은 리스트 아이템이 유지된 채 반복적으로 토글되는 prop이라 마운트 시점
+  // 초기값 함수(useState 지연 초기화)로는 두 번째 이후 편집 진입을 처리할 수 없고,
+  // key remount는 카드 자체를 매번 새로 만드는 과한 방식이라 부적합함.
+  const [prevEditing, setPrevEditing] = useState(editing);
+  if (editing !== prevEditing) {
+    setPrevEditing(editing);
     if (editing) {
       setIsContentExpanded(false);
+      setEditDate(item.dateRaw || '');
+      setEditDateEnd(item.dateEndRaw || '');
+      setEditMemo(item.memo);
+      setShowTabSelect(false);
+
+      const st = item.isAllDay === false ? extractTime(item.startedAt) : null;
+      setEditTime(st ? `${String(st.h).padStart(2, '0')}:${String(st.m).padStart(2, '0')}` : '');
+
+      const et = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null;
+      setEditTimeEnd(et ? `${String(et.h).padStart(2, '0')}:${String(et.m).padStart(2, '0')}` : '');
     }
-  }, [editing]);
-
-  // editing이 false → true로 전환되는 순간에만 초기화 (item 재참조로 인한 편집 중 데이터 유실 방지)
-  useEffect(() => {
-    if (!editing) return;
-
-    setEditDate(item.dateRaw || '');
-    setEditDateEnd(item.dateEndRaw || '');
-    setEditMemo(item.memo);
-    setShowTabSelect(false);
-
-    const st = item.isAllDay === false ? extractTime(item.startedAt) : null;
-    setEditTime(st ? `${String(st.h).padStart(2, '0')}:${String(st.m).padStart(2, '0')}` : '');
-
-    const et = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null;
-    setEditTimeEnd(et ? `${String(et.h).padStart(2, '0')}:${String(et.m).padStart(2, '0')}` : '');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editing]);
+  }
 
   const { isToday, isOngoing } = getBadgeInfo(item);
   const showTabBadge = currentTab === 'all' && !!tabName;

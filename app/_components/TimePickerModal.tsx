@@ -18,18 +18,18 @@ const SPACER = (COL_H / 2) - (CELL_H / 2); // = 78
 export default function TimePickerModal({ isOpen, value, label, onSelect, onClose }: TimePickerModalProps) {
   const hourRef = useRef<HTMLDivElement>(null);
   const minRef = useRef<HTMLDivElement>(null);
-  const [selH, setSelH] = useState(0);
-  const [selM, setSelM] = useState(0);
-
   // 현재 입력값(24시간 'HH:MM' 또는 '오후 2:30' 등) 파싱 — parseTime이 두 형식 모두 지원
-  useEffect(() => {
-    if (!value) return;
+  // 모달은 열릴 때마다 새로 마운트되므로(InputSection의 조건부 렌더링), 초기값 함수로 1회만 파싱하면 충분
+  const [selH, setSelH] = useState<number>(() => {
+    if (!value) return 0;
     const parsed = parseTime(value);
-    if (parsed) {
-      setSelH(parsed.h);
-      setSelM((Math.round(parsed.m / 5) * 5) % 60);
-    }
-  }, [value]);
+    return parsed ? parsed.h : 0;
+  });
+  const [selM, setSelM] = useState<number>(() => {
+    if (!value) return 0;
+    const parsed = parseTime(value);
+    return parsed ? (Math.round(parsed.m / 5) * 5) % 60 : 0;
+  });
 
   // 모달이 열릴 때 초기 스크롤 위치 설정
   useEffect(() => {
