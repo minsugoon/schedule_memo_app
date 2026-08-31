@@ -11,10 +11,18 @@ export function useAuth() {
   useEffect(() => {
     const supabase = createClient()
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setUser(session?.user ?? null)
+      })
+      .catch((err) => {
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('세션 조회 실패:', err)
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
 
     const {
       data: { subscription },

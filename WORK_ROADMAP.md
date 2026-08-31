@@ -12,7 +12,7 @@
 | 구현된 컴포넌트 | 16개 (app/_components/) |
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
-| 🟡 미조치 버그 | 7건 (TabNameModal iOS 줌 완료) |
+| 🟡 미조치 버그 | 6건 (TabNameModal iOS 줌, useAuth .catch() 완료) |
 | 🟢 코드 정리 필요 | 10건 |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
 | 예상 총 소요 | 약 6시간 |
@@ -86,7 +86,7 @@ globals.css 추가:
 
 ---
 
-### 4. useAuth .catch() 추가 🟡
+### 4. useAuth .catch() 추가 🟡 ✅ 완료
 **우선순위: 높음 | 난이도: ★☆☆ | 소요: 10분**
 
 reject 시 loading이 영원히 true로 남아 앱 빈 화면 영구 정지 가능.
@@ -301,7 +301,7 @@ CLAUDE.md의 파일 구조 섹션에 누락된 3개 파일 추가:
 
 | # | 위험도 | 파일 | 내용 | ROADMAP 연결 |
 |---|--------|------|------|-------------|
-| 4 | 🟡 | useAuth.ts L14 | .catch() 누락 | ROADMAP #4 |
+| 4 | 🟡 | useAuth.ts L14 | .catch() 누락 | ROADMAP #4 ✅ 완료 |
 | 5 | 🟡 | ScheduleApp.tsx L219 | 저장 실패 피드백 없음 | ROADMAP #5 |
 | 6 | 🟡 | ScheduleApp.tsx L170 | 종료일만 입력 시 우회 | ROADMAP #6 |
 | 7 | 🟡 | PWAInstallModal.tsx L11 | position: fixed 위반 | ROADMAP #7 |
