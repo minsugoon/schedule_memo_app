@@ -13,9 +13,9 @@
 | 구현된 훅 | 3개 (lib/hooks/) |
 | 🔴 버그 조치 완료 | 3건 (커밋 d5ee80a, 2026-07-22) |
 | 🟡 미조치 버그 | 0건 (TabNameModal iOS 줌, useAuth .catch(), 저장 실패 피드백, 종료일만 입력 우회, PWAInstallModal fixed, middleware PWA 경로, 탭 삭제 시 일정 처리, RLS 확인 완료) |
-| 🟢 코드 정리 필요 | 3건 (#16~#18 — #15 및 기존 4+2+1건은 완료) |
+| 🟢 코드 정리 필요 | 2건 (#17~#18 — #15~#16 및 기존 4+2+1건은 완료) |
 | 🆕 신규 기능 대기 | 0건 (스플래시 화면, 로딩 스피너 완료) |
-| 예상 총 소요 | #1~#15 전체 완료, #16~#18 약 1.5~2.5시간 |
+| 예상 총 소요 | #1~#16 전체 완료, #17~#18 약 1~1.5시간 |
 
 ### 조치 완료된 버그 (재착수 불필요)
 - ✅ ItemCard.tsx — 편집 중 데이터 유실 (useEffect 의존성 수정)
@@ -300,15 +300,19 @@ trigger cascading renders" 에러 6곳을 모두 해소. `npm run lint` 재실�
 
 ---
 
-### 16. PWAInstallModal `<img>` → `next/image` 전환 검토 🟢 🆕
+### 16. PWAInstallModal `<img>` → `next/image` 전환 🟢 ✅ 완료
 **우선순위: 낮음 | 난이도: ★☆☆ | 소요: 15분**
 
-`npm run lint` 재실행 중 새로 발견. `@next/next/no-img-element` 경고.
+`@next/next/no-img-element` 경고 해소. `npm run lint` 재실행 결과 소스 파일
+기준 findings 0건(경고 사라짐), `npm run build` 정상 통과.
 
 ```
-파일: app/_components/PWAInstallModal.tsx L25
-현황: <img src="/icon-192x192.png" ... /> 사용
-권장: next/image의 <Image />로 교체해 LCP·대역폭 최적화
+파일: app/_components/PWAInstallModal.tsx
+수정: import Image from 'next/image' 추가
+      <img src="/icon-192x192.png" ... className="rounded-2xl" />
+      → <Image src="/icon-192x192.png" ... className="rounded-2xl" />
+      (public/ 폴더 확인 결과 실제 파일명이 icon-192x192.png로 스펙과 일치,
+       width/height/className 등 기존 속성 전부 유지, 다른 코드 변경 없음)
 ```
 
 ---

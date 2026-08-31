@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 interface PWAInstallModalProps {
   onInstall: () => void
   onClose: () => void
@@ -22,7 +24,7 @@ const PWAInstallModal = ({ onInstall, onClose }: PWAInstallModalProps) => {
         }}
         onClick={e => e.stopPropagation()}
       >
-        <img
+        <Image
           src="/icon-192x192.png"
           alt="앱 아이콘"
           width={64}
