@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { isRange, extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
+import { extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
 import TabSelectModal from './TabSelectModal';
 import DateErrorModal from './DateErrorModal';
 
@@ -64,7 +64,7 @@ export default function ItemCard({
       const st = item.isAllDay === false ? extractTime(item.startedAt) : null;
       setEditTime(st ? `${String(st.h).padStart(2, '0')}:${String(st.m).padStart(2, '0')}` : '');
 
-      const et = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null;
+      const et = (item.isAllDay === false && !!item.endedAt) ? extractTime(item.endedAt) : null;
       setEditTimeEnd(et ? `${String(et.h).padStart(2, '0')}:${String(et.m).padStart(2, '0')}` : '');
     }
   }

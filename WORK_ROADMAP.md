@@ -372,6 +372,38 @@ trigger cascading renders" 에러 6곳을 모두 해소. `npm run lint` 재실�
 
 ---
 
+### 19. 수정 모드 종료시간 미표시 버그 수정 (EDIT_BUG_REPORT.md §2) 🟡 ✅ 완료
+**우선순위: 높음 | 난이도: ★☆☆ | 소요: 5분**
+
+`EDIT_BUG_REPORT.md` 탐색 결과로 확인된 버그. 같은 날 시작/종료 시간이 모두
+있는 일정을 수정 모드로 열면 종료시간 입력란이 비어있는 채로 표시됨.
+
+```
+파일: app/_components/ItemCard.tsx L67 (수정 전 기준)
+원인: editTimeEnd 초기화 조건이 isRange(item)에 의존.
+      isRange()는 "시작일 ≠ 종료일"일 때만 true를 반환하므로,
+      같은 날짜 안에서 시간만 다른 경우 item.endedAt에 유효한 값이
+      있어도 무시하고 빈 문자열로 초기화됨.
+
+수정:
+const et = (item.isAllDay === false && isRange(item)) ? extractTime(item.endedAt) : null
+→
+const et = (item.isAllDay === false && !!item.endedAt) ? extractTime(item.endedAt) : null
+
+부수 변경: 파일 내 isRange()를 더 이상 사용하지 않게 되어
+import 목록에서 isRange 제거 (미사용 import 방지).
+isRange() 함수 자체는 lib/dateUtils.ts에서 fmtDateLine() 등 다른 곳에서
+계속 사용 중이므로 삭제하지 않음.
+```
+
+**빌드 확인:** `npm run build` 정상 통과(기존 middleware→proxy 경고,
+Edge Runtime 관련 경고만 존재, 신규 에러 없음).
+
+**남은 항목:** `EDIT_BUG_REPORT.md` §1(종료일이 ISO 형식으로 노출되는 문제,
+`date_end_raw` 컬럼 미연동)은 이번 작업 범위에 포함되지 않음 — 별도 요청 시 조치.
+
+---
+
 ## 완료 기준 (매 작업마다)
 
 ```
