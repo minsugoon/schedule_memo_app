@@ -185,8 +185,14 @@ export default function ScheduleApp() {
       }
     }
 
+    // 종료일 없이 종료시간만 입력된 경우 → 시작일을 종료일로 간주(하루 일정 시간 범위)
+    const effectiveDateEndRaw =
+      (!dateEndRaw.trim() && timeEndRaw.trim())
+        ? dateRaw
+        : dateEndRaw
+
     const parsed = parseDate(dateRaw)
-    const parsedEnd = dateEndRaw ? parseDate(dateEndRaw) : null
+    const parsedEnd = effectiveDateEndRaw.trim() ? parseDate(effectiveDateEndRaw) : null
 
     const parsedTime = timeRaw.trim() ? parseTime(timeRaw) : null
     const parsedEndTime = timeEndRaw.trim() ? parseTime(timeEndRaw) : null
@@ -209,7 +215,7 @@ export default function ScheduleApp() {
       ended_at: endedAt,
       is_all_day: !parsedTime,
       date_raw: dateRaw,
-      date_end_raw: dateEndRaw,
+      date_end_raw: effectiveDateEndRaw,
       memo,
     })
     if (!success) showToast('일정 저장에 실패했습니다', 'error')
@@ -286,9 +292,15 @@ export default function ScheduleApp() {
       return
     }
 
+    // 종료일 없이 종료시간만 입력된 경우 → 시작일을 종료일로 간주(하루 일정 시간 범위)
+    const effectiveDateEndRaw =
+      (!dateEndRaw.trim() && timeEndRaw.trim())
+        ? dateRaw
+        : dateEndRaw
+
     // 날짜/시간 있음 → 파싱 후 저장
     const parsed = parseDate(dateRaw)
-    const parsedEnd = dateEndRaw.trim() ? parseDate(dateEndRaw) : null
+    const parsedEnd = effectiveDateEndRaw.trim() ? parseDate(effectiveDateEndRaw) : null
     const parsedTime = timeRaw.trim() ? parseTime(timeRaw) : null
     const parsedEndTime = timeEndRaw.trim() ? parseTime(timeEndRaw) : null
 
@@ -303,7 +315,7 @@ export default function ScheduleApp() {
     await updateSchedule(schedule.id, {
       tab_id: tabId,
       date_raw: dateRaw,
-      date_end_raw: dateEndRaw,
+      date_end_raw: effectiveDateEndRaw,
       memo,
       started_at: startedAt,
       ended_at: endedAt,

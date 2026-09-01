@@ -446,6 +446,45 @@ Edge Runtime 관련 경고만 존재, 신규 에러 없음).
 
 ---
 
+### 21. 하루 일정(당일 시간 범위) 자동 처리 🟡 ✅ 완료
+**우선순위: 보통 | 난이도: ★★☆ | 소요: 20분**
+
+시작일 + 시작시간 + 종료시간만 입력하고 종료일을 비워두면 `ended_at`이
+저장되지 않아 종료시간이 통째로 유실되던 문제. 종료일을 시작일과 동일하게
+자동 보완하도록 수정.
+
+```
+파일: app/_components/ScheduleApp.tsx
+① handleAddItem() — 날짜 파싱 직전에 effectiveDateEndRaw 계산 추가:
+   종료일이 비어있고 종료시간만 입력된 경우 시작일(dateRaw)을 종료일로 간주.
+   이후 parsedEnd/endedAt 계산과 addSchedule() 호출의 date_end_raw를
+   dateEndRaw 대신 effectiveDateEndRaw로 교체.
+② handleSaveEditWithTime() — 동일한 effectiveDateEndRaw 계산을
+   "날짜/시간 없음" 조기 반환 분기 이후, 파싱 직전에 추가.
+   parsedEnd/endedAt 계산과 updateSchedule() 호출의 date_end_raw를
+   effectiveDateEndRaw로 교체.
+   (hasDateOrTime 판별 자체는 원본 dateEndRaw 기준 그대로 유지 — 이 판별은
+   "날짜/시간 아무것도 없는 메모 저장" 분기를 가르는 것이라 종료일 자동
+   보완 로직과 무관함)
+
+파일: lib/dateUtils.ts
+확인 결과: fmtDateLine()에 당일 시작/종료 시간 범위 표시 로직이 이미
+구현되어 있음(L300-307, isSameDate(startDate, endDate)일 때
+"9월 5일(토) 오전 10:00 - 오후 12:00" 형식으로 시간 범위를 합쳐 반환).
+→ 수정 불필요. 문제의 원인은 표시 로직이 아니라 종료일을 비워두면
+ended_at 자체가 저장되지 않아 이 분기에 도달하지 못하는 것이었으므로,
+ScheduleApp.tsx의 저장 단계 수정만으로 해결됨.
+```
+
+**빌드 확인:** `npm run build` 정상 통과(기존 middleware→proxy 경고,
+Edge Runtime 관련 경고만 존재, 신규 에러 없음).
+
+**수동 확인 필요:** 시작일만 입력해 종료일을 자동 보완시킨 경우 카드 표시
+문구, Supabase `date_end_raw` 컬럼 저장값, 기존 기간 일정(종료일 직접 입력)
+동작 유지 여부는 로그인 후 브라우저에서 직접 확인 필요.
+
+---
+
 ## 완료 기준 (매 작업마다)
 
 ```
