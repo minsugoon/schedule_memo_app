@@ -11,6 +11,7 @@ export type DbSchedule = {
   ended_at: string | null
   is_all_day: boolean
   date_raw: string
+  date_end_raw: string
   memo: string
   is_done: boolean
   created_at: string
@@ -22,6 +23,7 @@ type AddScheduleInput = {
   ended_at?: string | null
   is_all_day?: boolean
   date_raw: string
+  date_end_raw?: string
   memo: string
 }
 
@@ -31,6 +33,7 @@ type UpdateScheduleInput = {
   ended_at?: string | null
   is_all_day?: boolean
   date_raw?: string
+  date_end_raw?: string
   memo?: string
 }
 
@@ -69,6 +72,7 @@ export function useSchedules() {
       ended_at: input.ended_at ?? null,
       is_all_day: input.is_all_day ?? true,
       date_raw: input.date_raw,
+      date_end_raw: input.date_end_raw ?? '',
       memo: input.memo,
       is_done: false,
     })

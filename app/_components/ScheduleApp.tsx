@@ -47,7 +47,7 @@ function toScheduleItem(row: DbSchedule): ScheduleItem {
     date: parseDate(row.date_raw),
     dateRaw: row.date_raw,
     dateEnd: isoToScheduleDate(row.ended_at),
-    dateEndRaw: isoToDateRaw(row.ended_at),
+    dateEndRaw: row.date_end_raw || isoToDateRaw(row.ended_at),
     memo: row.memo,
     done: row.is_done,
     createdAt: new Date(row.created_at).getTime(),
@@ -209,6 +209,7 @@ export default function ScheduleApp() {
       ended_at: endedAt,
       is_all_day: !parsedTime,
       date_raw: dateRaw,
+      date_end_raw: dateEndRaw,
       memo,
     })
     if (!success) showToast('일정 저장에 실패했습니다', 'error')
@@ -245,6 +246,7 @@ export default function ScheduleApp() {
     const success = await updateSchedule(schedule.id, {
       tab_id: tabId,
       date_raw: dateRaw,
+      date_end_raw: dateEndRaw,
       memo,
       started_at: parsed ? toISODate(parsed) : undefined,
       ended_at: parsedEnd ? toISODate(parsedEnd) : null,
@@ -301,6 +303,7 @@ export default function ScheduleApp() {
     await updateSchedule(schedule.id, {
       tab_id: tabId,
       date_raw: dateRaw,
+      date_end_raw: dateEndRaw,
       memo,
       started_at: startedAt,
       ended_at: endedAt,

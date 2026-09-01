@@ -404,6 +404,48 @@ Edge Runtime 관련 경고만 존재, 신규 에러 없음).
 
 ---
 
+### 20. 종료일 형식 불일치 수정 (EDIT_BUG_REPORT.md §1) 🟡 ✅ 완료
+**우선순위: 높음 | 난이도: ★★☆ | 소요: 20분**
+
+DB에 존재하지만 코드에서 미사용이던 `schedules.date_end_raw` 컬럼을 실제
+읽기/쓰기 경로에 연결. 기존에는 `dateEndRaw`가 매번 `ended_at` ISO
+타임스탬프에서 `isoToDateRaw()`로 재조립되어, 시작일(`0905` 형식 원문 유지)과
+종료일(`2026-09-05` ISO 재조립)의 표시 형식이 서로 달랐음.
+
+```
+파일: lib/hooks/useSchedules.ts
+① DbSchedule 타입에 date_end_raw: string 추가
+② AddScheduleInput 타입에 date_end_raw?: string 추가
+③ UpdateScheduleInput 타입에 date_end_raw?: string 추가
+④ addSchedule() INSERT 페이로드에 date_end_raw: input.date_end_raw ?? '' 추가
+⑤ updateSchedule()은 기존에도 .update(input)으로 전달받은 객체를 그대로 DB에
+   전달하는 구조라, UpdateScheduleInput에 date_end_raw?를 추가하는 것만으로
+   호출부가 해당 필드를 넘기면 자동으로 반영됨 — 함수 내부에 별도의
+   조건부 스프레드 코드를 추가하지 않음(기존 범용 패스스루 구조와 중복되는
+   불필요한 추상화라 판단)
+
+파일: app/_components/ScheduleApp.tsx
+① toScheduleItem() — dateEndRaw: row.date_end_raw || isoToDateRaw(row.ended_at)
+   원문 date_end_raw 우선 사용, 비어있으면(기존 데이터) ISO 폴백 유지.
+   isoToDateRaw() 함수는 삭제하지 않고 폴백용으로 계속 사용.
+② handleSaveEditWithTime() — updateSchedule() 호출(날짜/시간 있는 저장 경로)에
+   date_end_raw: dateEndRaw 추가. 날짜/시간 없는 메모 전용 저장 분기는
+   date_end_raw와 무관해 변경하지 않음.
+③ handleSaveEdit() — updateSchedule() 호출에 date_end_raw: dateEndRaw 추가.
+④ handleAddItem() — addSchedule() 호출에 date_end_raw: dateEndRaw 추가.
+```
+
+**빌드 확인:** `npm run build` 정상 통과(기존 middleware→proxy 경고,
+Edge Runtime 관련 경고만 존재, 신규 에러 없음).
+
+**수동 확인 필요(Supabase 콘솔 접근이 필요한 항목이라 코드 작업만으로는
+검증 불가):** 종료일 저장 후 Supabase Table Editor에서 `schedules.date_end_raw`
+컬럼에 값이 실제로 채워지는지, 그리고 수정 모드 재진입 시 종료일 input이
+`'0905'`처럼 시작일과 동일한 원문 형식으로 표시되는지는 실제 로그인 후
+브라우저에서 직접 확인 필요.
+
+---
+
 ## 완료 기준 (매 작업마다)
 
 ```
