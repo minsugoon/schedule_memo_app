@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { IconPencil, IconTrash } from '@tabler/icons-react';
 import type { ScheduleItem, TabKey } from '@/lib/types';
-import { extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, validateDateRange, getDateValidationMessage } from '@/lib/dateUtils';
+import { extractTime, dateKey, getToday, getBadgeInfo, fmtDateLine, validateDateRange, getDateValidationMessage, toDisplayDate } from '@/lib/dateUtils';
 import TabSelectModal from './TabSelectModal';
 import DateErrorModal from './DateErrorModal';
 
@@ -56,8 +56,8 @@ export default function ItemCard({
     setPrevEditing(editing);
     if (editing) {
       setIsContentExpanded(false);
-      setEditDate(item.dateRaw || '');
-      setEditDateEnd(item.dateEndRaw || '');
+      setEditDate(toDisplayDate(item.dateRaw || ''));
+      setEditDateEnd(toDisplayDate(item.dateEndRaw || ''));
       setEditMemo(item.memo);
       setShowTabSelect(false);
 

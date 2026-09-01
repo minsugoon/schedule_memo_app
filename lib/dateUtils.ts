@@ -40,6 +40,17 @@ export function parseDate(raw: string): ScheduleDate | null {
   return null;
 }
 
+// 원문 날짜 입력(예: '0905', '9-5')을 수정 모드 input 표시용 'YYYY-MM-DD' 형식으로 변환
+export const toDisplayDate = (dateRaw: string): string => {
+  if (!dateRaw.trim()) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateRaw)) return dateRaw;
+  const parsed = parseDate(dateRaw);
+  if (!parsed) return dateRaw;
+  const mm = String(parsed.m).padStart(2, '0');
+  const dd = String(parsed.d).padStart(2, '0');
+  return `${parsed.y}-${mm}-${dd}`;
+};
+
 export type FmtShortResult = { text: string; dayType: 'sat' | 'sun' | 'normal' };
 
 export function fmtShort(dt: ScheduleDate | null): FmtShortResult | null {

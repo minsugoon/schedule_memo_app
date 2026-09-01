@@ -485,6 +485,41 @@ Edge Runtime 관련 경고만 존재, 신규 에러 없음).
 
 ---
 
+### 22. 수정 모드 날짜 input 표시 형식 통일 🟡 ✅ 완료
+**우선순위: 보통 | 난이도: ★☆☆ | 소요: 15분**
+
+수정 모드 시작일/종료일 input에 원문(`0905`)이 그대로 노출되어 달력 아이콘으로
+선택했을 때의 `YYYY-MM-DD` 형식과 표시가 달랐던 문제. `toDisplayDate()`를
+신설해 두 input 모두 `YYYY-MM-DD` 형식으로 통일.
+
+```
+파일: lib/dateUtils.ts
+추가: toDisplayDate(dateRaw) — 이미 'YYYY-MM-DD'면 그대로 반환, 그 외
+형식(예: '0905', '9-5')은 parseDate()로 파싱 후 'YYYY-MM-DD'로 재조립,
+파싱 실패 시 원문 그대로 반환(폴백).
+
+파일: app/_components/ItemCard.tsx
+① import에 toDisplayDate 추가
+② editing 진입 시 초기화 블록(L59-60):
+   setEditDate(item.dateRaw || '') → setEditDate(toDisplayDate(item.dateRaw || ''))
+   setEditDateEnd(item.dateEndRaw || '') → setEditDateEnd(toDisplayDate(item.dateEndRaw || ''))
+
+파일: ScheduleApp.tsx — 확인만 진행, 수정 없음
+handleSaveEditWithTime()의 parseDate(dateRaw) 호출 경로 확인 결과,
+lib/dateUtils.ts의 parseDate() 첫 번째 패턴
+(/^(\d{4})[-.\s\/](\d{1,2})[-.\s\/](\d{1,2})$/)이 'YYYY-MM-DD' 형식을
+이미 정상 파싱하므로 저장 경로는 그대로 두어도 문제 없음.
+```
+
+**빌드 확인:** `npm run build` 정상 통과(기존 middleware→proxy 경고,
+Edge Runtime 관련 경고만 존재, 신규 에러 없음).
+
+**수동 확인 필요:** 기존 일정 수정 모드 진입 시 input 표시 형식, 달력 아이콘
+선택 후 형식 유지 여부, 저장 후 카드 표시 문구는 로그인 후 브라우저에서
+직접 확인 필요.
+
+---
+
 ## 완료 기준 (매 작업마다)
 
 ```
