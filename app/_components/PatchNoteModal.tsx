@@ -1,6 +1,6 @@
 'use client';
 
-import { IconX, IconSpeakerphone, IconChevronsUpDown } from '@tabler/icons-react';
+import { IconX, IconSpeakerphone, IconSelector } from '@tabler/icons-react';
 
 interface PatchNoteModalProps {
   isOpen: boolean;
@@ -87,7 +87,7 @@ export default function PatchNoteModal({ isOpen, onClose }: PatchNoteModalProps)
 
         <div className="patch-section">
           <div className="patch-section-title">
-            <IconChevronsUpDown size={14} color="var(--text2)" aria-hidden /> 입력창 접기/펼치기
+            <IconSelector size={14} color="var(--text2)" aria-hidden /> 입력창 접기/펼치기
           </div>
           <ul className="patch-list">
             <li>목록 위 ▼▲ 버튼으로 일정 입력창을 접고 펼 수 있어요</li>
