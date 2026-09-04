@@ -241,5 +241,6 @@ npm run lint          # ESLint 검사
 |----|------|------|
 | `memo_theme` | string | 라이트/다크 테마 (`light` \| `dark`), `layout.tsx` 플리커 방지 스크립트가 읽음 |
 | `pwa_installed` | boolean | PWA 설치 안내 재노출 여부 |
-| `patch_seen_20260702` | boolean | 해당 버전 패치노트 모달 확인 여부 (버전별 키) |
+| `patch_seen_20260904` | boolean | 해당 버전 패치노트 모달 확인 여부 (버전별 키, v0.8부터 자동 표시 없이 헤더 📣 버튼으로만 확인) |
+| `input_collapsed` | boolean | InputSection(일정 입력창) 접힘 상태 유지 |
 | `onboarding_seen_v1` | boolean | 온보딩 가이드 오버레이 최초 자동 표시 여부 (헤더 `?` 버튼 재실행 시에는 덮어쓰지 않음) |

@@ -1,6 +1,6 @@
 'use client';
 
-import { IconX, IconPencil, IconLayoutColumns, IconKeyboard, IconUser } from '@tabler/icons-react';
+import { IconX, IconSpeakerphone, IconChevronsUpDown } from '@tabler/icons-react';
 
 interface PatchNoteModalProps {
   isOpen: boolean;
@@ -50,7 +50,7 @@ export default function PatchNoteModal({ isOpen, onClose }: PatchNoteModalProps)
                 display: 'inline-block',
               }}
             >
-              v0.7 · 2026.07.02
+              v0.8 · 2026.09.04
             </span>
             <p style={{ fontSize: '16px', fontWeight: 500, color: 'var(--text)', marginBottom: '16px' }}>
               📋 할 일 메모장 업데이트
@@ -76,43 +76,23 @@ export default function PatchNoteModal({ isOpen, onClose }: PatchNoteModalProps)
 
         <div className="patch-section">
           <div className="patch-section-title">
-            <IconPencil size={14} color="var(--text2)" aria-hidden /> 일정 수정 개선
+            <IconSpeakerphone size={14} color="var(--text2)" aria-hidden /> 업데이트 확인 방식 개선
           </div>
           <ul className="patch-list">
-            <li>카드 수정 모드에서 시작일·시작시간·종료일·종료시간을 직접 편집할 수 있어요</li>
-            <li>수정 저장 시 탭을 선택해서 일정을 원하는 탭으로 이동할 수 있어요</li>
-            <li>수정 중에는 ✏️ 삭제 버튼이 숨겨져 실수로 삭제되지 않아요</li>
+            <li>패치노트가 로그인 시 자동으로 뜨지 않아요. 최초 사용자가 튜토리얼과 패치노트를 동시에 마주치지 않아요</li>
+            <li>헤더의 📣 버튼을 누르면 언제든지 업데이트 내역을 다시 볼 수 있어요</li>
+            <li>아직 확인하지 않은 업데이트가 있으면 📣 버튼 우상단에 빨간 점으로 표시돼요</li>
           </ul>
         </div>
 
         <div className="patch-section">
           <div className="patch-section-title">
-            <IconLayoutColumns size={14} color="var(--text2)" aria-hidden /> 탭 구조 정리
+            <IconChevronsUpDown size={14} color="var(--text2)" aria-hidden /> 입력창 접기/펼치기
           </div>
           <ul className="patch-list">
-            <li>전체 탭: 날짜가 있는 일정만 표시돼요 (메모 제외)</li>
-            <li>메모 탭(📝): 날짜 없이 메모만 입력하면 자동으로 저장되는 전용 공간이에요</li>
-            <li>탭 순서가 전체 → 개인 → 회사 순으로 정리됐어요</li>
-          </ul>
-        </div>
-
-        <div className="patch-section">
-          <div className="patch-section-title">
-            <IconKeyboard size={14} color="var(--text2)" aria-hidden /> 입력 편의 개선
-          </div>
-          <ul className="patch-list">
-            <li>시작일·종료일을 한 줄로, 시작시간·종료시간을 한 줄로 입력할 수 있어요</li>
-            <li>❓ 버튼을 누르면 날짜·시간 입력 방법을 언제든지 확인할 수 있어요</li>
-            <li>메모 입력란 글자 수가 입력창 오른쪽 끝에 바로 표시돼요</li>
-          </ul>
-        </div>
-
-        <div className="patch-section">
-          <div className="patch-section-title">
-            <IconUser size={14} color="var(--text2)" aria-hidden /> 계정
-          </div>
-          <ul className="patch-list">
-            <li>로그인 화면에서 &apos;다른 계정으로 로그인하기&apos;로 계정 전환이 가능해요</li>
+            <li>목록 위 ▼▲ 버튼으로 일정 입력창을 접고 펼 수 있어요</li>
+            <li>입력창을 접으면 카드 목록을 더 넓게 볼 수 있어요</li>
+            <li>접은 상태는 기기에 저장되어 다음 접속 때도 그대로 유지돼요</li>
           </ul>
         </div>
 

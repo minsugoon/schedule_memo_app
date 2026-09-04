@@ -84,7 +84,7 @@ export default function ScheduleApp() {
   const [showPatchNote, setShowPatchNote] = useState<boolean>(false)
   const [hasPatchBadge, setHasPatchBadge] = useState<boolean>(() =>
     typeof window !== 'undefined'
-      ? !localStorage.getItem('patch_seen_20260702')
+      ? !localStorage.getItem('patch_seen_20260904')
       : false
   )
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
@@ -374,7 +374,7 @@ export default function ScheduleApp() {
   }
 
   const handleClosePatchNote = () => {
-    localStorage.setItem('patch_seen_20260702', 'true')
+    localStorage.setItem('patch_seen_20260904', 'true')
     setShowPatchNote(false)
     setHasPatchBadge(false)
   }
