@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import type { ScheduleItem, ScheduleDate, TabKey, ViewMode } from '@/lib/types'
 import { parseDate, parseTime, timeToISO } from '@/lib/dateUtils'
 import { useAuth } from '@/lib/hooks/useAuth'
@@ -87,6 +88,10 @@ export default function ScheduleApp() {
       : false
   )
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
+  const [isInputCollapsed, setIsInputCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem('input_collapsed') === 'true'
+  })
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -374,6 +379,12 @@ export default function ScheduleApp() {
     setHasPatchBadge(false)
   }
 
+  const handleToggleCollapse = () => {
+    const next = !isInputCollapsed
+    localStorage.setItem('input_collapsed', String(next))
+    setIsInputCollapsed(next)
+  }
+
   const handleShowOnboarding = () => {
     setShowOnboarding(true)
   }
@@ -489,7 +500,21 @@ export default function ScheduleApp() {
             tabs={tabs}
             onAdd={handleAddItem}
             onHelp={(type) => setHelpType(type)}
+            collapsed={isInputCollapsed}
           />
+          <div className="collapse-bar">
+            <button
+              className="collapse-btn"
+              onClick={handleToggleCollapse}
+              aria-label={isInputCollapsed ? '입력창 펼치기' : '입력창 접기'}
+              title={isInputCollapsed ? '입력창 펼치기' : '입력창 접기'}
+            >
+              {isInputCollapsed
+                ? <IconChevronUp size={14} aria-hidden />
+                : <IconChevronDown size={14} aria-hidden />
+              }
+            </button>
+          </div>
           <ItemList
             items={items}
             currentTab={currentTab}

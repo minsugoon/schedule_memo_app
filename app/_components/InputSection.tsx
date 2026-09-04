@@ -20,9 +20,10 @@ interface InputSectionProps {
     memo: string
   ) => void;
   onHelp: (type: 'date' | 'time') => void;
+  collapsed?: boolean;
 }
 
-export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputSectionProps) {
+export default function InputSection({ currentTab, tabs, onAdd, onHelp, collapsed }: InputSectionProps) {
   const [dateRaw, setDateRaw] = useState('');
   const [timeRaw, setTimeRaw] = useState('');
   const [dateEndRaw, setDateEndRaw] = useState('');
@@ -65,7 +66,7 @@ export default function InputSection({ currentTab, tabs, onAdd, onHelp }: InputS
     : `${currentTabObj?.name ?? '개인'} 일정 추가 (Enter)`;
 
   return (
-    <div className="input-section">
+    <div className={`input-section${collapsed ? ' collapsed' : ''}`}>
 
       {dateError !== null && (
         <DateErrorModal

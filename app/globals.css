@@ -164,7 +164,20 @@ body { display: flex; justify-content: center; align-items: flex-start; padding:
 .tab-done-toggle[aria-pressed="true"] { color: var(--check-done); border-bottom: 2px solid var(--check-done); }
 
 /* ── 입력 영역 ── */
-.input-section { flex-shrink: 0; padding: 11px var(--pad-h) 10px; border-bottom: 0.5px solid var(--border); background: var(--bg); }
+.input-section {
+  flex-shrink: 0; padding: 11px var(--pad-h) 10px; border-bottom: 0.5px solid var(--border); background: var(--bg);
+  overflow: hidden; max-height: 300px;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+.input-section.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
+
+.collapse-bar { display: flex; justify-content: flex-end; padding: 0 var(--pad-h); flex-shrink: 0; }
+.collapse-btn {
+  width: 28px; height: 20px; background: none; border: none; color: var(--text3);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.collapse-btn:hover { color: var(--text); }
 .date-row { display: flex; gap: 7px; margin-bottom: 6px; }
 .date-row input { flex: 1; min-width: 0; }
 .memo-group { margin-bottom: 7px; }
