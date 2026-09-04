@@ -7,6 +7,7 @@ import {
   IconLogout,
   IconRefresh,
   IconQuestionMark,
+  IconSpeakerphone,
 } from '@tabler/icons-react';
 import { DAYS } from '@/lib/dateUtils';
 
@@ -17,11 +18,13 @@ interface AppHeaderProps {
   onRefresh?: () => void;
   refreshing?: boolean;
   onShowOnboarding: () => void;
+  onShowPatchNote: () => void;
+  hasPatchBadge: boolean;
 }
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
 
-export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, refreshing, onShowOnboarding }: AppHeaderProps) {
+export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, refreshing, onShowOnboarding, onShowPatchNote, hasPatchBadge }: AppHeaderProps) {
   const [clock, setClock] = useState('');
   const [todayDisplay, setTodayDisplay] = useState('');
 
@@ -54,6 +57,31 @@ export default function AppHeader({ theme, onToggleTheme, onSignOut, onRefresh, 
             title="사용 가이드"
           >
             <IconQuestionMark size={15} aria-hidden />
+          </button>
+
+          {/* 📣 패치노트 버튼 */}
+          <button
+            className="header-btn"
+            onClick={onShowPatchNote}
+            aria-label="업데이트 내역"
+            title="업데이트 내역"
+            style={{ position: 'relative' }}
+          >
+            <IconSpeakerphone size={15} aria-hidden />
+            {hasPatchBadge && (
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: '2px',
+                  right: '2px',
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: '#e5484d',
+                }}
+              />
+            )}
           </button>
 
           {/* 새로고침 버튼 — onRefresh prop 있을 때만 */}

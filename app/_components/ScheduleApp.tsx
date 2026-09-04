@@ -80,10 +80,12 @@ export default function ScheduleApp() {
   const [hydrated, setHydrated] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
-  const [showPatchNote, setShowPatchNote] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false
-    return !localStorage.getItem('patch_seen_20260702')
-  })
+  const [showPatchNote, setShowPatchNote] = useState<boolean>(false)
+  const [hasPatchBadge, setHasPatchBadge] = useState<boolean>(() =>
+    typeof window !== 'undefined'
+      ? !localStorage.getItem('patch_seen_20260702')
+      : false
+  )
   const [helpType, setHelpType] = useState<'date' | 'time' | null>(null)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
@@ -362,9 +364,14 @@ export default function ScheduleApp() {
     router.push('/login')
   }
 
+  const handleOpenPatchNote = () => {
+    setShowPatchNote(true)
+  }
+
   const handleClosePatchNote = () => {
     localStorage.setItem('patch_seen_20260702', 'true')
     setShowPatchNote(false)
+    setHasPatchBadge(false)
   }
 
   const handleShowOnboarding = () => {
@@ -442,6 +449,8 @@ export default function ScheduleApp() {
         onRefresh={handleRefresh}
         refreshing={refreshing}
         onShowOnboarding={handleShowOnboarding}
+        onShowPatchNote={handleOpenPatchNote}
+        hasPatchBadge={hasPatchBadge}
       />
       <TabBar
         tabs={tabs}
